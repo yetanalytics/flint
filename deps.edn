@@ -1,5 +1,5 @@
 {:paths ["src/main"]
- :deps {}
+ :deps {org.clojure/clojure {:mvn/version "1.10.3"}}
  :aliases
  {:test {:extra-paths ["src/test"]
          :extra-deps  {io.github.cognitect-labs/test-runner
