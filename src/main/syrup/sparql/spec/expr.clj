@@ -6,7 +6,7 @@
 ;; Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Dummy definition of `::where` spec
+;; Forward declare ::where spec
 (s/def ::where any?)
 
 (def terminal-expr?
@@ -73,4 +73,14 @@
 
 (comment
   (s/conform expr-spec '(+ 2 2))
-  (s/conform expr-spec '(var (+ 2 2))))
+  (s/conform expr-spec '(avg (+ 2 2))))
+
+(def expr-as-var-spec
+  (s/and vector?
+         (s/cat :expr expr-spec
+                :as #{:as}
+                :var ax/variable?)
+         (s/conformer #(dissoc % :as))))
+
+(comment
+  (s/conform expr-as-var-spec ['(+ 2 2) :as :?foo]))
