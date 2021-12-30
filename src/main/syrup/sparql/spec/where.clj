@@ -1,7 +1,8 @@
 (ns syrup.sparql.spec.where
   (:require [clojure.spec.alpha :as s]
             [syrup.sparql.spec.expr :as ex]
-            [syrup.sparql.spec.triple :as triple]))
+            [syrup.sparql.spec.triple :as triple]
+            [syrup.sparql.spec.value :as vs]))
 
 ;; Forward declare where spec
 (declare where-spec)
@@ -25,21 +26,9 @@
 
 (s/def ::bind ex/expr-as-var-spec)
 
-(s/def ::values
-  (s/or :old
-        (s/and (s/map-of (s/coll-of ::var)
-                         (s/coll-of (s/coll-of any?)))
-               (fn [[vars values]]
-                 (let [nv (count vars)]
-                   (every? #(= nv (count %)) values))))
-        :new
-        (s/and (s/map-of ::var (s/coll-of any?))
-               (fn [m]
-                 (let [values (vals m)
-                       nv     (count (first values))]
-                   (every? #(= nv (count %)) values))))))
+(s/def ::values vs/values-clause-spec)
 
-(def where-spec
+(def where-nonselect-spec
   (s/coll-of (s/or :triples  triple/triples-spec
                    :union    (s/keys :req-un [::union])
                    :optional (s/keys :req-un [::optional])
@@ -51,6 +40,16 @@
                                                   ::filter-not-exists)])
                    :bind     (s/keys :req-un [::bind])
                    :values   (s/keys :req-un [::values]))))
+
+;; TODO: SolutionModifier
+;; TODO: where clause
+(def where-select-spec
+  (s/keys :req-un [(or ::select ::select-distinct ::select-where)
+                   ::values]))
+
+(def where-spec
+  (s/or :sub-select where-select-spec
+        :graph-pattern where-nonselect-spec))
 
 (s/def ::where where-spec)
 
