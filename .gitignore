@@ -12,3 +12,8 @@ pom.xml.asc
 .lein-failures
 .nrepl-port
 .cpcache/
+
+# VSCode
+.clj-kondo/.cache/
+.calva/
+.lsp/
