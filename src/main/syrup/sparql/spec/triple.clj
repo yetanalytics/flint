@@ -2,7 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.walk :as w]
             [clojure.string :as cstr]
-            [syrup.sparql.spec.axiom :as ax]))
+            [syrup.sparql.spec.axiom :as ax]
+            [syrup.sparql.spec.path :as path]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
@@ -57,7 +58,7 @@
 
 (def pred-spec
   (s/or :predicate ax/var-or-iri-pred-spec
-        :pred-path coll?))
+        :pred-path path/path-spec))
 
 (def pred-nopath-spec
   (s/or :predicate ax/var-or-iri-pred-spec))
@@ -126,8 +127,8 @@
   (s/describe pred-spec)
   (s/describe pred-nopath-spec)
 
-  (s/conform pred-spec ['?pred])
-  (s/conform pred-nopath-spec ['?pred])
+  (s/conform pred-spec '(alt "foo" "bar"))
+  (s/explain pred-nopath-spec '(alt "foo" "bar"))
   
   (s/conform pred-objs-spec
              {'?p1 #{'?oa '?ob}

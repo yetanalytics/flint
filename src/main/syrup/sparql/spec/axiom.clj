@@ -8,8 +8,8 @@
   #"([^<>\"{}|\^\\`\s])*")
 
 (defn iri? [s]
-  (boolean (or (re-matches iri-regex s)
-               (keyword? s))))
+  (boolean (or (and (string? s) (re-matches iri-regex s))
+               (and (keyword? s) (not (#{:a :*} s))))))
 
 (defn variable? [x]
   (boolean (and (instance? clojure.lang.Named x)
@@ -22,6 +22,10 @@
   (boolean (#{'a :a} x)))
 
 ;; TODO: Incomplete specs
+
+(def iri-pred-spec
+  (s/or :iri iri?
+        :rdf-type rdf-type?))
 
 (def var-or-iri-spec
   (s/or :var variable?
