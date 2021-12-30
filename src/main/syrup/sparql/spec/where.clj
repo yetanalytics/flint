@@ -1,4 +1,4 @@
-(ns main.syrup.sparql.spec.where
+(ns syrup.sparql.spec.where
   (:require [clojure.spec.alpha :as s]
             [syrup.sparql.spec.expr :as ex]
             [syrup.sparql.spec.triple :as triple]))
