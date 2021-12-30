@@ -1,4 +1,4 @@
-(ns main.syrup.sparql.spec.axiom
+(ns syrup.sparql.spec.axiom
   (:require [clojure.spec.alpha :as s]))
 
 ;; Use a regex defined by the SPARQL grammar instead of copying from
@@ -26,6 +26,11 @@
 (def var-or-iri-spec
   (s/or :var variable?
         :iri iri?))
+
+(def var-or-iri-pred-spec
+  (s/or :var variable?
+        :iri iri?
+        :rdf-type rdf-type?))
 
 (def var-or-term-spec
   (s/or :var variable?
