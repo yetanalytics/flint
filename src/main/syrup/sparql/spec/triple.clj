@@ -1,6 +1,36 @@
 (ns syrup.sparql.spec.triple
   (:require [clojure.spec.alpha :as s]
+            [clojure.walk :as w]
+            [clojure.string :as cstr]
             [syrup.sparql.spec.axiom :as ax]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;; Defining nopath specs ;;;;;
+
+(def ^:private nopath-spec-syms
+  #{`pred-spec
+    `pred-objs-spec
+    `normal-form-spec
+    `triples-vec-spec
+    `triples-spec})
+
+(defn- form->nopath-sym
+  [sym]
+  (if (and (symbol? sym) (nopath-spec-syms sym))
+    (let [sym-ns (namespace sym)
+          sym-name (name sym)]
+      (symbol sym-ns
+              (cstr/replace sym-name #"-spec" "-nopath-spec")))
+    sym))
+
+(defn- form->nopath-spec-form
+  [form]
+  (w/postwalk form->nopath-sym form))
+
+;;;;; Conformance helpers ;;;;;
 
 (defn- conj-set
   [s x]
@@ -15,6 +45,10 @@
           {}
           triple-vecs))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def subj-spec
   (s/or :subject ax/var-or-iri-spec))
 
@@ -25,43 +59,83 @@
   (s/or :predicate ax/var-or-iri-pred-spec
         :pred-path coll?))
 
+(def pred-nopath-spec
+  (s/or :predicate ax/var-or-iri-pred-spec))
+
 (def obj-set-spec
   (s/or :o-set (s/coll-of obj-spec
                           :min-count 1
                           :kind set?
                           :into [])))
 
-(def pred-objs-spec
-  (s/or :po-map (s/map-of pred-spec obj-set-spec
-                          :min-count 1
-                          :into [])))
-
-(def normal-form-spec
-  (s/or :spo-map (s/map-of subj-spec pred-objs-spec
-                           :conform-keys true
+(def ^:private pred-objs-spec-form
+  `(s/or :po-map (s/map-of pred-spec obj-set-spec
+                           :min-count 1
                            :into [])))
 
+(def pred-objs-spec
+  (eval pred-objs-spec-form))
+(def pred-objs-nopath-spec
+  (eval (form->nopath-spec-form pred-objs-spec-form)))
+
+(def ^:private normal-form-spec-form
+  `(s/or :spo-map (s/map-of subj-spec pred-objs-spec
+                            :conform-keys true
+                            :into [])))
+
+(def normal-form-spec
+  (eval normal-form-spec-form))
+(def normal-form-nopath-spec
+  (eval (form->nopath-spec-form normal-form-spec)))
+
 ;; TODO: Optimize
+(def ^:private triples-vec-spec-form
+  `(s/and (s/coll-of (s/tuple (s/nonconforming subj-spec)
+                              (s/nonconforming pred-spec)
+                              (s/nonconforming obj-spec))
+                     :min-count 1
+                     :kind vector?)
+          (s/conformer triples->nform)
+          (s/conformer normal-form-spec)))
+
 (def triples-vec-spec
-  (s/and (s/coll-of (s/tuple (s/nonconforming subj-spec)
-                             (s/nonconforming pred-spec)
-                             (s/nonconforming obj-spec))
-                    :min-count 1
-                    :kind vector?)
-         (s/conformer triples->nform)
-         (s/conformer normal-form-spec)))
+  (eval triples-vec-spec-form))
+(def triples-vec-nopath-spec
+  (eval (form->nopath-spec-form triples-vec-spec-form)))
+
+(def ^:private triples-spec-form
+  `(s/and (s/or :sugared triples-vec-spec
+                :normal-form normal-form-spec)
+          ;; Remove s/or tag
+          (s/conformer second)))
 
 (def triples-spec
-  (s/and (s/or :sugared triples-vec-spec
-               :normal-form normal-form-spec)
-         ;; Remove s/or tag
-         (s/conformer second)))
+  (eval triples-spec-form))
+(def triples-nopath-spec
+  (eval (form->nopath-spec-form triples-spec-form)))
 
 ;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
 ;; NOTE: RDF collections not supported (yet?)
 
 (comment
   (s/conform subj-spec '?subj)
+
+  (s/conform pred-spec '?pred)
+  (s/conform pred-nopath-spec '?pred)
+
+  (s/describe pred-spec)
+  (s/describe pred-nopath-spec)
+
+  (s/conform pred-spec ['?pred])
+  (s/conform pred-nopath-spec ['?pred])
+  
+  (s/conform pred-objs-spec
+             {'?p1 #{'?oa '?ob}
+              '?p2 #{'?oa '?ob}})
+  
+  (s/conform pred-objs-nopath-spec
+             {'?p1 #{'?oa '?ob}
+              '?p2 #{'?oa '?ob}})
   (=
    (s/conform triples-spec
               {'?subj {'?p1 #{'?oa '?ob}
@@ -70,4 +144,25 @@
               [['?subj '?p1 '?oa]
                ['?subj '?p1 '?ob]
                ['?subj '?p2 '?oa]
-               ['?subj '?p2 '?ob]])))
+               ['?subj '?p2 '?ob]]))
+  
+  (=
+   (s/conform triples-spec
+              {'?subj {'?p1 #{'?oa '?ob}
+                       '?p2 #{'?oa '?ob}}})
+   (s/conform triples-nopath-spec
+              {'?subj {'?p1 #{'?oa '?ob}
+                       '?p2 #{'?oa '?ob}}}))
+  
+  (=
+   (s/conform triples-spec
+              [['?subj '?p1 '?oa]
+               ['?subj '?p1 '?ob]
+               ['?subj '?p2 '?oa]
+               ['?subj '?p2 '?ob]])
+   (s/conform triples-nopath-spec
+              [['?subj '?p1 '?oa]
+               ['?subj '?p1 '?ob]
+               ['?subj '?p2 '?oa]
+               ['?subj '?p2 '?ob]]))
+  )
