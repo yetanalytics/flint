@@ -3,6 +3,8 @@
             [syrup.sparql.spec.axiom :as ax]
             [syrup.sparql.spec.expr :as ex]
             [syrup.sparql.spec.triple :as triple]
+            [syrup.sparql.spec.modifier :as ms]
+            [syrup.sparql.spec.select :as ss]
             [syrup.sparql.spec.value :as vs]))
 
 ;; Forward declare where specs
@@ -47,34 +49,12 @@
          (s/cat :kword #{:values}
                 :pattern vs/values-clause-spec)))
 
-;; TODO: SolutionModifier
-;; TODO: where clause
 (def where-select-spec
-  (s/keys :req-un [(or ::select ::select-distinct ::select-where)
-                   ::values]))
-
-(def where-keys
-  #{::union
-    ::optional
-    ::minus
-    ::graph
-    ::service
-    ::service-silent
-    ::filter
-    ::filter-exists
-    ::filter-not-exists
-    ::bind
-    ::values})
-
-(def where-keys-un
-  (map (fn [k] (keyword (name k))) where-keys))
-
-(def where-graph-pat-spec
-  (s/+ (s/or :triples triple/normal-form-spec
-             :not-triples (s/and (s/cat :k where-keys
-                                        :v any?)
-                                 (fn [{:keys [k v]}]
-                                   (s/valid? k v))))))
+  (s/merge
+   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-where)
+                    ::where
+                    ::vs/values])
+   ms/solution-modifier-spec))
 
 (def where-spec*
   (s/* (s/alt :triple   triple/triple-vec-spec
@@ -93,7 +73,6 @@
         :sub-select where-select-spec))
 
 (s/def ::where where-spec)
-
 
 (comment
   (s/explain triple/triple-vec-spec [:?s :?p :?o])

@@ -4,6 +4,8 @@
             [syrup.sparql.spec.expr     :as ex]
             [syrup.sparql.spec.prologue :as pro]
             [syrup.sparql.spec.triple   :as triple]
+            [syrup.sparql.spec.modifier :as mod]
+            [syrup.sparql.spec.select   :as ss]
             [syrup.sparql.spec.where    :as ws]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14,42 +16,12 @@
 (s/def ::from-named ax/iri?)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Solution Modifier specs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(s/def ::group-by
-  (s/coll-of (s/or :builtin ex/expr-spec ; TODO
-                   :custom ex/expr-spec ; TODO
-                   :expr ex/expr-as-var-spec
-                   :var ax/variable?)
-             :min-count 1))
-
-(s/def ::order-by
-  (s/coll-of (s/cat :op #{'asc 'desc}
-                    :expr ex/expr-spec)
-             :min-count 1))
-
-(s/def ::having
-  (s/coll-of ex/expr-spec
-             :min-count 1))
-
-(s/def ::limit int?)
-(s/def ::offset int?)
-
-(def solution-modifier-spec
-  (s/keys :opt-un [::group-by
-                   ::order-by
-                   ::having
-                   ::limit
-                   ::offset]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def select-spec
-  (s/or :vars    (s/coll-of ax/variable? :min-count 1)
-        :expr     ex/expr-as-var-spec
+  (s/or :var-or-exprs (s/* (s/alt :var ax/variable?
+                                  :expr ex/expr-as-var-spec))
         :wildcard ax/wildcard?))
 
 (s/def ::select select-spec)
@@ -91,11 +63,11 @@
 
 (def select-query-spec
   (s/merge
-   pro/prologue-spec
-   (s/keys* :req-un [(or ::select ::select-distinct ::select-where)
+   (s/keys* :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-where)
                      ::ws/where]
             :opt-un [::from ::from-named])
-   solution-modifier-spec))
+   pro/prologue-spec
+   mod/solution-modifier-spec))
 
 (s/def ::construct triple/triples-nopath-spec)
 
@@ -104,8 +76,8 @@
    (s/keys* :req-un [::construct
                      ::ws/where]
             :opt-un [::from ::from-named])
-   solution-modifier-spec
-   pro/prologue-spec))
+   pro/prologue-spec
+   mod/solution-modifier-spec))
 
 (s/def ::describe
   (s/or :vars-or-iris (s/coll-of ax/var-or-iri-spec)
@@ -116,12 +88,12 @@
    (s/keys* :req-un [::describe
                      ::ws/where]
             :opt-un [::from ::from-named])
-   solution-modifier-spec
-   pro/prologue-spec))
+   pro/prologue-spec
+   mod/solution-modifier-spec))
 
 (def ask-query-spec
   (s/merge
    (s/keys* :req-un [::ws/where]
             :opt-un [::from ::from-named])
-   solution-modifier-spec
-   pro/prologue-spec))
+   pro/prologue-spec
+   mod/solution-modifier-spec))
