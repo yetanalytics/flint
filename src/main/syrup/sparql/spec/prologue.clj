@@ -6,7 +6,7 @@
   (s/coll-of ax/iri?))
 
 (s/def ::prefixes
-  (s/map-of string? ax/iri?))
+  (s/map-of keyword? ax/iri?))
 
 (def prologue-spec
   (s/keys :opt-un [::bases ::prefixes]))

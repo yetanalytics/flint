@@ -14,7 +14,7 @@
 
 (def expr-spec
   (s/and
-   list?
+   (comp not vector?)
    (s/or :terminal    terminal-expr?
          :0-ary       (s/cat :op #{'rand 'now 'uuid 'struuid})
          :0-1-ary     (s/cat :op #{'bnode}
@@ -63,24 +63,26 @@
                              :arg-1 expr-spec
                              :arg-2 expr-spec
                              :vargs (s/+ expr-spec))
-         :coll        (s/cat :op #{'concat 'coalesce}
-                             :arg-1 (s/coll-of expr-spec))
-         :var-ary     (s/cat :op #{'and 'or
+         :var-ary     (s/cat :op #{'concat 'coalesce
+                                   'and 'or
                                    '= 'not= '< '> '<= '>= 'in 'not-in
                                    '+ '- '* '/
                                    ax/iri?}
                              :vargs (s/* expr-spec)))))
 
 (comment
+  (s/explain expr-spec 2)
+  (s/explain expr-spec '(+ 2 2))
   (s/conform expr-spec '(+ 2 2))
-  (s/conform expr-spec '(avg (+ 2 2))))
+  (s/conform expr-spec '(avg (+ 2 2)))
+  
+  (s/explain expr-spec '(regex ?title "^SPARQL")))
 
 (def expr-as-var-spec
   (s/and vector?
          (s/cat :expr expr-spec
-                :as #{:as}
-                :var ax/variable?)
-         (s/conformer #(dissoc % :as))))
+                :var ax/variable?)))
 
 (comment
-  (s/conform expr-as-var-spec ['(+ 2 2) :as :?foo]))
+  (s/explain expr-as-var-spec ['(+ 2 2) :?foo])
+  (s/explain expr-as-var-spec '[(concat ?G " " ?S) ?name]))

@@ -38,6 +38,7 @@
 
 (def var-or-term-spec
   (s/or :var variable?
+        :iri iri?
         :nil nil?
         :string-literal string?
         :numeric-literal number?

@@ -1,7 +1,7 @@
 (ns syrup.sparql.spec.modifier
   (:require [clojure.spec.alpha :as s]
-            [syrup.spraql.spec.axiom :as ax]
-            [syrup.sparql.spec.expr :as ex]))
+            [syrup.sparql.spec.axiom :as ax]
+            [syrup.sparql.spec.expr  :as ex]))
 
 (s/def ::group-by
   (s/coll-of (s/or :builtin ex/expr-spec ; TODO

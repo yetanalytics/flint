@@ -87,7 +87,12 @@
                           [:optional
                            [[:?s :?p :?o]]]
                           [:graph "http://example.org#graph"
-                           [{:?s {:?p #{:?o}}}]]]))
+                           [{:?s {:?p #{:?o}}}]]])
+  
+  (s/explain where-spec* '[[?x :dc/title ?title]
+                           [:filter (regex ?title "^SPARQL")]])
+  
+  (s/explain filter-spec '[:filter (not-exists [[?person :foaf/name ?name]])]))
 
 (comment
 

@@ -63,9 +63,9 @@
 
 (def select-query-spec
   (s/merge
-   (s/keys* :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-where)
-                     ::ws/where]
-            :opt-un [::from ::from-named])
+   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-where)
+                    ::ws/where]
+           :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))
 
@@ -73,9 +73,9 @@
 
 (def construct-query-spec
   (s/merge
-   (s/keys* :req-un [::construct
-                     ::ws/where]
-            :opt-un [::from ::from-named])
+   (s/keys :req-un [::construct
+                    ::ws/where] ; TODO: nopath version
+           :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))
 
@@ -85,15 +85,15 @@
 
 (def describe-query-spec
   (s/merge
-   (s/keys* :req-un [::describe
-                     ::ws/where]
-            :opt-un [::from ::from-named])
+   (s/keys :req-un [::describe
+                    ::ws/where]
+           :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))
 
 (def ask-query-spec
   (s/merge
-   (s/keys* :req-un [::ws/where]
-            :opt-un [::from ::from-named])
+   (s/keys :req-un [::ws/where]
+           :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))

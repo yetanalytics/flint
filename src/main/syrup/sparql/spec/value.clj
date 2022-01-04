@@ -7,8 +7,10 @@
   (s/or :sparql
         (s/and (s/map-of (s/coll-of ax/variable?)
                          (s/coll-of (s/coll-of any?)))
-               (fn [[vars values]]
-                 (let [nv (count vars)]
+               (fn [m]
+                 (let [vars   (first (keys m))
+                       values (first (vals m))
+                       nv     (count vars)]
                    (every? #(= nv (count %)) values))))
         :clojure
         (s/and (s/map-of ax/variable? (s/coll-of any?))
