@@ -15,7 +15,7 @@
   #{`pred-spec
     `pred-objs-spec
     `normal-form-spec
-    `triples-vec-spec
+    `triple-vec-spec
     `triples-spec})
 
 (defn- form->nopath-sym
@@ -30,21 +30,6 @@
 (defn- form->nopath-spec-form
   [form]
   (w/postwalk form->nopath-sym form))
-
-;;;;; Conformance helpers ;;;;;
-
-(defn- conj-set
-  [s x]
-  (if s (conj s x) #{x}))
-
-(defn- triples->nform
-  [triple-vecs]
-  (reduce (fn [acc [s p o]]
-            (if-not (and p o)
-              (assoc acc s nil)
-              (update-in acc [s p] conj-set o)))
-          {}
-          triple-vecs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
@@ -90,22 +75,18 @@
   (eval (form->nopath-spec-form normal-form-spec)))
 
 ;; TODO: Optimize
-(def ^:private triples-vec-spec-form
-  `(s/and (s/coll-of (s/tuple (s/nonconforming subj-spec)
-                              (s/nonconforming pred-spec)
-                              (s/nonconforming obj-spec))
-                     :min-count 1
-                     :kind vector?)
-          (s/conformer triples->nform)
-          (s/conformer normal-form-spec)))
+(def ^:private triple-vec-spec-form
+  `(s/tuple (s/nonconforming subj-spec)
+            (s/nonconforming pred-spec)
+            (s/nonconforming obj-spec)))
 
-(def triples-vec-spec
-  (eval triples-vec-spec-form))
-(def triples-vec-nopath-spec
-  (eval (form->nopath-spec-form triples-vec-spec-form)))
+(def triple-vec-spec
+  (eval triple-vec-spec-form))
+(def triple-vec-nopath-spec
+  (eval (form->nopath-spec-form triple-vec-spec-form)))
 
 (def ^:private triples-spec-form
-  `(s/and (s/or :sugared triples-vec-spec
+  `(s/and (s/or :sugared triple-vec-spec
                 :normal-form normal-form-spec)
           ;; Remove s/or tag
           (s/conformer second)))
@@ -139,13 +120,9 @@
               '?p2 #{'?oa '?ob}})
   (=
    (s/conform triples-spec
-              {'?subj {'?p1 #{'?oa '?ob}
-                       '?p2 #{'?oa '?ob}}})
+              {'?subj {'?pred #{'?obj}}})
    (s/conform triples-spec
-              [['?subj '?p1 '?oa]
-               ['?subj '?p1 '?ob]
-               ['?subj '?p2 '?oa]
-               ['?subj '?p2 '?ob]]))
+              ['?subj '?pred '?obj]))
   
   (=
    (s/conform triples-spec
@@ -154,16 +131,4 @@
    (s/conform triples-nopath-spec
               {'?subj {'?p1 #{'?oa '?ob}
                        '?p2 #{'?oa '?ob}}}))
-  
-  (=
-   (s/conform triples-spec
-              [['?subj '?p1 '?oa]
-               ['?subj '?p1 '?ob]
-               ['?subj '?p2 '?oa]
-               ['?subj '?p2 '?ob]])
-   (s/conform triples-nopath-spec
-              [['?subj '?p1 '?oa]
-               ['?subj '?p1 '?ob]
-               ['?subj '?p2 '?oa]
-               ['?subj '?p2 '?ob]]))
   )
