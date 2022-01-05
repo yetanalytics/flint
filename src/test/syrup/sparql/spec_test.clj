@@ -118,15 +118,14 @@
                   [:bind [(* ?p (- 1 ?discount)) ?price]]
                   [:filter (< ?price 20)]
                   [?x :dc/title ?title]]}
-      ;; TODO
-      #_'{:prefxes {:dc "http://purl.org/dc/elements/1.1/"
-                    :ns "http://example.org/ns#"}
-          :select  [?title ?price]
-          :where   [[[?x :ns/price ?price]
-                     [?x :ns/discount ?discount]
-                     [:bind [(* ?p (- 1 ?discount)) ?price]]]
-                    [:filter (< ?price 20)]
-                    [?x :dc/title ?title]]}
+      '{:prefxes {:dc "http://purl.org/dc/elements/1.1/"
+                  :ns "http://example.org/ns#"}
+        :select  [?title ?price]
+        :where   [[[?x :ns/price ?price]
+                   [?x :ns/discount ?discount]
+                   [:bind [(* ?p (- 1 ?discount)) ?price]]]
+                  [:filter (< ?price 20)]
+                  [?x :dc/title ?title]]}
       ;; with VALUES applied
       '{:prefixes {:dc "http://purl.org/dc/elements/1.1/"
                    :ns "http://example.org/ns#"
@@ -178,12 +177,12 @@
         :having   [(> (sum ?lprice) 10)]}
       ;; with subqueries
       ;; TODO
-      #_'{:prefixes {:$ "http://people.example/"}
-          :select   [?y ?minName]
-          :where    [[:alice :knows ?y]
-                     {:select   [?y [(min ?name) ?minName]]
-                      :where    [[?y :name ?name]]
-                      :group-by [?y]}]}
+      '{:prefixes {:$ "http://people.example/"}
+        :select   [?y ?minName]
+        :where    [[:alice :knows ?y]
+                   {:select   [?y [(min ?name) ?minName]]
+                    :where    [[?y :name ?name]]
+                    :group-by [?y]}]}
       ;; Specifying the graph
       '{:prefixes   {:foaf "http://xmlns.com/foaf/0.1/"
                      :dc   "http://purl.org/dc/elements/1.1/"}
@@ -238,19 +237,19 @@
                      [:graph ?g [[?x :foaf/mbox ?mbox]]]]}
       ;; with ORDER BY applied
       '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"}
-          :select   [?name]
-          :where    [[?x :foaf/name ?name]]
-          :order-by [?name]}
+        :select   [?name]
+        :where    [[?x :foaf/name ?name]]
+        :order-by [?name]}
       '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"
-                     :$    "http://example.org/ns#"}
-          :select   [?name]
-          :where    [{?x {:foaf/name #{?name} :empId #{?emp}}}]
-          :order-by [(desc ?name)]}
+                   :$    "http://example.org/ns#"}
+        :select   [?name]
+        :where    [{?x {:foaf/name #{?name} :empId #{?emp}}}]
+        :order-by [(desc ?name)]}
       '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"
-                     :$    "http://example.org/ns#"}
-          :select   [?name]
-          :where    [{?x {:foaf/name #{?name} :empId #{?emp}}}]
-          :order-by [?name (desc ?emp)]}
+                   :$    "http://example.org/ns#"}
+        :select   [?name]
+        :where    [{?x {:foaf/name #{?name} :empId #{?emp}}}]
+        :order-by [?name (desc ?emp)]}
       ;; with LIMIT/OFFSET applied
       '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"}
         :select   [?name]
@@ -323,9 +322,10 @@
         :where    [[?x :ent/employeeId "1234"]]})))
 
 (comment
-  
-  (s/explain qs/construct-query-spec
-             '{:prefixes  {:foaf "http://xmlns.com/foaf/0.1/"
-                           :org  "http://example.com/ns#"}
-               :construct [[?x :foaf/name ?name]]
-               :where     [[?x :org/employeeName ?name]]}))
+  (s/explain qs/select-query-spec
+             '{:prefixes {:$ "http://people.example/"}
+               :select   [?y ?minName]
+               :where    [[:alice :knows ?y]
+                          {:select   [?y [(min ?name) ?minName]]
+                           :where    [[?y :name ?name]]
+                           :group-by [?y]}]}))

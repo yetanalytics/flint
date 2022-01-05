@@ -52,13 +52,14 @@
 (def where-select-spec
   (s/merge
    (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
-                    ::where
-                    ::vs/values])
+                    ::where]
+           :opt-un [::vs/values])
    ms/solution-modifier-spec))
 
 (def where-spec*
   (s/* (s/alt :triple   triple/triple-vec-spec
               :nform    triple/normal-form-spec
+              :group    where-spec
               :union    union-spec
               :optional optional-spec
               :minus    minus-spec
