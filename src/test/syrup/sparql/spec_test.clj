@@ -1,7 +1,8 @@
 (ns syrup.sparql.spec-test
-  (:require [clojure.test :refer [deftest testing are]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [clojure.spec.alpha :as s]
-            [syrup.sparql.spec.query :as qs]))
+            [syrup.sparql.spec.query  :as qs]
+            [syrup.sparql.spec.update :as us]))
 
 (deftest select-query-spec-test
   (testing "SELECT with"
@@ -343,3 +344,93 @@
                           {:select   [?y [(min ?name) ?minName]]
                            :where    [[?y :name ?name]]
                            :group-by [?y]}]}))
+
+(deftest update-spec-test
+  (testing "INSERT DATA"
+    (are [u] (s/valid? us/insert-data-update-spec u)
+      '{:prefixes {:dc "http://purl.org/dc/elements/1.1/"}
+        :insert-data [{"http://example/book1"
+                       {:dc/title   #{"A new book"}
+                        :dc/creator #{"A. N. Other"}}}]}
+      '{:prefixes {:dc "http://purl.org/dc/elements/1.1/"
+                   :ns "http://example.org/ns#"}
+        :insert-data [[:graph "http://example/bookStore"
+                       [["http://example/book1" :ns/price 42]]]]}))
+  (testing "DELETE DATA"
+    (are [u] (s/valid? us/delete-data-update-spec u)
+      '{:prefixes {:dc "http://purl.org/dc/elements/1.1/"}
+        :delete-data [{"http://example/book2"
+                       {:dc/title   #{"David Copperfield"}
+                        :dc/creator #{"Edmund Wells"}}}]}))
+  (testing "DELETE/INSERT"
+    (are [u] (s/valid? us/modify-update-spec u)
+      '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"}
+        :with     "http://example/addresses"
+        :delete   [[?person :foaf/givenName "Bill"]
+                   [?person :foaf/givenName "William"]]
+        :where    [[?person :foaf/givenName "Bill"]]}
+      '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"}
+        :with     "http://example/addresses"
+        :delete   [[?person ?property ?value]]
+        :where    [{?person {?property       #{?value}
+                             :foaf/givenName #{"Fred"}}}]}
+      '{:prefixes {:dc  "http://purl.org/dc/elements/1.1/"
+                   :xsd "http://www.w3.org/2001/XMLSchema#"}
+        :insert   [[:graph "http://example/bookStore2" [[?book ?p ?v]]]]
+        :where    [[:graph
+                    "http://example/bookStore"
+                    [[?book :dc/date ?date]
+                     [:filter (> ?date #inst "1970-01-01T00:00:00-02:00")]
+                     [?book ?p ?v]]]]}
+      '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"
+                   :rdf  "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
+        :insert   [[:graph
+                    "http://example/addresses"
+                    [[?person :foaf/name ?name]
+                     [?person :foaf/mbox ?email]]]]
+        :where    [[:graph
+                    "http://example/people"
+                    [[?person :foaf/name ?name]
+                     [:optional [[?person :foaf/mbox ?email]]]]]]}
+      '{:prefixes {:foaf "http://xmlns.com/foaf/0.1/"}
+        :with     "http://example/addresses"
+        :delete   [[?person :foaf/givenName "Bill"]]
+        :insert   [[?person :foaf/givenName "William"]]
+        :where    [[?person :foaf/givenName "Bill"]]}))
+  (testing "DELETE WHERE"
+    (are [u] (s/valid? us/delete-where-update-spec u)
+      '{:prefixes     {:foaf "http://xmlns.com/foaf/0.1/"}
+        :delete-where [{?person {:foaf/givenName #{"Fred"}
+                                 ?property       #{?value}}}]}
+      '{:prefixes     {:foaf "http://xmlns.com/foaf/0.1/"}
+        :delete-where [[:graph
+                        "http://example.com/names"
+                        [{?person {:foaf/givenName #{"Fred"}
+                                   ?property1      #{?value1}}}]]
+                       [:graph
+                        "http://example.com/addresses"
+                        [[?person ?property2 ?value2]]]]}))
+  (testing "COPY"
+    (is (s/valid? us/copy-update-spec
+                  '{:copy :default
+                    :to   "http://example.org/named"})))
+  (testing "MOVE"
+    (is (s/valid? us/move-update-spec
+                  '{:move :default
+                    :to   "http://example.org/named"})))
+  (testing "MOVE"
+    (is (s/valid? us/add-update-spec
+                  '{:add :default
+                    :to  "http://example.org/named"}))))
+
+(comment
+  (s/explain us/insert-data-update-spec
+             '{:prefixes {:dc "http://purl.org/dc/elements/1.1/"
+                          :ns "http://example.org/ns#"}
+               :insert-data [[:graph "http://example/bookStore"
+                              [["http://example/book1" :ns/price 42]]]]})
+  (s/explain us/delete-data-update-spec
+             '{:prefixes {:dc "http://purl.org/dc/elements/1.1/"}
+               :delete-data [{"http://example/book2"
+                              {:dc/title   #{"David Copperfield"}
+                               :dc/creator #{"Edmund Wells"}}}]}))

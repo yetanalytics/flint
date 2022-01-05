@@ -69,12 +69,8 @@
    pro/prologue-spec
    mod/solution-modifier-spec))
 
-(s/def ::construct
-  (s/coll-of (s/or :vec triple/triples-nopath-spec
-                   :nform triple/normal-form-nopath-spec)))
-(s/def ::construct-where
-  (s/coll-of (s/or :vec triple/triples-nopath-spec
-                   :nform triple/normal-form-nopath-spec)))
+(s/def ::construct triple/triples-nopath-spec)
+(s/def ::construct-where triple/triples-nopath-spec)
 
 (def construct-query-spec
   (s/or :construct

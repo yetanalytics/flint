@@ -70,23 +70,23 @@
 ;; Graph Update specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(s/def ::insert-data triple/triples-spec)
+(s/def ::insert-data triple/quads-spec)
 
 (def insert-data-update-spec
   (s/keys :req-un [::insert-data]))
 
-(s/def ::delete-data triple/triples-spec)
+(s/def ::delete-data triple/quads-spec)
 
 (def delete-data-update-spec
-  (s/keys :req-un [::delete-date]))
+  (s/keys :req-un [::delete-data]))
 
-(s/def ::delete-where triple/triples-spec)
+(s/def ::delete-where triple/quads-spec)
 
 (def delete-where-update-spec
   (s/keys :req-un [::delete-where]))
 
-(s/def ::insert triple/triples-spec)
-(s/def ::delete triple/triples-spec)
+(s/def ::insert triple/quads-spec)
+(s/def ::delete triple/quads-spec)
 
 (def modify-update-spec
   (s/keys :req-un [::ws/where]

@@ -86,8 +86,8 @@
   (eval (form->nopath-spec-form triple-vec-spec-form)))
 
 (def ^:private triples-spec-form
-  `(s/and (s/or :sugared triple-vec-spec
-                :normal-form normal-form-spec)
+  `(s/and (s/coll-of (s/or :vector triple-vec-spec
+                           :normal-form normal-form-spec))
           ;; Remove s/or tag
           (s/conformer second)))
 
@@ -95,6 +95,17 @@
   (eval triples-spec-form))
 (def triples-nopath-spec
   (eval (form->nopath-spec-form triples-spec-form)))
+
+(def quads-spec
+  (s/and (s/coll-of
+          (s/or :vector triple-vec-nopath-spec
+                :normal-form normal-form-nopath-spec
+                :quad (s/and vector?
+                             (s/cat ::s/k #{:graph}
+                                    ::s/v (s/cat :iri ax/var-or-iri-spec
+                                                 :pat triples-nopath-spec)))))
+          ;; Remove s/or tag
+         (s/conformer second)))
 
 ;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
 ;; NOTE: RDF collections not supported (yet?)
@@ -126,9 +137,9 @@
   
   (=
    (s/conform triples-spec
-              {'?subj {'?p1 #{'?oa '?ob}
-                       '?p2 #{'?oa '?ob}}})
+              [{'?subj {'?p1 #{'?oa '?ob}
+                        '?p2 #{'?oa '?ob}}}])
    (s/conform triples-nopath-spec
-              {'?subj {'?p1 #{'?oa '?ob}
-                       '?p2 #{'?oa '?ob}}}))
+              [{'?subj {'?p1 #{'?oa '?ob}
+                        '?p2 #{'?oa '?ob}}}]))
   )
