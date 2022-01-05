@@ -271,15 +271,15 @@
                     :org  "http://example.com/ns#"}
         :construct [[?x :foaf/name ?name]]
         :where     [[?x :org/employeeName ?name]]}
-      #_'{:prefixes  {:foaf  "http://xmlns.com/foaf/0.1/"
-                      :vcard "http://www.w3.org/2001/vcard-rdf/3.0#"}
-          :construct [[?x :vcard/N _v]
-                      [_v :vcard/givenName ?gname]
-                      [_v :vcard/familyName ?fname]]
-          :where     [[:union [[?x :foaf/firstname ?gname]
-                               [?x :foaf/givenname ?gname]]]
-                      [:union [[?x :foaf/surname ?fname]
-                               [?x :foaf/family_name ?fname]]]]}
+      '{:prefixes  {:foaf  "http://xmlns.com/foaf/0.1/"
+                    :vcard "http://www.w3.org/2001/vcard-rdf/3.0#"}
+        :construct [[?x :vcard/N _v]
+                    [_v :vcard/givenName ?gname]
+                    [_v :vcard/familyName ?fname]]
+        :where     [[:union [[?x :foaf/firstname ?gname]
+                             [?x :foaf/givenname ?gname]]]
+                    [:union [[?x :foaf/surname ?fname]
+                             [?x :foaf/family_name ?fname]]]]}
       '{:prefixes  {:dc  "http://purl.org/dc/elements/1.1/"
                     :app "http://example.org/ns#"
                     :xsd "http://www.w3.org/2001/XMLSchema#"}
@@ -289,13 +289,13 @@
                     [?g :dc/date ?date]
                     [:filter (> (:app/customDate ?date)
                                 #inst "2005-02-28T00:00:00Z")]]}
-      #_'{:prefixes  {:foaf "http://xmlns.com/foaf/0.1/"
-                      :site "http://example.org/stats#"}
-          :construct [[[] :foaf/name ?name]]
-          :where     [{[] {:foaf/name #{?name}
-                           :site/hits #{?hits}}}]
-          :order-by  [(desc ?hits)]
-          :limit     2}
+      '{:prefixes  {:foaf "http://xmlns.com/foaf/0.1/"
+                    :site "http://example.org/stats#"}
+        :construct [[_ :foaf/name ?name]]
+        :where     [{_ {:foaf/name #{?name}
+                        :site/hits #{?hits}}}]
+        :order-by  [(desc ?hits)]
+        :limit     2}
       '{:prefixes        {:foaf "http://xmlns.com/foaf/0.1/"}
         :construct-where [[?x :foaf/name ?name]]}))
   (testing "ASK queries"

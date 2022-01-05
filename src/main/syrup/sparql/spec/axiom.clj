@@ -12,8 +12,12 @@
                (and (keyword? s) (not (#{:a :*} s))))))
 
 (defn variable? [x]
-  (boolean (and (instance? clojure.lang.Named x)
+  (boolean (and (symbol? x)
                 (->> x name (re-matches #"\?.*")))))
+
+(defn bnode? [x]
+  (boolean (and (symbol? x)
+                (->> x name (re-matches #"_.*")))))
 
 (defn wildcard? [x]
   (boolean (#{'* :*} x)))
@@ -31,6 +35,11 @@
   (s/or :var variable?
         :iri iri?))
 
+(def var-or-iri-subj-spec
+  (s/or :var variable?
+        :iri iri?
+        :bnode bnode?))
+
 (def var-or-iri-pred-spec
   (s/or :var variable?
         :iri iri?
@@ -39,6 +48,7 @@
 (def var-or-term-spec
   (s/or :var variable?
         :iri iri?
+        :bnode bnode?
         :nil nil?
         :string-literal string?
         :numeric-literal number?

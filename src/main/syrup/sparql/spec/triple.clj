@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def subj-spec
-  (s/or :subject ax/var-or-iri-spec))
+  (s/or :subject ax/var-or-iri-subj-spec))
 
 (def obj-spec
   (s/or :object ax/var-or-term-spec))
