@@ -51,7 +51,7 @@
 
 (def where-select-spec
   (s/merge
-   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-where)
+   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
                     ::where
                     ::vs/values])
    ms/solution-modifier-spec))

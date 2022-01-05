@@ -11,8 +11,10 @@
              :min-count 1))
 
 (s/def ::order-by
-  (s/coll-of (s/cat :op #{'asc 'desc}
-                    :expr ex/expr-spec)
+  (s/coll-of (s/or :asc-desc (s/cat :op #{'asc 'desc}
+                                    :expr ex/expr-spec)
+                   :expr ex/expr-spec
+                   :var  ax/variable?)
              :min-count 1))
 
 (s/def ::having

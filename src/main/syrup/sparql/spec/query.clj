@@ -13,7 +13,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::from ax/iri?)
-(s/def ::from-named ax/iri?)
+(s/def ::from-named (s/coll-of ax/iri? :min-count 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query
@@ -63,21 +63,32 @@
 
 (def select-query-spec
   (s/merge
-   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-where)
+   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
                     ::ws/where]
            :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))
 
-(s/def ::construct triple/triples-nopath-spec)
+(s/def ::construct
+  (s/coll-of (s/or :vec triple/triples-nopath-spec
+                   :nform triple/normal-form-nopath-spec)))
+(s/def ::construct-where
+  (s/coll-of (s/or :vec triple/triples-nopath-spec
+                   :nform triple/normal-form-nopath-spec)))
 
 (def construct-query-spec
-  (s/merge
-   (s/keys :req-un [::construct
-                    ::ws/where] ; TODO: nopath version
-           :opt-un [::from ::from-named])
-   pro/prologue-spec
-   mod/solution-modifier-spec))
+  (s/or :construct
+        (s/merge
+         (s/keys :req-un [::construct ::ws/where]
+                 :opt-un [::from ::from-named])
+         pro/prologue-spec
+         mod/solution-modifier-spec)
+        :construct-where
+        (s/merge
+         (s/keys :req-un [::construct-where]
+                 :opt-un [::from ::from-named])
+         pro/prologue-spec
+         mod/solution-modifier-spec)))
 
 (s/def ::describe
   (s/or :vars-or-iris (s/coll-of ax/var-or-iri-spec)
@@ -85,15 +96,16 @@
 
 (def describe-query-spec
   (s/merge
-   (s/keys :req-un [::describe
-                    ::ws/where]
-           :opt-un [::from ::from-named])
+   (s/keys :req-un [::describe]
+           :opt-un [::from ::from-named ::ws/where])
    pro/prologue-spec
    mod/solution-modifier-spec))
 
+(s/def ::ask ws/where-spec)
+
 (def ask-query-spec
   (s/merge
-   (s/keys :req-un [::ws/where]
+   (s/keys :req-un [::ask]
            :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))

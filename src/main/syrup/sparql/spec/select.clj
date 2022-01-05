@@ -10,4 +10,4 @@
 
 (s/def ::select select-spec)
 (s/def ::select-distinct select-spec)
-(s/def ::select-where select-spec)
+(s/def ::select-reduced select-spec)

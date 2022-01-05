@@ -10,7 +10,7 @@
 (s/def ::where any?)
 
 (def terminal-expr?
-  (some-fn number? boolean? string? ax/variable?))
+  (some-fn number? boolean? string? ax/variable? inst?))
 
 (def expr-spec
   (s/and
@@ -68,6 +68,8 @@
                                    '= 'not= '< '> '<= '>= 'in 'not-in
                                    '+ '- '* '/
                                    ax/iri?}
+                             :vargs (s/* expr-spec))
+         :custom      (s/cat :op ax/iri?
                              :vargs (s/* expr-spec)))))
 
 (comment
@@ -76,7 +78,11 @@
   (s/conform expr-spec '(+ 2 2))
   (s/conform expr-spec '(avg (+ 2 2)))
   
-  (s/explain expr-spec '(regex ?title "^SPARQL")))
+  (s/explain expr-spec '(regex ?title "^SPARQL"))
+  
+  (s/explain expr-spec '(:app/customDate ?date))
+  (s/explain expr-spec '(> (:app/customDate ?date)
+                           #inst "2005-02-28T00:00:00Z")))
 
 (def expr-as-var-spec
   (s/and vector?
