@@ -21,7 +21,7 @@
 
 (def select-spec
   (s/or :var-or-exprs (s/* (s/alt :var ax/variable?
-                                  :expr ex/expr-as-var-spec))
+                                  :expr ::ex/expr-as-var))
         :wildcard ax/wildcard?))
 
 (s/def ::select select-spec)
@@ -97,7 +97,7 @@
    pro/prologue-spec
    mod/solution-modifier-spec))
 
-(s/def ::ask ws/where-spec)
+(s/def ::ask ::ws/where)
 
 (def ask-query-spec
   (s/merge

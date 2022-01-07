@@ -43,7 +43,7 @@
 
 (def pred-spec
   (s/or :predicate ax/var-or-iri-pred-spec
-        :pred-path path/path-spec))
+        :pred-path ::path/path))
 
 (def pred-nopath-spec
   (s/or :predicate ax/var-or-iri-pred-spec))

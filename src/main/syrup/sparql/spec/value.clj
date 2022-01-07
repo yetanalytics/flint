@@ -18,3 +18,5 @@
                  (let [values (vals m)
                        nv     (count (first values))]
                    (every? #(= nv (count %)) values))))))
+
+(s/def ::values values-clause-spec)

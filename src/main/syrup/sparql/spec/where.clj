@@ -7,80 +7,44 @@
             [syrup.sparql.spec.select :as ss]
             [syrup.sparql.spec.value :as vs]))
 
-;; Forward declare where specs
-(declare where-one-spec)
-(declare where-spec)
-
-(def union-spec
-  (s/and vector?
-         (s/cat ::s/k #{:union}
-                ::s/v (s/+ where-spec))))
-
-(s/def ::optional where-spec)
-(def optional-spec
-  (s/and vector? (s/keys* :req-un [::optional])))
-
-(s/def ::minus where-spec)
-(def minus-spec
-  (s/and vector? (s/keys* :req-un [::minus])))
-
-(def graph-spec
-  (s/and vector?
-         (s/cat ::s/k #{:graph}
-                ::s/v (s/cat :iri ax/var-or-iri-spec
-                             :pat where-spec))))
-
-(def service-spec
-  (s/and vector?
-         (s/cat ::s/k #{:service :service-silent}
-                ::s/v (s/cat :iri ax/var-or-iri-spec
-                             :pat where-spec))))
-
-(s/def ::filter ex/expr-spec)
-(def filter-spec
-  (s/and vector? (s/keys* :req-un [::filter])))
-
-(s/def ::bind ex/expr-as-var-spec)
-(def bind-spec
-  (s/and vector? (s/keys* :req-un [::bind])))
-
-(def values-spec
-  (s/and vector?
-         (s/cat :kword #{:values}
-                :pattern vs/values-clause-spec)))
-
-(def where-select-spec
+(s/def ::select
   (s/merge
    (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
                     ::where]
            :opt-un [::vs/values])
    ms/solution-modifier-spec))
 
-(def where-spec*
-  (s/* (s/alt :triple   triple/triple-vec-spec
-              :nform    triple/normal-form-spec
-              :group    where-spec
-              :union    union-spec
-              :optional optional-spec
-              :minus    minus-spec
-              :graph    graph-spec
-              :service  service-spec
-              :filter   filter-spec
-              :bind     bind-spec
-              :values   values-spec)))
-
-(def where-spec
-  (s/or :graph-pattern where-spec*
-        :sub-select where-select-spec))
-
-(s/def ::where where-spec)
+(s/def ::where
+  (s/or :sub-select ::select
+        :group (s/* (s/alt
+                     :triple   triple/triple-vec-spec
+                     :nform    triple/normal-form-spec
+                     :group    ::where
+                     :union    (s/cat ::s/k #{:union}
+                                      ::s/v (s/+ ::where))
+                     :optional (s/cat ::s/k #{:optional}
+                                      ::s/v ::where)
+                     :minus    (s/cat ::s/k #{:minus}
+                                      ::s/v ::where)
+                     :graph    (s/cat ::s/k #{:graph}
+                                      ::s/v (s/cat :iri ax/var-or-iri-spec
+                                                   :pat ::where))
+                     :service  (s/cat ::s/k #{:service :service-silent}
+                                      ::s/v (s/cat :iri ax/var-or-iri-spec
+                                                   :pat ::where))
+                     :filter   (s/cat ::s/k #{:filter}
+                                      ::s/v ::ex/expr)
+                     :bind     (s/cat ::s/k #{:bind}
+                                      ::s/v ::ex/expr-as-var)
+                     :values   (s/cat ::s/k #{:values}
+                                      ::s/v ::vs/values)))))
 
 (comment
   (s/explain triple/triple-vec-spec [:?s :?p :?o])
   (s/explain-data union-spec [:union
                               [[:?book :dc10/title :?title]]
                               [[:?book :dc11/title :?title]]])
-  (s/explain where-spec* [[:?s :?p :?o]
+  (s/explain ::where [[:?s :?p :?o]
                           {:?s {:?p #{:?o1 :?o2}}}
                           [:union
                            [[:?book :dc10/title :?title]]
@@ -90,10 +54,8 @@
                           [:graph "http://example.org#graph"
                            [{:?s {:?p #{:?o}}}]]])
   
-  (s/explain where-spec* '[[?x :dc/title ?title]
-                           [:filter (regex ?title "^SPARQL")]])
-  
-  (s/explain filter-spec '[:filter (not-exists [[?person :foaf/name ?name]])]))
+  (s/explain ::where '[[?x :dc/title ?title]
+                           [:filter (regex ?title "^SPARQL")]]))
 
 (comment
 
@@ -106,7 +68,7 @@
            {:optional {:?s {:?p #{:?o}}}}]}
 
 ;;   {?book dc10:title  ?title} UNION {?book dc11:title  ?title}
-  (s/explain where-spec [{:?s2 {:?p2 #{:?o2}}}])
+  (s/explain ::where [{:?s2 {:?p2 #{:?o2}}}])
   (s/explain (s/keys :req-un [::union])
              {:union [{:?s2 {:?p2 #{:?o2}}}
                       {:?s3 {:?p3 #{:?o3}}}]})
