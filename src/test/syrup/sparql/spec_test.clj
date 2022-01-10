@@ -434,3 +434,15 @@
                :delete-data [{"http://example/book2"
                               {:dc/title   #{"David Copperfield"}
                                :dc/creator #{"Edmund Wells"}}}]}))
+
+(comment
+  '{:select [?v]
+    :where  [[?v ?p 42]]}
+  
+  '[?v ?p 42]
+  '[:triple [?v ?p 42]]
+  "?v ?p 42 ."
+
+  '{?v {?p #{42}}}
+  '[:spo [?v [:po [?p [:o 42]]]]]
+  )

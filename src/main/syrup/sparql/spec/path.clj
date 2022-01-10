@@ -3,19 +3,18 @@
             [syrup.sparql.spec.axiom :as ax]))
 
 (s/def ::path
-  (s/or :varardic
-        (s/cat :op #{'alt 'cat 'inv '? '* '+}
-               :paths (s/* ::path))
-        :unary
-        (s/cat :op #{'not}
-               :path ::path)
-        :terminal
-        ax/iri-pred-spec))
+  (s/or ::terminal
+        (s/or :iri ax/iri?
+              :rdf-type ax/rdf-type?)
+        ::branch
+        (s/and (s/or :varardic
+                     (s/cat :op #{'alt 'cat 'inv '? '* '+}
+                            :paths (s/* ::path))
+                     :unary
+                     (s/cat :op #{'not}
+                            :path ::path))
+               (s/conformer second)
+               (s/conformer (fn [{:keys [op path paths]}]
+                              {:op    op
+                               :paths (if path [path] paths)})))))
 
-(comment
-  (s/conform ax/iri-pred-spec 'a)
-  (s/conform ::path 'a)
-  (s/conform ::path "http://example.org")
-  (s/conform ::path
-             '(alt :a "http://example.org" "http://example2.org"))
-  )

@@ -34,23 +34,3 @@
 (def var-or-iri-spec
   (s/or :var variable?
         :iri iri?))
-
-(def var-or-iri-subj-spec
-  (s/or :var variable?
-        :iri iri?
-        :bnode bnode?))
-
-(def var-or-iri-pred-spec
-  (s/or :var variable?
-        :iri iri?
-        :rdf-type rdf-type?))
-
-(def var-or-term-spec
-  (s/or :var variable?
-        :iri iri?
-        :bnode bnode?
-        :nil nil?
-        :string-literal string?
-        :numeric-literal number?
-        :boolean-literal boolean?
-        :date-time-literal inst?))

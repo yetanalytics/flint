@@ -31,115 +31,76 @@
   [form]
   (w/postwalk form->nopath-sym form))
 
+(defn- spec->nopath-spec
+  [spec]
+  (-> spec s/form form->nopath-spec-form eval))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Specs
+;; Subj/Pred/Obj Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def subj-spec
-  (s/or :subject ax/var-or-iri-subj-spec))
+  (s/or :var ax/variable?
+        :iri ax/iri?
+        :bnode ax/bnode?))
 
 (def obj-spec
-  (s/or :object ax/var-or-term-spec))
+  (s/or :var ax/variable?
+        :iri ax/iri?
+        :bnode ax/bnode?
+        :nil nil?
+        :string-literal string?
+        :numeric-literal number?
+        :boolean-literal boolean?
+        :date-time-literal inst?))
 
 (def pred-spec
-  (s/or :predicate ax/var-or-iri-pred-spec
-        :pred-path ::path/path))
+  (s/or :var ax/variable?
+        :iri ax/iri?
+        :rdf-type ax/rdf-type?
+        :path ::path/path))
 
 (def pred-nopath-spec
-  (s/or :predicate ax/var-or-iri-pred-spec))
+  (s/or :var ax/variable?
+        :iri ax/iri?
+        :rdf-type ax/rdf-type?))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Combo Specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def obj-set-spec
-  (s/or :o-set (s/coll-of obj-spec
-                          :min-count 1
-                          :kind set?
-                          :into [])))
-
-(def ^:private pred-objs-spec-form
-  `(s/or :po-map (s/map-of pred-spec obj-set-spec
-                           :min-count 1
-                           :into [])))
+  (s/or :o (s/coll-of obj-spec
+                      :min-count 1
+                      :kind set?
+                      :into [])))
 
 (def pred-objs-spec
-  (eval pred-objs-spec-form))
-(def pred-objs-nopath-spec
-  (eval (form->nopath-spec-form pred-objs-spec-form)))
+  (s/or :po (s/map-of pred-spec obj-set-spec
+                      :min-count 1
+                      :into [])))
 
-(def ^:private normal-form-spec-form
-  `(s/or :spo-map (s/map-of subj-spec pred-objs-spec
-                            :conform-keys true
-                            :into [])))
+(def pred-objs-nopath-spec
+  (spec->nopath-spec pred-objs-spec))
 
 (def normal-form-spec
-  (eval normal-form-spec-form))
-(def normal-form-nopath-spec
-  (eval (form->nopath-spec-form normal-form-spec)))
+  (s/or :spo (s/map-of subj-spec pred-objs-spec
+                       :conform-keys true
+                       :into [])))
 
-;; TODO: Optimize
-(def ^:private triple-vec-spec-form
-  `(s/tuple (s/nonconforming subj-spec)
-            (s/nonconforming pred-spec)
-            (s/nonconforming obj-spec)))
+(def normal-form-nopath-spec
+  (spec->nopath-spec normal-form-spec))
 
 (def triple-vec-spec
-  (eval triple-vec-spec-form))
+  (s/tuple subj-spec pred-spec obj-spec))
+
 (def triple-vec-nopath-spec
-  (eval (form->nopath-spec-form triple-vec-spec-form)))
-
-(def ^:private triples-spec-form
-  `(s/and (s/coll-of (s/or :vector triple-vec-spec
-                           :normal-form normal-form-spec))
-          ;; Remove s/or tag
-          (s/conformer second)))
-
-(def triples-spec
-  (eval triples-spec-form))
-(def triples-nopath-spec
-  (eval (form->nopath-spec-form triples-spec-form)))
-
-(def quads-spec
-  (s/and (s/coll-of
-          (s/or :vector triple-vec-nopath-spec
-                :normal-form normal-form-nopath-spec
-                :quad (s/and vector?
-                             (s/cat ::s/k #{:graph}
-                                    ::s/v (s/cat :iri ax/var-or-iri-spec
-                                                 :pat triples-nopath-spec)))))
-          ;; Remove s/or tag
-         (s/conformer second)))
+  (spec->nopath-spec triple-vec-spec))
 
 ;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
 ;; NOTE: RDF collections not supported (yet?)
 
 (comment
-  (s/conform subj-spec '?subj)
-
-  (s/conform pred-spec '?pred)
-  (s/conform pred-nopath-spec '?pred)
-
-  (s/describe pred-spec)
-  (s/describe pred-nopath-spec)
-
-  (s/conform pred-spec '(alt "foo" "bar"))
-  (s/explain pred-nopath-spec '(alt "foo" "bar"))
-  
-  (s/conform pred-objs-spec
-             {'?p1 #{'?oa '?ob}
-              '?p2 #{'?oa '?ob}})
-  
-  (s/conform pred-objs-nopath-spec
-             {'?p1 #{'?oa '?ob}
-              '?p2 #{'?oa '?ob}})
-  (=
-   (s/conform triples-spec
-              {'?subj {'?pred #{'?obj}}})
-   (s/conform triples-spec
-              ['?subj '?pred '?obj]))
-  
-  (=
-   (s/conform triples-spec
-              [{'?subj {'?p1 #{'?oa '?ob}
-                        '?p2 #{'?oa '?ob}}}])
-   (s/conform triples-nopath-spec
-              [{'?subj {'?p1 #{'?oa '?ob}
-                        '?p2 #{'?oa '?ob}}}]))
-  )
+  (s/conform normal-form-spec '{?s {?p #{?o}}})
+    
+  (s/conform triple-vec-nopath-spec '[?s ?p ?o]))

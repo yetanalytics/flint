@@ -4,10 +4,9 @@
             [syrup.sparql.spec.expr  :as ex]))
 
 (s/def ::group-by
-  (s/coll-of (s/or :builtin ::ex/expr ; TODO
-                   :custom ::ex/expr ; TODO
-                   :expr ::ex/expr-as-var
-                   :var ax/variable?)
+  (s/coll-of (s/or :expr ::ex/expr
+                   :var ax/variable?
+                   :expr-as-var ::ex/expr-as-var)
              :min-count 1))
 
 (s/def ::order-by
