@@ -69,10 +69,9 @@
                                     :arg-1 ::expr
                                     :arg-2 ::expr
                                     :vargs (s/+ ::expr))
-                :var-ary     (s/cat :op #{'concat 'coalesce
-                                          ax/iri?}
+                :var-ary     (s/cat :op #{'concat 'coalesce}
                                     :vargs (s/* ::expr))
-                :custom      (s/cat :op ax/iri?
+                :custom      (s/cat :op ax/iri-spec
                                     :vargs (s/* ::expr)))
           (s/conformer second)
           (s/conformer (fn [{:keys [op arg-1 arg-2 arg-3 vargs]}]

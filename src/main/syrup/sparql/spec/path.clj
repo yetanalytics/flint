@@ -5,6 +5,7 @@
 (s/def ::path
   (s/or ::terminal
         (s/or :iri ax/iri?
+              :prefix-iri ax/prefix-iri?
               :rdf-type ax/rdf-type?)
         ::branch
         (s/and (s/or :varardic
@@ -17,4 +18,3 @@
                (s/conformer (fn [{:keys [op path paths]}]
                               {:op    op
                                :paths (if path [path] paths)})))))
-

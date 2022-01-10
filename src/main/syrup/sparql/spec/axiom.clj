@@ -5,11 +5,13 @@
 ;; xapi-schema or other non-SPARQL library.
 ;; TODO: Test that SPARQL IRIs and xapi-schema IRIs are compatible
 (def iri-regex
-  #"([^<>\"{}|\^\\`\s])*")
+  #"<([^<>\"{}|\^\\`\s])*>")
 
 (defn iri? [s]
-  (boolean (or (and (string? s) (re-matches iri-regex s))
-               (and (keyword? s) (not (#{:a :*} s))))))
+  (boolean (and (string? s) (re-matches iri-regex s))))
+
+(defn prefix-iri? [s]
+  (boolean (and (keyword? s) (not (#{:a :*} s)))))
 
 (defn variable? [x]
   (boolean (and (symbol? x)
@@ -27,10 +29,15 @@
 
 ;; TODO: Incomplete specs
 
+(def iri-spec
+  (s/or :iri iri?
+        :prefix-iri prefix-iri?))
+
 (def iri-pred-spec
   (s/or :iri iri?
         :rdf-type rdf-type?))
 
 (def var-or-iri-spec
   (s/or :var variable?
-        :iri iri?))
+        :iri iri?
+        :prefix-iri prefix-iri?))

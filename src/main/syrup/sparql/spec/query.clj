@@ -12,8 +12,8 @@
 ;; Dataset Clause specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(s/def ::from ax/iri?)
-(s/def ::from-named (s/coll-of ax/iri? :min-count 1))
+(s/def ::from ax/iri-spec)
+(s/def ::from-named (s/coll-of ax/iri-spec :min-count 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query
@@ -28,39 +28,6 @@
 (s/def ::select-distinct select-spec)
 (s/def ::select-reduced select-spec)
 
-(s/cat :prologue (s/* (s/alt)))
-
-;; (defmacro datomic-query-spec-form
-;;   [qname qform]
-;;   `(s/cat :bases    (s/? (s/cat ::s/k #{:bases}
-;;                                 ::s/v ::pro/bases))
-;;           :prefixes (s/? (s/cat ::s/k #{:prefixes}
-;;                                 ::s/v ::pro/prefixes))
-;;           ~qname    ~qform
-;;           :from     (s/? (s/cat ::s/k #{:from :from-named}
-;;                                 ::s/v ax/iri?))
-;;           :where    (s/cat ::s/k #{:where}
-;;                            ::s/v (s/* (s/alt :triple   triple/triple-vec-spec
-;;                                              :nform    triple/normal-form-spec
-;;                                              :union    ws/union-spec
-;;                                              :optional ws/optional-spec
-;;                                              :minus    ws/minus-spec
-;;                                              :graph    ws/graph-spec
-;;                                              :service  ws/service-spec
-;;                                              :filter   ws/filter-spec
-;;                                              :bind     ws/bind-spec
-;;                                              :values   ws/values-spec)))
-;;           :group-by (s/? (s/cat ::s/k #{:group-by}
-;;                                 ::s/v ::group-by))
-;;           :having   (s/? (s/cat ::s/k #{:having}
-;;                                 ::s/v ::having))
-;;           :order-by (s/? (s/cat ::s/k #{:order-by}
-;;                                 ::s/v ::order-by))
-;;           :limit    (s/? (s/cat ::s/k #{:limit}
-;;                                 ::s/v ::limit))
-;;           :offset   (s/? (s/cat ::s/k #{:offset}
-;;                                 ::s/v ::offset))))
-
 (def select-query-spec
   (s/merge
    (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
@@ -69,8 +36,13 @@
    pro/prologue-spec
    mod/solution-modifier-spec))
 
-(s/def ::construct triple/triples-nopath-spec)
-(s/def ::construct-where triple/triples-nopath-spec)
+(def triples-spec
+  (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
+                   :nform triple/normal-form-nopath-spec)
+             :min-count 1))
+
+(s/def ::construct triples-spec)
+(s/def ::construct-where triples-spec)
 
 (def construct-query-spec
   (s/or :construct

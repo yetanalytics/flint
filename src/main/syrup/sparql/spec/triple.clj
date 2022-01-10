@@ -42,27 +42,31 @@
 (def subj-spec
   (s/or :var ax/variable?
         :iri ax/iri?
+        :prefix-iri ax/prefix-iri?
         :bnode ax/bnode?))
 
 (def obj-spec
   (s/or :var ax/variable?
         :iri ax/iri?
+        :prefix-iri ax/prefix-iri?
         :bnode ax/bnode?
         :nil nil?
-        :string-literal string?
-        :numeric-literal number?
-        :boolean-literal boolean?
-        :date-time-literal inst?))
+        :str-lit string?
+        :num-lit number?
+        :bool-lit boolean?
+        :dt-lit inst?))
 
 (def pred-spec
   (s/or :var ax/variable?
         :iri ax/iri?
+        :prefix-iri ax/prefix-iri?
         :rdf-type ax/rdf-type?
         :path ::path/path))
 
 (def pred-nopath-spec
   (s/or :var ax/variable?
         :iri ax/iri?
+        :prefix-iri ax/prefix-iri?
         :rdf-type ax/rdf-type?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
