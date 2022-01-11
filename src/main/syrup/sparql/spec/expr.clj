@@ -8,13 +8,13 @@
 
 (s/def ::expr
   (s/or
-   ::terminal
+   :expr-terminal
    (s/or :var ax/variable?
          :dt-lit inst?
          :num-lit number?
          :bool-lit boolean?
          :str-lit string?)
-   ::branch
+   :expr-branch
    (s/and list?
           (s/or :0-ary       (s/cat :op #{'rand 'now 'uuid 'struuid})
                 :0-1-ary     (s/cat :op #{'bnode}
@@ -36,10 +36,10 @@
                                           'count 'count-distinct}
                                     :arg-1 ::expr)
                 :1-wild-ary  (s/cat :op #{'count 'count-distinct}
-                                    :arg-1 (s/or ::terminal
+                                    :arg-1 (s/or :expr-terminal
                                                  (s/or :wildcard ax/wildcard?)))
                 :1-var-ary   (s/cat :op #{'bound}
-                                    :arg-1 (s/or ::terminal
+                                    :arg-1 (s/or :expr-terminal
                                                  (s/or :var ax/variable?)))
                 :1-where-ary (s/cat :op #{'exists 'not-exists}
                              ;; Avoid mutually recursive `:require`
@@ -60,7 +60,7 @@
                                     :arg-2 (s/? (s/& (s/cat :k #{:separator}
                                                             :v string?)
                                                      (s/conformer
-                                                      (fn [x] [::terminal [:kwarg x]])))))
+                                                      (fn [x] [:expr-terminal [:kwarg x]])))))
                 :3-ary       (s/cat :op #{'if}
                                     :arg-1 ::expr
                                     :arg-2 ::expr

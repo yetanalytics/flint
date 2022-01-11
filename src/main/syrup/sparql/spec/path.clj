@@ -3,11 +3,11 @@
             [syrup.sparql.spec.axiom :as ax]))
 
 (s/def ::path
-  (s/or ::terminal
+  (s/or :path-terminal
         (s/or :iri ax/iri?
               :prefix-iri ax/prefix-iri?
               :rdf-type ax/rdf-type?)
-        ::branch
+        :path-branch
         (s/and (s/or :varardic
                      (s/cat :op #{'alt 'cat 'inv '? '* '+}
                             :paths (s/* ::path))

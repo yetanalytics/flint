@@ -30,9 +30,9 @@
 
 (def quad-spec
   (s/and vector?
-         (s/cat ::k #{:graph}
-                ::v (s/cat :var-or-iri ax/var-or-iri-spec
-                           :triples triples-spec))))
+         (s/cat :k #{:graph}
+                :v (s/cat :var-or-iri ax/var-or-iri-spec
+                          :triples triples-spec))))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :tvec  triple/triple-vec-nopath-spec

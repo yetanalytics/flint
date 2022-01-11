@@ -20,8 +20,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def select-spec
-  (s/or :var-or-exprs (s/* (s/alt :var ax/variable?
-                                  :expr ::ex/expr-as-var))
+  (s/or :vars-or-exprs (s/coll-of (s/or :var ax/variable?
+                                        :expr ::ex/expr-as-var))
         :wildcard ax/wildcard?))
 
 (s/def ::select select-spec)
@@ -45,18 +45,11 @@
 (s/def ::construct-where triples-spec)
 
 (def construct-query-spec
-  (s/or :construct
-        (s/merge
-         (s/keys :req-un [::construct ::ws/where]
-                 :opt-un [::from ::from-named])
-         pro/prologue-spec
-         mod/solution-modifier-spec)
-        :construct-where
-        (s/merge
-         (s/keys :req-un [::construct-where]
-                 :opt-un [::from ::from-named])
-         pro/prologue-spec
-         mod/solution-modifier-spec)))
+  (s/merge
+   (s/keys :req-un [(or (and ::construct ::ws/where) ::construct-where)]
+           :opt-un [::from ::from-named])
+   pro/prologue-spec
+   mod/solution-modifier-spec))
 
 (s/def ::describe
   (s/or :vars-or-iris (s/coll-of ax/var-or-iri-spec)
@@ -77,3 +70,9 @@
            :opt-un [::from ::from-named])
    pro/prologue-spec
    mod/solution-modifier-spec))
+
+(def query-spec
+  (s/or :select-query    select-query-spec
+        :construct-query construct-query-spec
+        :describe-query  describe-query-spec
+        :ask-query       ask-query-spec))

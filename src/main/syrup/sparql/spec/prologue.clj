@@ -3,10 +3,12 @@
             [syrup.sparql.spec.axiom :as ax]))
 
 (s/def ::bases
-  (s/coll-of ax/iri?))
+  (s/and (s/coll-of ax/iri?)
+         (s/conformer (partial map (fn [b] [:base b])))))
 
 (s/def ::prefixes
-  (s/map-of keyword? ax/iri?))
+  (s/and (s/map-of keyword? ax/iri?)
+         (s/conformer (partial map (fn [[pre iri]] [:prefix [pre iri]])))))
 
 (def prologue-spec
   (s/keys :opt-un [::bases ::prefixes]))

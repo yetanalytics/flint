@@ -1,7 +1,6 @@
 (ns syrup.sparql.spec.triple-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.spec.alpha :as s]
-            [syrup.sparql.spec.path :as ps]
             [syrup.sparql.spec.triple :as ts]))
 
 (deftest foo
@@ -28,9 +27,9 @@
            (s/conform ts/triple-vec-spec '[?s ?p ?o])))
     (testing "with and without paths"
       (is (= '[:spo [[[:var ?s]
-                      [:po [[[:path [::ps/branch {:op       cat
-                                                  :paths [[::ps/terminal [:iri :x/one]]
-                                                          [::ps/terminal [:iri :x/two]]]}]]
+                      [:po [[[:path [:path-branch {:op       cat
+                                                   :paths [[:path-terminal [:prefix-iri :x/one]]
+                                                           [:path-terminal [:prefix-iri :x/two]]]}]]
                              [:o [[:var ?o]]]]]]]]]
              (s/conform ts/normal-form-spec
                         '{?s {(cat :x/one :x/two) #{?o}}})))
@@ -38,9 +37,9 @@
            (s/conform ts/normal-form-nopath-spec
                       '{?s {(cat :x/one :x/two) #{?o}}})))
       (is (= '[[:var ?s]
-               [:path [::ps/branch {:op       cat
-                                    :paths [[::ps/terminal [:iri :x/one]]
-                                            [::ps/terminal [:iri :x/two]]]}]]
+               [:path [:path-branch {:op       cat
+                                     :paths [[:path-terminal [:prefix-iri :x/one]]
+                                             [:path-terminal [:prefix-iri :x/two]]]}]]
                [:var ?o]]
              (s/conform ts/triple-vec-spec
                         '[?s (cat :x/one :x/two) ?o]))))))
