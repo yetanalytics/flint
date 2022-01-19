@@ -29,12 +29,15 @@
 (s/def ::select-reduced select-spec)
 
 (def select-query-spec
-  (s/merge
-   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
-                    ::ws/where]
-           :opt-un [::from ::from-named])
-   pro/prologue-spec
-   mod/solution-modifier-spec))
+  (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
+                   ::ws/where]
+          :opt-un [::pro/bases ::pro/prefixes
+                   ::from ::from-named
+                   ::mod/group-by
+                   ::mod/order-by
+                   ::mod/having
+                   ::mod/limit
+                   ::mod/offset]))
 
 (def triples-spec
   (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
@@ -45,31 +48,41 @@
 (s/def ::construct-where triples-spec)
 
 (def construct-query-spec
-  (s/merge
-   (s/keys :req-un [(or (and ::construct ::ws/where) ::construct-where)]
-           :opt-un [::from ::from-named])
-   pro/prologue-spec
-   mod/solution-modifier-spec))
+  (s/keys :req-un [(or (and ::construct ::ws/where) ::construct-where)]
+          :opt-un [::pro/bases ::pro/prefixes
+                   ::from ::from-named
+                   ::mod/group-by
+                   ::mod/order-by
+                   ::mod/having
+                   ::mod/limit
+                   ::mod/offset]))
 
 (s/def ::describe
-  (s/or :vars-or-iris (s/coll-of ax/var-or-iri-spec)
+  (s/or :vars-or-iris (s/coll-of ax/var-or-iri-spec :min-count 1)
         :wildcard ax/wildcard?))
 
 (def describe-query-spec
-  (s/merge
-   (s/keys :req-un [::describe]
-           :opt-un [::from ::from-named ::ws/where])
-   pro/prologue-spec
-   mod/solution-modifier-spec))
+  (s/keys :req-un [::describe]
+          :opt-un [::pro/bases ::pro/prefixes
+                   ::from ::from-named
+                   ::ws/where
+                   ::mod/group-by
+                   ::mod/order-by
+                   ::mod/having
+                   ::mod/limit
+                   ::mod/offset]))
 
 (s/def ::ask ::ws/where)
 
 (def ask-query-spec
-  (s/merge
-   (s/keys :req-un [::ask]
-           :opt-un [::from ::from-named])
-   pro/prologue-spec
-   mod/solution-modifier-spec))
+  (s/keys :req-un [::ask]
+          :opt-un [::pro/bases ::pro/prefixes
+                   ::from ::from-named
+                   ::mod/group-by
+                   ::mod/order-by
+                   ::mod/having
+                   ::mod/limit
+                   ::mod/offset]))
 
 (def query-spec
   (s/or :select-query    select-query-spec

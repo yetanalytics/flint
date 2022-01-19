@@ -5,13 +5,13 @@
 
 (deftest modifier-conform-test
   (testing "Conforming solution modifiers"
-    (is (= [[:expr [:expr-terminal [:var '?foo]]]]
+    (is (= [[:expr-terminal [:var '?foo]]]
            (s/conform ::ms/group-by ['?foo])))
     (is (= '[[:expr-as-var
-             {:expr [:expr-branch {:op   +
-                                  :args ([:expr-terminal [:num-lit 2]]
-                                         [:expr-terminal [:num-lit 2]])}]
-              :var ?foo}]]
+              [[:expr-branch {:op   +
+                              :args ([:expr-terminal [:num-lit 2]]
+                                     [:expr-terminal [:num-lit 2]])}]
+               [:var ?foo]]]]
            (s/conform ::ms/group-by ['[(+ 2 2) ?foo]])))
     (is (= '[[:asc-desc
               {:op asc

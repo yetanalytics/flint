@@ -4,9 +4,11 @@
             [syrup.sparql.spec.expr  :as ex]))
 
 (s/def ::group-by
-  (s/coll-of (s/or :expr ::ex/expr
-                   :var ax/variable?
-                   :expr-as-var ::ex/expr-as-var)
+  (s/coll-of (s/and (s/or :expr ::ex/expr
+                          :var ax/variable?
+                          :expr-as-var ::ex/expr-as-var)
+                    (s/conformer (fn [[kw x]]
+                                   (if (#{:var} kw) [kw x] x))))
              :min-count 1))
 
 (s/def ::order-by

@@ -5,7 +5,7 @@
 
 (deftest conform-test
   (testing "Conform VALUES clause"
-    (is (= '{[?foo ?bar] [[1 :a] [2 :b] [3 :c]]}
+    (is (= '[:values-map {[?foo ?bar] [[1 :a] [2 :b] [3 :c]]}]
            (s/conform ::vs/values '{[?foo ?bar] [[1 :a] [2 :b] [3 :c]]})
            (s/conform ::vs/values '{?foo [1 2 3]
                                     ?bar [:a :b :c]})))))

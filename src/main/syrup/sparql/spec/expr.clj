@@ -97,10 +97,9 @@
   )
 
 (s/def ::expr-as-var
-  (s/and vector?
-         (s/cat :expr ::expr
-                :var ax/variable?)))
+  (s/or :expr-as-var (s/and vector?
+                            (s/tuple ::expr (s/or :var ax/variable?)))))
 
 (comment
-  (s/explain ::expr-as-var ['(+ 2 2) :?foo])
+  (s/conform ::expr-as-var ['(+ 2 2) '?foo])
   (s/explain ::expr-as-var '[(concat ?G " " ?S) ?name]))

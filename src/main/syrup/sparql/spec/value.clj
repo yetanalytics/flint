@@ -26,7 +26,7 @@
                      {vars values})))))
    (s/conformer second)))
 
-(s/def ::values values-clause-spec)
+(s/def ::values (s/or :values-map values-clause-spec))
 
 (comment
   (s/conform ::values '{[?foo ?bar] [[1 :a] [2 :b] [3 :c]]})
