@@ -18,6 +18,8 @@
 
 (s/def ::with ax/iri-spec)
 
+(s/def ::graph ax/iri-spec)
+
 (s/def ::using
   (s/coll-of (s/or :default ax/iri-spec
                    :named (s/keys :req-un [::graph]))))
@@ -44,6 +46,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::load ax/iri-spec)
+(s/def ::load-silent ::load)
 
 (def load-update-spec
   (s/keys :req-un [(or ::load ::load-silent)]
@@ -51,34 +54,40 @@
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
-        :keyword #{:default :named :all}))
+        :update-kw #{:default :named :all}))
+(s/def ::clear-silent ::clear)
 
 (def clear-update-spec
   (s/keys :req-un [(or ::clear ::clear-silent)]))
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
-        :keyword #{:default :named :all}))
+        :update-kw #{:default :named :all}))
+(s/def ::drop-silent ::drop)
 
 (def drop-update-spec
   (s/keys :req-un [(or ::drop ::drop-silent)]))
 
 (s/def ::create ax/iri-spec)
+(s/def ::create-silent ::create)
 
 (def create-update-spec
   (s/keys :req-un [(or ::create ::create-silent)]))
 
 (s/def ::add graph-or-default-spec)
+(s/def ::add-silent ::add)
 
 (def add-update-spec
   (s/keys :req-un [(or ::add ::add-silent) ::to]))
 
 (s/def ::move graph-or-default-spec)
+(s/def ::move-silent ::move)
 
 (def move-update-spec
   (s/keys :req-un [(or ::move ::move-silent) ::to]))
 
 (s/def ::copy graph-or-default-spec)
+(s/def ::copy-silent ::copy)
 
 (def copy-update-spec
   (s/keys :req-un [(or ::copy ::copy-silent) ::to]))
@@ -111,3 +120,23 @@
                    ::insert
                    ::using
                    ::with]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Update Request
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def update-spec
+  (s/or :load-update   load-update-spec
+        :clear-update  clear-update-spec
+        :drop-update   drop-update-spec
+        :create-update create-update-spec
+        :add-update    add-update-spec
+        :move-update   move-update-spec
+        :copy-update   copy-update-spec
+        :insert-data-update  insert-data-update-spec
+        :delete-data-update  delete-data-update-spec
+        :delete-where-update delete-where-update-spec
+        :modify-update       modify-update-spec))
+
+(def update-request-spec
+  (s/or :update-request (s/coll-of update-spec :min-count 1 :kind vector?)))
