@@ -28,12 +28,3 @@
 
 (s/def ::values (s/or :values-map values-clause-spec))
 
-(comment
-  (s/conform ::values '{[?foo ?bar] [[1 :a] [2 :b] [3 :c]]})
-
-  (s/conform ::values '{?foo [1 2 3]
-                        ?bar [:a :b :c]})
-  
-  (vals '{?foo [1 2 3]
-          ?bar [:a :b :c]})
-  (map (fn [& ks] ks) [1 2 3] [:a :b :c]))

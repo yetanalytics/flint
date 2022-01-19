@@ -58,12 +58,3 @@
                     :min-count 1
                     :kind vector?)
         :sub-empty (s/and vector? empty?)))
-
-(comment
-  (s/conform ::select
-             '{:select [?s] :where []})
-  (s/conform ::select
-             '{:select [?s] :where [[?s ?p ?o]]})
-  (s/conform ::where
-             '[[:union [[?s ?p ?o]]]]))
-

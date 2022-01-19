@@ -4,7 +4,22 @@
             [syrup.sparql.spec.expr :as es]))
 
 (deftest expr-conform-test
-  (testing "Conforming expressions"
+  (testing "Conforming expression"
+    (testing "terminals"
+      (is (s/valid? ::es/expr '?foo))
+      (is (s/valid? ::es/expr "bar"))
+      (is (s/valid? ::es/expr 2))
+      (is (s/valid? ::es/expr false))
+      (is (= [:expr-terminal [:var '?foo]]
+             (s/conform ::es/expr '?foo)))
+      (is (= [:expr-terminal [:dt-lit #inst "2022-01-19T22:20:49Z"]]
+             (s/conform ::es/expr #inst "2022-01-19T22:20:49Z")))
+      (is (= [:expr-terminal [:num-lit 100]]
+             (s/conform ::es/expr 100)))
+      (is (= [:expr-terminal [:bool-lit true]]
+             (s/conform ::es/expr true)))
+      (is (= [:expr-terminal [:str-lit "ok"]]
+             (s/conform ::es/expr "ok"))))
     (is (= [:expr-branch {:op   'rand
                           :args []}]
            (s/conform ::es/expr '(rand))))
@@ -66,3 +81,19 @@
     (is (s/invalid? (s/conform ::es/expr '(not false true))))
     (is (s/invalid? (s/conform ::es/expr '(contains "foo"))))
     (is (s/invalid? (s/conform ::es/expr '(+))))))
+
+(deftest expr-as-var-test
+  (testing "expr-as-var spec"
+    (is (= '[:expr-as-var
+             [[:expr-branch {:op   +
+                             :args ([:expr-terminal [:num-lit 2]]
+                                    [:expr-terminal [:num-lit 2]])}]
+              [:var ?foo]]]
+           (s/conform ::es/expr-as-var '[(+ 2 2) ?foo])))
+    (is (= '[:expr-as-var
+             [[:expr-branch {:op   concat
+                             :args ([:expr-terminal [:var ?G]]
+                                    [:expr-terminal [:str-lit " "]]
+                                    [:expr-terminal [:var ?S]])}]
+              [:var ?name]]]
+           (s/conform ::es/expr-as-var '[(concat ?G " " ?S) ?name])))))
