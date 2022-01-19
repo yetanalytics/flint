@@ -1,0 +1,3 @@
+;; SELECT with no WHERE
+{:select [?x]
+ :where  []}

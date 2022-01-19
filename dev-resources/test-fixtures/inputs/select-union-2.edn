@@ -1,0 +1,7 @@
+;; SELECT with UNION (different object)
+{:prefixes {:dc10 "<http://purl.org/dc/elements/1.0/>"
+            :dc11 "<http://purl.org/dc/elements/1.1/>"}
+ :select   [?x ?y]
+ :where    [[:union
+             [[?book :dc10/title ?x]]
+             [[?book :dc11/title ?y]]]]}

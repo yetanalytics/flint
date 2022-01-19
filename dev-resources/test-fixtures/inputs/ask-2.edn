@@ -1,0 +1,4 @@
+;; ASK with shared subject
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :ask      [{?x {:foaf/name #{"Alice"}
+                 :foaf/mbox #{"mailto:alice@work.example"}}}]}

@@ -1,0 +1,10 @@
+;; CONSTRUCT with GRAPH and FILTER
+{:prefixes  {:dc  "<http://purl.org/dc/elements/1.1/>"
+             :app "<http://example.org/ns#>"
+             :xsd "<http://www.w3.org/2001/XMLSchema#>"}
+ :construct [[?s ?p ?o]]
+ :where     [[:graph ?g [[?s ?p ?o]]]
+             [?g :dc/publisher "<http://www.w3.org>"]
+             [?g :dc/date ?date]
+             [:filter (> (:app/customDate ?date)
+                         #inst "2005-02-28T00:00:00Z")]]}

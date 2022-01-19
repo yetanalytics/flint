@@ -1,0 +1,5 @@
+;; SELECT with MIN and STR expression in GROUP BY
+{:prefixes {:$ "<http://example.com/data/#>"}
+ :select   [?x [(* (min ?y) 2) ?min]]
+ :where    [[?x :p ?y] [?x :q ?z]]
+ :group-by [?x (str ?z)]}

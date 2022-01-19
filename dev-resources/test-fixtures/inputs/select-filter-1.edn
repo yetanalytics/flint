@@ -1,0 +1,5 @@
+;; SELECT with FILTER (`regex` expression)
+{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"}
+ :select   [?title]
+ :where    [[?x :dc/title ?title]
+            [:filter (regex ?title "^SPARQL")]]}

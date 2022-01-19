@@ -1,0 +1,6 @@
+;; SELECT with MINUS
+{:prefixes        {:$    "<http://example/>"
+                   :foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select-distinct [?s]
+ :where           [[?s ?p ?o]
+                   [:minus [[?s :foaf/givenName "Bob"]]]]}

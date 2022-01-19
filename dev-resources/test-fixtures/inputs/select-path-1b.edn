@@ -1,0 +1,4 @@
+;; SELECT with SUM and sequential property path
+{:prefixes {:$ "<http://example/>"}
+ :select   [[(sum ?x) ?total]]
+ :where    [[:s (cat :item :price) ?x]]}

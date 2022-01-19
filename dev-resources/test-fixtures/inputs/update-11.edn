@@ -1,0 +1,3 @@
+;; COPY update
+{:copy :default
+ :to   "<http://example.org/named>"}

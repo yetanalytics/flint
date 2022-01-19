@@ -1,0 +1,7 @@
+;; SELECT with FILTER nested inside of OPTIONAL
+{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
+            :ns "<http://example.org/ns#>"}
+ :select   [?title ?price]
+ :where    [[?x :dc/title ?title]
+            [:optional [[?x :ns/price ?price]
+                        [:filter (< ?price 30)]]]]}

@@ -1,0 +1,5 @@
+;; SELECT with var + iri WHERE
+{:select [?title]
+ :where  [["<http://example.org>"
+           "<http://purl.org/dc/elements/1.1/title>"
+           ?title]]}

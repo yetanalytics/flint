@@ -1,0 +1,8 @@
+;; SELECT using GRAPH
+{:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"
+              :dc   "<http://purl.org/dc/elements/1.1/>"}
+ :select     [?name ?mbox ?date]
+ :where      [{?g {:dc/publisher #{?name}
+                   :dc/date      #{?date}}}
+              [:graph ?g [{?person {:foaf/name #{?name}
+                                    :foaf/mbox #{?mbox}}}]]]}

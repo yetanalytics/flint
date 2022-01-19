@@ -1,0 +1,7 @@
+;; SELECT with LIMIT OFFSET
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select   [?name]
+ :where    [[?x :foaf/name ?name]]
+ :order-by [?name]
+ :limit    5
+ :offset   10}

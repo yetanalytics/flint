@@ -1,0 +1,5 @@
+;; SELECT with AVG and GROUP BY
+{:select   [[(avg ?y) ?avg]]
+ :where    [{?a {:x #{?x}
+                 :y #{?y}}}]
+ :group-by [?x]}

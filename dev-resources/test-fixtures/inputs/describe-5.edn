@@ -1,0 +1,4 @@
+;; DESCRIBE with numerical string literal
+{:prefixes {:ent "<http://org.example.com/employees#>"}
+ :describe [?x]
+ :where    [[?x :ent/employeeId "1234"]]}

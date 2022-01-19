@@ -1,0 +1,6 @@
+;; SELECT with ORDER BY ?var DESC
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"
+            :$    "<http://example.org/ns#>"}
+ :select   [?name]
+ :where    [{?x {:foaf/name #{?name} :empId #{?emp}}}]
+ :order-by [?name (desc ?emp)]}

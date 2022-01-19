@@ -1,0 +1,6 @@
+;; SELECT with FILTER EXISTS
+{:prefixes {:rdf  "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+            :foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select   [?person]
+ :where    [[?person :rdf/type :foaf/Person]
+            [:filter (exists [[?person :foaf/name ?name]])]]}
