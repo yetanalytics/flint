@@ -75,7 +75,7 @@
                                     :vargs (s/* ::expr)))
           (s/conformer second)
           (s/conformer (fn [{:keys [op arg-1 arg-2 arg-3 vargs]}]
-                         {:op op
+                         {:op   op
                           :args (cond-> []
                                   arg-1 (conj arg-1)
                                   arg-2 (conj arg-2)

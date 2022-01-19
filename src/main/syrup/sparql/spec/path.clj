@@ -8,9 +8,16 @@
               :prefix-iri ax/prefix-iri?
               :rdf-type ax/rdf-type?)
         :path-branch
-        (s/and (s/or :varardic
-                     (s/cat :op #{'alt 'cat 'inv '? '* '+}
+        (s/and list?
+               (s/or :varardic
+                     (s/cat :op #{'alt 'cat}
                             :paths (s/* ::path))
+                     :unary-left
+                     (s/cat :op #{'inv 'not}
+                            :path ::path)
+                     :unary-right
+                     (s/cat :op #{'? '* '+}
+                            :path ::path)
                      :unary
                      (s/cat :op #{'not}
                             :path ::path))
