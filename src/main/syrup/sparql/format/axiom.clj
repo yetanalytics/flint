@@ -11,7 +11,7 @@
   (name variable))
 
 (defmethod f/format-ast :bnode [[_ bnode]]
-  (if-some [?suffix (second (re-matches #"_(.*)" (name bnode)))]
+  (if-some [?suffix (second (re-matches #"_(.+)" (name bnode)))]
     (str "_:" ?suffix)
     "[]"))
 
@@ -31,7 +31,7 @@
   (str bool-value))
 
 (defmethod f/format-ast :dt-lit [[_ dt-value]]
-  (str dt-value "^^<http://www.w3.org/2001/XMLSchema#dateTime>"))
+  (str (.toInstant dt-value) "^^<http://www.w3.org/2001/XMLSchema#dateTime>"))
 
 (defmethod f/format-ast :lmap-lit [[_ value]]
   (let [[ltag lval] (first value)]
