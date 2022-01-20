@@ -24,10 +24,3 @@
 
 (s/def ::limit int?)
 (s/def ::offset int?)
-
-(def solution-modifier-spec
-  (s/keys :opt-un [::group-by
-                   ::order-by
-                   ::having
-                   ::limit
-                   ::offset]))

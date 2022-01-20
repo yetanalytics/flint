@@ -27,15 +27,11 @@
 (defn rdf-type? [x]
   (boolean (#{'a :a} x)))
 
-;; TODO: Incomplete specs
+;; Composite specs
 
 (def iri-spec
   (s/or :iri iri?
         :prefix-iri prefix-iri?))
-
-(def iri-pred-spec
-  (s/or :iri iri?
-        :rdf-type rdf-type?))
 
 (def var-or-iri-spec
   (s/or :var variable?

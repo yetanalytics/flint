@@ -105,6 +105,5 @@
 ;; NOTE: RDF collections not supported (yet?)
 
 (comment
-  (s/conform normal-form-spec '{?s {?p #{?o}}})
-    
-  (s/conform triple-vec-nopath-spec '[?s ?p ?o]))
+  ;; Hack to shut up `unused-public-var` warnings
+  pred-objs-nopath-spec)

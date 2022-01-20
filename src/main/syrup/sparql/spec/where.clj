@@ -22,9 +22,11 @@
   (s/or :sub-select ::select
         :sub-where (s/coll-of
                     (s/or
-                     :recurse  ::where
                      :tvec     triple/triple-vec-spec
                      :nform    triple/normal-form-spec
+                     :recurse  (s/& (s/cat :k #{:where}
+                                           :v ::where)
+                                    (s/conformer #(:v %)))
                      :union    (s/& (s/cat :k #{:union}
                                            :v (s/+ ::where))
                                     (s/conformer #(:v %)))

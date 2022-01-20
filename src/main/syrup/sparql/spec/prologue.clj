@@ -9,6 +9,3 @@
 (s/def ::prefixes
   (s/and (s/map-of keyword? ax/iri?)
          (s/conformer (partial map (fn [[pre iri]] [:prefix [pre iri]])))))
-
-(def prologue-spec
-  (s/keys :opt-un [::bases ::prefixes]))

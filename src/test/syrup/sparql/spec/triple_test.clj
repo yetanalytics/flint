@@ -33,13 +33,17 @@
                              [:o [[:var ?o]]]]]]]]]
              (s/conform ts/normal-form-spec
                         '{?s {(cat :x/one :x/two) #{?o}}})))
-      (is (s/invalid?
-           (s/conform ts/normal-form-nopath-spec
-                      '{?s {(cat :x/one :x/two) #{?o}}})))
       (is (= '[[:var ?s]
                [:path [:path-branch {:op       cat
                                      :paths [[:path-terminal [:prefix-iri :x/one]]
                                              [:path-terminal [:prefix-iri :x/two]]]}]]
                [:var ?o]]
              (s/conform ts/triple-vec-spec
-                        '[?s (cat :x/one :x/two) ?o]))))))
+                        '[?s (cat :x/one :x/two) ?o])))
+      (is (not (s/valid? ts/normal-form-nopath-spec
+                         '{?s {(cat :x/one :x/two) #{?o}}})))
+      (is (->> '{?s {(cat :x/one :x/two) #{?o}}}
+               (s/explain-data ts/normal-form-nopath-spec)
+               ::s/problems
+               (map :val)
+               (every? (partial = '(cat :x/one :x/two))))))))

@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as s]
             [syrup.sparql.spec.where :as ws]))
 
-(deftest where-conform-test
+(deftest conform-where-test
   (testing "Conform WHERE clause"
     (is (= '[:sub-select {:select [:var-or-exprs [[:var ?s]]]
                           :where  [:sub-where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]}]
@@ -16,8 +16,8 @@
                                          :args ([:expr-terminal [:num-lit 2]]
                                                 [:expr-terminal [:num-lit 2]])}]
                                        [:var ?foo]]]]}]
-           (s/conform ::ws/where '{:select [?s]
-                                   :where [[?s ?p ?o]]
+           (s/conform ::ws/where '{:select   [?s]
+                                   :where    [[?s ?p ?o]]
                                    :group-by [[(+ 2 2) ?foo]]})))
     (is (= '[:sub-where
              [[:union
@@ -70,3 +70,14 @@
     (is (= '[:sub-where
              [[:values [:values-map {[?bar ?qux] [[1 2]]}]]]]
            (s/conform ::ws/where [[:values '{?bar [1] ?qux [2]}]])))))
+
+(deftest invalid-where-test
+  (testing "invalid WHERE clauses"
+    (is (not (s/valid? ::ws/where '[[:optional [[?s ?p]]]])))
+    (is (not (s/valid? ::ws/where '[[[[?s ?p]]]])))
+    (is (not (s/valid? ::ws/where '[[:where [{:select   [?s]
+                                              :where    [[?s ?p ?o]]
+                                              :group-by [[(+ 2 2) ?foo]]}
+                                             {:select   [?s]
+                                              :where    [[?s ?p ?o]]
+                                              :group-by [[(+ 2 2) ?foo]]}]]])))))
