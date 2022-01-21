@@ -4,8 +4,8 @@
 
 (s/def ::bases
   (s/and (s/coll-of ax/iri?)
-         (s/conformer (partial map (fn [b] [:base b])))))
+         (s/conformer (partial map (fn [b] [:base [:iri b]])))))
 
 (s/def ::prefixes
   (s/and (s/map-of keyword? ax/iri?)
-         (s/conformer (partial map (fn [[pre iri]] [:prefix [pre iri]])))))
+         (s/conformer (partial map (fn [[pre iri]] [:prefix [pre [:iri iri]]])))))
