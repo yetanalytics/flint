@@ -104,6 +104,18 @@
                            :args [[:expr-terminal [:bool-lit true]]]}]]}]
                 (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
+    (is (= "true || false && !true"
+           (->> [:expr-branch
+                 {:op   'or
+                  :args [[:expr-terminal [:bool-lit true]]
+                         [:expr-branch
+                          {:op 'and
+                           :args [[:expr-terminal [:bool-lit false]]
+                                  [:expr-branch
+                                   {:op   'not
+                                    :args [[:expr-terminal [:bool-lit true]]]}]]}]]}]
+                (w/postwalk f/annotate-ast)
+                (w/postwalk f/format-ast))))
     (is (= "GROUP_CONCAT(?foo; SEPARATOR = ';')"
            (->> [:expr-branch {:op   'group-concat
                                :args [[:expr-terminal [:var '?foo]]
