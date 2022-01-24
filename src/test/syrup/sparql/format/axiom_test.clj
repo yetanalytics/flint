@@ -1,6 +1,7 @@
 (ns syrup.sparql.format.axiom-test
   (:require [clojure.test :refer [deftest testing is]]
-            [syrup.sparql.format :as f]))
+            [syrup.sparql.format :as f]
+            [syrup.sparql.format.axiom]))
 
 (deftest axiom-format
   (testing "Formatting terminal AST nodes"
