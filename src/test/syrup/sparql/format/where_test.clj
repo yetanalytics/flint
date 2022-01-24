@@ -80,13 +80,13 @@
                       [:expr/args
                        ([:expr/terminal [:num-lit 2]]
                         [:expr/terminal [:var ?bar]])]]]]
-                   [:filter
+                   [:where/filter
                     [:expr/branch
                      [[:expr/op ns:myfn]
                       [:expr/args
                        ([:expr/terminal [:num-lit 2]]
                         [:expr/terminal [:var ?baz]])]]]]
-                   [:values [:values/map [[[:var ?x] [:var ?y]]
-                                          [[[:num-lit 1] [:num-lit 2]]]]]]]]
-                (w/postwalk f/annotate-ast)
+                   [:where/values
+                    [:values/map [[[:var ?x] [:var ?y]]
+                                  [[[:num-lit 1] [:num-lit 2]]]]]]]]
                 (w/postwalk f/format-ast))))))

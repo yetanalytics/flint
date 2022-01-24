@@ -12,7 +12,7 @@
 (defmethod f/format-ast :mod/expr [[_ expr]]
   expr)
 
-(defmethod f/format-ast :mod/expr-var [[_ expr-as-var]]
+(defmethod f/format-ast :mod/expr-as-var [[_ expr-as-var]]
   (str "(" expr-as-var ")"))
 
 (defmethod f/format-ast :group-by [[_ value]]

@@ -43,10 +43,7 @@
   (str "SERVICE SILENT " iri " " pattern))
 
 (defmethod f/format-ast :where/filter [[_ expr]]
-  (str "FILTER " expr)
-  #_(if (re-matches #"[\w\:]+\(.*\)" expr)
-    (str "FILTER " expr)
-    (str "FILTER (" expr ")")))
+  (str "FILTER " expr))
 
 (defmethod f/format-ast :where/bind [[_ expr-as-var]]
   (str "BIND (" expr-as-var ")"))

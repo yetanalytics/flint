@@ -15,18 +15,12 @@
                                [:expr/args [[:expr/terminal [:num-lit 2]]
                                             [:expr/terminal [:num-lit 3]]]]]]
                 (w/postwalk f/format-ast))))
-    #_(is (= "2 + 3"
+    (is (= "(2 + 3)"
            (->> [:expr/branch [[:expr/op '+]
                                [:expr/args [[:expr/terminal [:num-lit 2]]
                                             [:expr/terminal [:num-lit 3]]]]]]
                 (w/postwalk f/format-ast))))
-    (is (= "(2 + 3)" #_"2 + 3"
-           (->> [:expr/branch [[:expr/op '+]
-                               [:expr/args [[:expr/terminal [:num-lit 2]]
-                                            [:expr/terminal [:num-lit 3]]]]]]
-                (w/postwalk f/annotate-ast)
-                (w/postwalk f/format-ast))))
-    (is (= "(2 * (3 + 3))" #_"2 * (3 + 3)"
+    (is (= "(2 * (3 + 3))"
            (->> [:expr/branch
                  [[:expr/op '*]
                   [:expr/args [[:expr/terminal [:num-lit 2]]
@@ -36,7 +30,7 @@
                                               [:expr/terminal [:num-lit 3]]]]]]]]]]
                 #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
-    (is (= "(2 - (6 - 2))" #_"2 - (6 - 2)" ; => -2
+    (is (= "(2 - (6 - 2))" ; => -2
            (->> [:expr/branch
                  [[:expr/op '-]
                   [:expr/args [[:expr/terminal [:num-lit 2]]
@@ -44,9 +38,8 @@
                                 [[:expr/op '-]
                                  [:expr/args [[:expr/terminal [:num-lit 6]]
                                               [:expr/terminal [:num-lit 2]]]]]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
-    (is (= "((2 - 6) - 2)" #_"(2 - 6) - 2" ; => -6
+    (is (= "((2 - 6) - 2)" ; => -6
            (->> [:expr/branch
                  [[:expr/op '-]
                   [:expr/args [[:expr/branch
@@ -54,9 +47,8 @@
                                  [:expr/args [[:expr/terminal [:num-lit 2]]
                                               [:expr/terminal [:num-lit 6]]]]]]
                                [:expr/terminal [:num-lit 2]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
-    (is (= "(((2 * 3) + 4) / 2)" #_"(2 * 3 + 4) / 2" ; (/ (+ (* 2 3) 4) 2)
+    (is (= "(((2 * 3) + 4) / 2)" ; (/ (+ (* 2 3) 4) 2)
            (->> [:expr/branch
                  [[:expr/op '/]
                   [:expr/args [[:expr/branch
@@ -67,9 +59,8 @@
                                                              [:expr/terminal [:num-lit 3]]]]]]
                                               [:expr/terminal [:num-lit 4]]]]]]
                                [:expr/terminal [:num-lit 2]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
-    (is (= "((2 * 3) + (4 / 2))" #_"2 * 3 + 4 / 2" ; (+ (* 2 3) (/ 4 2))
+    (is (= "((2 * 3) + (4 / 2))" ; (+ (* 2 3) (/ 4 2))
            (->> [:expr/branch
                  [[:expr/op '+]
                   [:expr/args [[:expr/branch
@@ -80,7 +71,6 @@
                                 [[:expr/op '/]
                                  [:expr/args [[:expr/terminal [:num-lit 4]]
                                               [:expr/terminal [:num-lit 2]]]]]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "SUM(2, (3 - 3))"
            (->> [:expr/branch
@@ -90,7 +80,6 @@
                                 [[:expr/op '-]
                                  [:expr/args [[:expr/terminal [:num-lit 3]]
                                               [:expr/terminal [:num-lit 3]]]]]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "((true || false) && !true)"
            (->> [:expr/branch
@@ -102,7 +91,6 @@
                                [:expr/branch
                                 [[:expr/op 'not]
                                  [:expr/args [[:expr/terminal [:bool-lit true]]]]]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "(true || (false && !true))"
            (->> [:expr/branch
@@ -114,31 +102,26 @@
                                               [:expr/branch
                                                [[:expr/op 'not]
                                                 [:expr/args [[:expr/terminal [:bool-lit true]]]]]]]]]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "GROUP_CONCAT(?foo; SEPARATOR = ';')"
            (->> [:expr/branch [[:expr/op 'group-concat]
                                [:expr/args [[:expr/terminal [:var '?foo]]
                                             [:expr/terminal [:kwarg {:k :separator
                                                                      :v ";"}]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "GROUP_CONCAT(DISTINCT ?foo; SEPARATOR = ';')"
            (->> [:expr/branch [[:expr/op 'group-concat-distinct]
                                [:expr/args [[:expr/terminal [:var '?foo]]
                                             [:expr/terminal [:kwarg {:k :separator
                                                                      :v ";"}]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "ENCODE_FOR_URI(?foo)"
            (->> [:expr/branch [[:expr/op 'encode-for-uri]
                                [:expr/args [[:expr/terminal [:var '?foo]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "isIRI(?foo)"
            (->> [:expr/branch [[:expr/op 'iri?]
                                [:expr/args [[:expr/terminal [:var '?foo]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast)))))
   (testing "expr AS var formatting"
     (is (= "(2 + 2) AS ?foo"
@@ -149,5 +132,4 @@
                       [[:expr/terminal [:num-lit 2]]
                        [:expr/terminal [:num-lit 2]]]]]]
                    [:var ?foo]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))))

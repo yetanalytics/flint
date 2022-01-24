@@ -22,7 +22,6 @@
                    [:order-by [[:mod/asc-desc
                                 [[:mod/op asc]
                                  [:mod/expr [:expr/terminal [:var ?y]]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast)))))
   (testing "format CONSTRUCT query"
     (is (= (cstr/join "\n" ["CONSTRUCT ?x ?y ?z ."
@@ -34,7 +33,6 @@
                   [[:construct [:tvec [[:var ?x] [:var ?y] [:var ?z]]]]
                    [:from [:iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "FROM <http://example.org/my-graph/>"
@@ -45,7 +43,6 @@
                   [[:construct []]
                    [:from [:iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "WHERE {"
@@ -54,7 +51,6 @@
            (->> '[:construct-query
                   [[:construct []]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast)))))
   (testing "format DESCRIBE query"
     (is (= (cstr/join "\n" ["DESCRIBE ?x ?y"
@@ -68,7 +64,6 @@
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast)))))
   (testing "format ASK query"
     (is (= (cstr/join "\n" ["ASK"
@@ -82,7 +77,6 @@
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["ASK"
                             "WHERE {"
@@ -91,5 +85,4 @@
            (->> '[:ask-query
                   [[:ask []]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))))

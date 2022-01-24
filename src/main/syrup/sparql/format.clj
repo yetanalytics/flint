@@ -28,12 +28,6 @@
 ;; Multimethods
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmulti annotate-ast
-  "Add metadata to the AST node; intended to be used before formatting."
-  dispatch-ast-node)
-
-(defmethod annotate-ast :default [ast-node] ast-node)
-
 (defmulti format-ast
   "Convert the AST node into a string."
   dispatch-ast-node)
