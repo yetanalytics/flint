@@ -4,68 +4,28 @@
             [clojure.walk :as w]
             [syrup.sparql.format :as f]))
 
-;; TODO: Ban variables from INSERT/DELETE DATA
-
 (deftest format-test
   (testing "format INSERT DATA"
     (is (= (cstr/join "\n" ["INSERT DATA {"
-                            "    ?x ?y ?z ."
-                            "    ?i ?j ?k ."
+                            "    foo:x dc:title 'Title' ."
                             "}"])
            (->> '[:insert-data-update
-                  [:insert-data [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]
-                                 [:tvec [[:var ?i] [:var ?j] [:var ?k]]]]]]
-                (w/postwalk f/format-ast))))
-    (is (= (cstr/join "\n" ["INSERT DATA {"
-                            "    ?x ?y ?z ."
-                            "    ?i ?j ?k ."
-                            "    ?s ?p ?o"
-                            "    GRAPH <http://example.org> {"
-                            "        ?q ?r ?s ."
-                            "    }"
-                            "}"])
-           (->> '[:insert-data-update
-                  [:insert-data
-                   [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]
-                    [:nform [:spo [[[:var ?i]
-                                    [:po [[[:var ?j]
-                                           [:o [[:var ?k]]]]]]]
-                                   [[:var ?s]
-                                    [:po [[[:var ?p]
-                                           [:o [[:var ?o]]]]]]]]]]
-                    [:quads [:graph
-                             [:iri "<http://example.org>"]
-                             [:tvec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]
+                  [:insert-data [[:tvec [[:prefix-iri :foo/x]
+                                         [:prefix-iri :dc/title]
+                                         [:str-lit "Title"]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format DELETE DATA"
-    (is (= (cstr/join "\n" ["INSERT DATA {"
-                            "    ?x ?y ?z ."
-                            "    ?i ?j ?k ."
-                            "}"])
-           (->> '[:insert-data-update
-                  [:insert-data [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]
-                                 [:tvec [[:var ?i] [:var ?j] [:var ?k]]]]]]
-                (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["DELETE DATA {"
-                            "    ?x ?y ?z ."
-                            "    ?i ?j ?k ."
-                            "    ?s ?p ?o"
                             "    GRAPH <http://example.org> {"
-                            "        ?q ?r ?s ."
+                            "        foo:x dc:title 'Title' ."
                             "    }"
                             "}"])
            (->> '[:delete-data-update
-                  [:delete-data
-                   [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]
-                    [:nform [:spo [[[:var ?i]
-                                    [:po [[[:var ?j]
-                                           [:o [[:var ?k]]]]]]]
-                                   [[:var ?s]
-                                    [:po [[[:var ?p]
-                                           [:o [[:var ?o]]]]]]]]]]
-                    [:quads [:graph
-                             [:iri "<http://example.org>"]
-                             [:tvec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]
+                  [:delete-data [[:quads [:graph
+                                          [:iri "<http://example.org>"]
+                                          [[:tvec [[:prefix-iri :foo/x]
+                                                   [:prefix-iri :dc/title]
+                                                   [:str-lit "Title"]]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format DELETE WHERE"
     (is (= (cstr/join "\n" ["DELETE WHERE {"
@@ -95,7 +55,7 @@
                                            [:o [[:var ?o]]]]]]]]]]
                     [:quads [:graph
                              [:iri "<http://example.org>"]
-                             [:tvec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]
+                             [[:tvec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format INSERT...DELETE"
     (is (= (cstr/join "\n" ["WITH <http://example.org>"
