@@ -4,18 +4,52 @@
             [syrup.sparql.spec.triple :as triple]
             [syrup.sparql.spec.where  :as ws]))
 
+(def key-order-map
+  {:bases        0
+   :prefixes     1
+   ;; Graph management
+   :load         2
+   :load-silent  2
+   :clear        2
+   :clear-silent 2
+   :drop         2
+   :drop-silent  2
+   :add          2
+   :add-silent   2
+   :move         2
+   :move-silent  2
+   :copy         2
+   :copy-silent  2
+   :to           3
+   ;; Graph modification
+   :insert-data  2
+   :delete-data  2
+   :delete-where 2
+   :with         2
+   :delete       3
+   :insert       4
+   :using        5
+   :where        6})
+
+(defn- qkey-comp
+  [k1 k2]
+  (let [n1 (get key-order-map k1 100)
+        n2 (get key-order-map k2 100)]
+    (- n1 n2)))
+
 (defmacro smap->vec
   [form]
   `(s/and ~form
-          (s/conformer #(into [] %))))
+          (s/conformer #(into [] %))
+          (s/conformer #(sort-by first qkey-comp %))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def graph-or-default-spec
-  (s/or :default #{:default}
-        :named ax/iri-spec))
+  (s/or :update/default-graph #{:default}
+        :update/named-graph ax/iri-spec))
 
 (s/def ::to graph-or-default-spec)
 
@@ -26,8 +60,10 @@
 (s/def ::graph ax/iri-spec)
 
 (s/def ::using
-  (s/coll-of (s/or :default ax/iri-spec
-                   :named (s/keys :req-un [::graph]))))
+  (s/or :update/iri ax/iri-spec
+        :update/named-iri (s/tuple #{:named} ax/iri-spec))
+  #_(s/coll-of (s/or :update/default ax/iri-spec
+                   :update/named (smap->vec (s/keys :req-un [::graph])))))
 
 ;; Quads
 
@@ -37,9 +73,10 @@
 
 (def quad-spec
   (s/and vector?
-         (s/cat :k #{:graph}
-                :v (s/cat :var-or-iri ax/var-or-iri-spec
-                          :triples triples-spec))))
+         (s/& (s/cat :update/k #{:graph}
+                     :var-or-iri ax/var-or-iri-spec
+                     :triples triples-spec)
+              (s/conformer #(into [] %)))))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :tvec  triple/triple-vec-nopath-spec
@@ -59,7 +96,7 @@
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
-        :update-kw #{:default :named :all}))
+        :update/kw #{:default :named :all}))
 
 (s/def ::clear-silent ::clear)
 
@@ -68,7 +105,7 @@
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
-        :update-kw #{:default :named :all}))
+        :update/kw #{:default :named :all}))
 
 (s/def ::drop-silent ::drop)
 
@@ -122,11 +159,12 @@
 (s/def ::delete triple-or-quads-spec)
 
 (def modify-update-spec
-  (smap->vec (s/keys :req-un [::ws/where]
+  (smap->vec (s/keys :req-un [(or ::delete ::insert)
+                              ::ws/where]
                      :opt-un [::delete
                               ::insert
-                              ::using
-                              ::with])))
+                              ::with
+                              ::using])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Update Request

@@ -2,16 +2,17 @@
   (:require [clojure.string :as cstr]
             [syrup.sparql.format :as f]))
 
-(defmethod f/format-ast :asc-desc [[_ {:keys [op sub-expr]}]]
-  (if op ; has ASC/DESC
-    (let [op-name (cstr/upper-case (name op))]
-      (str op-name "(" sub-expr ")"))
-    sub-expr))
+(defmethod f/format-ast :mod/op [[_ op]]
+  (name op))
 
-(defmethod f/format-ast :expr [[_ expr]]
-  (str "(" expr ")"))
+(defmethod f/format-ast :mod/asc-desc [[_ [op sub-expr]]]
+  (let [op-name (cstr/upper-case op)]
+    (str op-name "(" sub-expr ")")))
 
-(defmethod f/format-ast :expr-var [[_ expr-as-var]]
+(defmethod f/format-ast :mod/expr [[_ expr]]
+  expr)
+
+(defmethod f/format-ast :mod/expr-var [[_ expr-as-var]]
   (str "(" expr-as-var ")"))
 
 (defmethod f/format-ast :group-by [[_ value]]

@@ -41,9 +41,10 @@
                           [:expr/args [[:expr/terminal [:var '?foo]]]]]]
            (s/conform ::es/expr '(bound ?foo))))
     (is (= [:expr/branch [[:expr/op 'exists]
-                          [:expr/args [[:sub-where [[:tvec '[[:var ?s]
-                                                             [:var ?p]
-                                                             [:var ?o]]]]]]]]]
+                          [:expr/args [[:where-sub/where
+                                        [[:tvec '[[:var ?s]
+                                                  [:var ?p]
+                                                  [:var ?o]]]]]]]]]
            (s/conform ::es/expr '(exists [[?s ?p ?o]]))))
     (is (= [:expr/branch [[:expr/op 'contains]
                           [:expr/args [[:expr/terminal [:str-lit "foo"]]

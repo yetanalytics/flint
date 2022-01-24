@@ -5,10 +5,10 @@
 
 (deftest conform-where-test
   (testing "Conform WHERE clause"
-    (is (= '[:where-sub/select [[:select [:var-or-exprs [[:var ?s]]]]
+    (is (= '[:where-sub/select [[:select [:select/var-or-exprs [[:var ?s]]]]
                                 [:where [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
            (s/conform ::ws/where '{:select [?s] :where [[?s ?p ?o]]})))
-    (is (= '[:where-sub/select [[:select [:var-or-exprs [[:var ?s]]]]
+    (is (= '[:where-sub/select [[:select [:select/var-or-exprs [[:var ?s]]]]
                                 [:where [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]
                                 [:group-by [[:mod/expr-as-var
                                              [:expr/as-var

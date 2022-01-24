@@ -8,10 +8,35 @@
             [syrup.sparql.spec.select   :as ss]
             [syrup.sparql.spec.where    :as ws]))
 
+(def key-order-map
+  {:bases           0
+   :prefixes        1
+   :select          2
+   :select-distinct 2
+   :select-reduced  2
+   :construct       2
+   :describe        2
+   :ask             2
+   :from            3
+   :from-named      4
+   :where           5
+   :group-by        6
+   :order-by        7
+   :having          8
+   :limit           9
+   :offset          10})
+
+(defn- qkey-comp
+  [k1 k2]
+  (let [n1 (get key-order-map k1 100)
+        n2 (get key-order-map k2 100)]
+    (- n1 n2)))
+
 (defmacro smap->vec
   [form]
   `(s/and ~form
-          (s/conformer #(into [] %))))
+          (s/conformer #(into [] %))
+          (s/conformer #(sort-by first qkey-comp %))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dataset Clause specs
@@ -35,25 +60,24 @@
 
 (def select-query-spec
   (smap->vec (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
-                          ::ws/where]
-                 :opt-un [::pro/bases ::pro/prefixes
-                          ::from ::from-named
-                          ::mod/group-by
-                          ::mod/order-by
-                          ::mod/having
-                          ::mod/limit
-                          ::mod/offset])))
+                              ::ws/where]
+                     :opt-un [::pro/bases ::pro/prefixes
+                              ::from ::from-named
+                              ::mod/group-by
+                              ::mod/order-by
+                              ::mod/having
+                              ::mod/limit
+                              ::mod/offset])))
 
 (def triples-spec
   (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
                    :nform triple/normal-form-nopath-spec)
-             :min-count 1))
+             :min-count 0))
 
 (s/def ::construct triples-spec)
-(s/def ::construct-where triples-spec)
 
 (def construct-query-spec
-  (smap->vec (s/keys :req-un [(or (and ::construct ::ws/where) ::construct-where)]
+  (smap->vec (s/keys :req-un [::construct ::ws/where]
                      :opt-un [::pro/bases ::pro/prefixes
                               ::from ::from-named
                               ::mod/group-by
@@ -68,19 +92,19 @@
 
 (def describe-query-spec
   (smap->vec (s/keys :req-un [::describe]
-                 :opt-un [::pro/bases ::pro/prefixes
-                          ::from ::from-named
-                          ::ws/where
-                          ::mod/group-by
-                          ::mod/order-by
-                          ::mod/having
-                          ::mod/limit
-                          ::mod/offset])))
+                     :opt-un [::pro/bases ::pro/prefixes
+                              ::from ::from-named
+                              ::ws/where
+                              ::mod/group-by
+                              ::mod/order-by
+                              ::mod/having
+                              ::mod/limit
+                              ::mod/offset])))
 
-(s/def ::ask ::ws/where)
+(s/def ::ask empty?)
 
 (def ask-query-spec
-  (smap->vec (s/keys :req-un [::ask]
+  (smap->vec (s/keys :req-un [::ask ::ws/where]
                      :opt-un [::pro/bases ::pro/prefixes
                               ::from ::from-named
                               ::mod/group-by
