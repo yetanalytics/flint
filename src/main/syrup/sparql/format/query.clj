@@ -2,7 +2,6 @@
   (:require [clojure.string :as cstr]
             [syrup.sparql.format :as f]
             [syrup.sparql.format.axiom]
-            [syrup.sparql.format.expr]
             [syrup.sparql.format.prologue]
             [syrup.sparql.format.triple]
             [syrup.sparql.format.modifier]

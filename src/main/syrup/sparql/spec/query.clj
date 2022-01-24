@@ -1,7 +1,6 @@
 (ns syrup.sparql.spec.query
   (:require [clojure.spec.alpha :as s]
             [syrup.sparql.spec.axiom    :as ax]
-            [syrup.sparql.spec.expr     :as ex]
             [syrup.sparql.spec.prologue :as pro]
             [syrup.sparql.spec.triple   :as triple]
             [syrup.sparql.spec.modifier :as mod]
@@ -49,17 +48,10 @@
 ;; Query
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def select-spec
-  (s/or :vars-or-exprs (s/coll-of (s/or :var ax/variable?
-                                        :expr ::ex/expr-as-var))
-        :wildcard ax/wildcard?))
-
-(s/def ::select select-spec)
-(s/def ::select-distinct select-spec)
-(s/def ::select-reduced select-spec)
-
 (def select-query-spec
-  (smap->vec (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
+  (smap->vec (s/keys :req-un [(or ::ss/select
+                                  ::ss/select-distinct
+                                  ::ss/select-reduced)
                               ::ws/where]
                      :opt-un [::pro/bases ::pro/prefixes
                               ::from ::from-named
