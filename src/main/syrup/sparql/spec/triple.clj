@@ -11,29 +11,30 @@
 
 ;;;;;; Defining nopath specs ;;;;;
 
-(def ^:private nopath-spec-syms
-  #{`pred-spec
-    `pred-objs-spec
-    `normal-form-spec
-    `triple-vec-spec
-    `triples-spec})
-
-(defn- form->nopath-sym
-  [sym]
-  (if (and (symbol? sym) (nopath-spec-syms sym))
+(defn- sym->new-sym
+  [old-sym-re new-sym sym]
+  (if (symbol? sym)
     (let [sym-ns (namespace sym)
           sym-name (name sym)]
       (symbol sym-ns
-              (cstr/replace sym-name #"-spec" "-nopath-spec")))
+              (cstr/replace sym-name old-sym-re new-sym)))
     sym))
 
 (defn- form->nopath-spec-form
   [form]
-  (w/postwalk form->nopath-sym form))
+  (w/postwalk (partial sym->new-sym #"-spec" "-nopath-spec") form))
 
 (defn- spec->nopath-spec
   [spec]
   (-> spec s/form form->nopath-spec-form eval))
+
+(defn- form->novar-spec-form
+  [form]
+  (w/postwalk (partial sym->new-sym #"-spec" "-novar-spec") form))
+
+(defn- spec->novar-spec
+  [spec]
+  (-> spec s/form form->novar-spec-form eval))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subj/Pred/Obj Specs
@@ -44,6 +45,13 @@
         :iri ax/iri?
         :prefix-iri ax/prefix-iri?
         :bnode ax/bnode?))
+
+(def pred-spec
+  (s/or :var ax/variable?
+        :iri ax/iri?
+        :prefix-iri ax/prefix-iri?
+        :rdf-type ax/rdf-type?
+        :path ::path/path))
 
 (def obj-spec
   (s/or :var ax/variable?
@@ -56,18 +64,36 @@
         :bool-lit boolean?
         :dt-lit inst?))
 
-(def pred-spec
-  (s/or :var ax/variable?
-        :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :rdf-type ax/rdf-type?
-        :path ::path/path))
+;; No property paths
+
+(def subj-nopath-spec subj-spec)
 
 (def pred-nopath-spec
   (s/or :var ax/variable?
         :iri ax/iri?
         :prefix-iri ax/prefix-iri?
         :rdf-type ax/rdf-type?))
+
+(def obj-nopath-spec obj-spec)
+
+;; No variables (or bnodes or property paths)
+
+(def subj-novar-spec
+  (s/or :iri ax/iri?
+        :prefix-iri ax/prefix-iri?))
+
+(def pred-novar-spec
+  (s/or :iri ax/iri?
+        :prefix-iri ax/prefix-iri?))
+
+(def obj-novar-spec
+  (s/or :iri ax/iri?
+        :prefix-iri? ax/prefix-iri?
+        :nil nil?
+        :str-lit string?
+        :num-lit number?
+        :bool-lit boolean?
+        :dt-lit inst?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Combo Specs
@@ -79,6 +105,12 @@
                       :kind set?
                       :into [])))
 
+(def obj-set-nopath-spec
+  obj-set-spec)
+
+(def obj-set-novar-spec
+  (spec->novar-spec obj-set-spec))
+
 (def pred-objs-spec
   (s/or :po (s/map-of pred-spec obj-set-spec
                       :min-count 1
@@ -86,6 +118,9 @@
 
 (def pred-objs-nopath-spec
   (spec->nopath-spec pred-objs-spec))
+
+(def pred-objs-novar-spec
+  (spec->novar-spec pred-objs-spec))
 
 (def normal-form-spec
   (s/or :spo (s/map-of subj-spec pred-objs-spec
@@ -95,11 +130,17 @@
 (def normal-form-nopath-spec
   (spec->nopath-spec normal-form-spec))
 
+(def normal-form-novar-spec
+  (spec->novar-spec normal-form-spec))
+
 (def triple-vec-spec
   (s/tuple subj-spec pred-spec obj-spec))
 
 (def triple-vec-nopath-spec
   (spec->nopath-spec triple-vec-spec))
+
+(def triple-vec-novar-spec
+  (spec->novar-spec triple-vec-spec))
 
 ;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
 ;; NOTE: RDF collections not supported (yet?)

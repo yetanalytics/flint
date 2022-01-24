@@ -57,13 +57,9 @@
 
 (s/def ::with ax/iri-spec)
 
-(s/def ::graph ax/iri-spec)
-
 (s/def ::using
   (s/or :update/iri ax/iri-spec
-        :update/named-iri (s/tuple #{:named} ax/iri-spec))
-  #_(s/coll-of (s/or :update/default ax/iri-spec
-                   :update/named (smap->vec (s/keys :req-un [::graph])))))
+        :update/named-iri (s/tuple #{:named} ax/iri-spec)))
 
 ;; Quads
 
@@ -71,17 +67,31 @@
   (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
                    :nform triple/normal-form-nopath-spec)))
 
+(def triples-novar-spec
+  (s/coll-of (s/or :tvec triple/triple-vec-novar-spec
+                   :nform triple/normal-form-novar-spec)))
+
 (def quad-spec
   (s/and vector?
-         (s/& (s/cat :update/k #{:graph}
-                     :var-or-iri ax/var-or-iri-spec
-                     :triples triples-spec)
-              (s/conformer #(into [] %)))))
+         (s/tuple #{:graph}
+                  ax/var-or-iri-spec
+                  triples-spec)))
+
+(def quad-novar-spec
+  (s/and vector?
+         (s/tuple #{:graph}
+                  ax/var-or-iri-spec
+                  triples-novar-spec)))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :tvec  triple/triple-vec-nopath-spec
                    :nform triple/normal-form-nopath-spec
                    :quads quad-spec)))
+
+(def triple-or-quads-novar-spec
+  (s/coll-of (s/or :tvec  triple/triple-vec-novar-spec
+                   :nform triple/normal-form-novar-spec
+                   :quads quad-novar-spec)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -140,12 +150,12 @@
 ;; Graph Update specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(s/def ::insert-data triple-or-quads-spec)
+(s/def ::insert-data triple-or-quads-novar-spec)
 
 (def insert-data-update-spec
   (smap->vec (s/keys :req-un [::insert-data])))
 
-(s/def ::delete-data triple-or-quads-spec)
+(s/def ::delete-data triple-or-quads-novar-spec)
 
 (def delete-data-update-spec
   (smap->vec (s/keys :req-un [::delete-data])))

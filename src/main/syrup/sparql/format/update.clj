@@ -5,6 +5,9 @@
             [syrup.sparql.format.triple]
             [syrup.sparql.format.where]))
 
+(defn- format-quads [quads]
+  (str "{\n" (f/indent-str (cstr/join "\n" quads)) "\n}"))
+
 (defmethod f/format-ast :update/kw [[_ kw]]
   (case kw
     :default "DEFAULT"
@@ -24,7 +27,7 @@
   (str "GRAPH " iri))
 
 (defmethod f/format-ast :quads [[_ [_ var-or-iri triples]]]
-  (str "GRAPH " var-or-iri " {\n" (f/indent-str triples) "\n}"))
+  (str "GRAPH " var-or-iri " " (format-quads triples)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -108,9 +111,6 @@
 
 (defmethod f/format-ast :with [[_ with]]
   (str "WITH " with))
-
-(defn- format-quads [quads]
-  (str "{\n" (f/indent-str (cstr/join "\n" quads)) "\n}"))
 
 (defmethod f/format-ast :insert-data [[_ insert-data]]
   (str "INSERT DATA " (format-quads insert-data)))
