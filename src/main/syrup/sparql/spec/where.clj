@@ -5,7 +5,7 @@
             [syrup.sparql.spec.triple :as triple]
             [syrup.sparql.spec.modifier :as ms]
             [syrup.sparql.spec.select :as ss]
-            [syrup.sparql.spec.value :as vs]))
+            [syrup.sparql.spec.values :as vs]))
 
 (s/def ::select
   (s/keys :req-un [(or ::ss/select ::ss/select-distinct ::ss/select-reduced)
