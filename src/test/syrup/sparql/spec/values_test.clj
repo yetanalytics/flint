@@ -13,8 +13,8 @@
            (s/conform ::vs/values '{?foo [1 2 3]
                                     ?bar [:x :y :z]})))
     (is (= '[:values/map [[[:var ?foo] [:var ?bar]]
-                          [[[:undef nil] [:prefix-iri :x]]
-                           [[:num-lit 2] [:undef nil]]]]]
+                          [[[:values/undef nil] [:prefix-iri :x]]
+                           [[:num-lit 2] [:values/undef nil]]]]]
            (s/conform ::vs/values '{[?foo ?bar] [[nil :x] [2 nil]]})
            (s/conform ::vs/values '{?foo [nil 2]
                                     ?bar [:x nil]})))))

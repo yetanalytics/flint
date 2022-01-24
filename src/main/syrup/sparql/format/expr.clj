@@ -58,42 +58,48 @@
     (#{'not} op) 6
     :else max-precedence))
 
-(defmethod f/format-ast :kwarg [[_ {:keys [k v]}]]
+(defmethod f/format-ast :expr/kwarg [[_ [k v]]]
   (str (cstr/upper-case (name k)) " = '" v "'"))
 
-(defmethod f/format-ast :expr-branch [[_ {:keys [op args arg-precs]}]]
-  (let [op-prec  (get-precedence op args)
+(defmethod f/format-ast :expr/op [[_ op]] op)
+
+(defmethod f/format-ast :expr/args [[_ args]] args)
+
+(defmethod f/format-ast :expr/branch [[_ [op args]]]
+  (let [; op-prec  (get-precedence op args)
         op-str   (op->str op)
-        infix?   (infix-op? op args)
-        unary?   (unary-op? op args)
-        prec-cmp (if (and infix? (#{'- '/} op)) >= >)
-        arg-strs (if (or infix? unary?)
-                   (map (fn [arg-str arg-prec]
-                          (if (prec-cmp op-prec arg-prec)
-                            (str "(" arg-str ")")
-                            arg-str))
-                        args
-                        (or arg-precs (repeat (count args) 0)))
-                   args)
+        ;; infix?   (infix-op? op args)
+        ;; unary?   (unary-op? op args)
+        ; prec-cmp (if (and infix? (#{'- '/} op)) >= >)
+        ;; arg-strs (if (or (infix-op? op args)
+        ;;                  (unary-op? op args))
+        ;;            (map (fn [arg-str] (str "(" arg-str ")")) args)
+        ;;            #_(map (fn arg->str [arg-str arg-prec]
+        ;;                   (if (prec-cmp op-prec arg-prec)
+        ;;                     (str "(" arg-str ")")
+        ;;                     arg-str))
+        ;;                 args
+        ;;                 (or arg-precs (repeat (count args) 0)))
+        ;;            args)
         ?dist (when (distinct-op? op) "DISTINCT ")]
     (cond
-      (infix-op? op args) (cstr/join (str " " op-str " ") arg-strs)
-      (unary-op? op args) (str op-str (first arg-strs))
-      (semicolon-sep? op) (str op-str "(" ?dist (cstr/join "; " arg-strs) ")")
-      :else               (str op-str "(" ?dist (cstr/join ", " arg-strs) ")"))))
+      (infix-op? op args) (str "(" (cstr/join (str " " op-str " ") args) ")")
+      (unary-op? op args) (str op-str (first args))
+      (semicolon-sep? op) (str op-str "(" ?dist (cstr/join "; " args) ")")
+      :else               (str op-str "(" ?dist (cstr/join ", " args) ")"))))
 
-(defmethod f/format-ast :expr-terminal [[_ terminal]]
+(defmethod f/format-ast :expr/terminal [[_ terminal]]
   terminal)
 
-(defmethod f/format-ast :expr-as-var [[_ [expr var]]]
+(defmethod f/format-ast :expr/as-var [[_ [expr var]]]
   (str expr " AS " var))
 
-(defmethod f/annotate-ast :expr-branch [[kw {:keys [args] :as branch}]]
-  (let [arg-precs (map (fn [arg]
-                         (if (and (vector? arg)
-                                  (= :expr-branch (first arg)))
-                           (get-precedence (-> arg second :op)
-                                           (-> arg second :args))
-                           max-precedence))
-                       args)]
-    [kw (assoc branch :arg-precs arg-precs)]))
+;; (defmethod f/annotate-ast :expr/branch [[kw [op [_ args]]]]
+;;   (let [arg-precs (map (fn [arg]
+;;                          (if (and (vector? arg)
+;;                                   (= :expr/branch (first arg)))
+;;                            (get-precedence (-> arg second :op)
+;;                                            (-> arg second :args))
+;;                            max-precedence))
+;;                        args)]
+;;     [kw [op [:expr/args args] arg-precs]]))

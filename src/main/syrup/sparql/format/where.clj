@@ -22,43 +22,44 @@
          (filter some?)
          (cstr/join "\n"))))
 
-(defmethod f/format-ast :sub-select [[_ sub-select]]
+(defmethod f/format-ast :where-sub/select [[_ sub-select]]
   (str "{\n" (f/indent-str (format-select-query sub-select)) "\n}"))
 
-(defmethod f/format-ast :sub-where [[_ sub-where]]
+(defmethod f/format-ast :where-sub/where [[_ sub-where]]
   (str "{\n" (f/indent-str (cstr/join "\n" sub-where)) "\n}"))
 
-(defmethod f/format-ast :sub-empty [_]
+(defmethod f/format-ast :where-sub/empty [_]
   "{}")
 
-(defmethod f/format-ast :recurse [[_ pattern]]
+(defmethod f/format-ast :where/recurse [[_ pattern]]
   pattern)
 
-(defmethod f/format-ast :union [[_ patterns]]
+(defmethod f/format-ast :where/union [[_ patterns]]
   (cstr/join " UNION " patterns))
 
-(defmethod f/format-ast :optional [[_ pattern]]
+(defmethod f/format-ast :where/optional [[_ pattern]]
   (str "OPTIONAL " pattern))
 
-(defmethod f/format-ast :minus [[_ pattern]]
+(defmethod f/format-ast :where/minus [[_ pattern]]
   (str "MINUS " pattern))
 
-(defmethod f/format-ast :graph [[_ [iri pattern]]]
+(defmethod f/format-ast :where/graph [[_ [iri pattern]]]
   (str "GRAPH " iri " " pattern))
 
-(defmethod f/format-ast :service [[_ [iri pattern]]]
+(defmethod f/format-ast :where/service [[_ [iri pattern]]]
   (str "SERVICE " iri " " pattern))
 
-(defmethod f/format-ast :service-silent [[_ [iri pattern]]]
+(defmethod f/format-ast :where/service-silent [[_ [iri pattern]]]
   (str "SERVICE SILENT " iri " " pattern))
 
-(defmethod f/format-ast :filter [[_ expr]]
-  (if (re-matches #"[\w\:]+\(.*\)" expr)
+(defmethod f/format-ast :where/filter [[_ expr]]
+  (str "FILTER " expr)
+  #_(if (re-matches #"[\w\:]+\(.*\)" expr)
     (str "FILTER " expr)
     (str "FILTER (" expr ")")))
 
-(defmethod f/format-ast :bind [[_ expr-as-var]]
+(defmethod f/format-ast :where/bind [[_ expr-as-var]]
   (str "BIND (" expr-as-var ")"))
 
-(defmethod f/format-ast :values [[_ values]]
+(defmethod f/format-ast :where/values [[_ values]]
   (str "VALUES " values))

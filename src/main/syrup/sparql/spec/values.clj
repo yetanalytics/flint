@@ -8,7 +8,7 @@
         :num-lit number?
         :bool-lit boolean?
         :str-lit string?
-        :undef nil?))
+        :values/undef nil?))
 
 (defn- matching-val-lengths*
   [m]

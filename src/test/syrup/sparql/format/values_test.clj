@@ -13,25 +13,25 @@
                             "  3"
                             "}"])
            (w/postwalk f/format-ast
-                       [:values-map {[[:var '?foo]]
+                       [:values/map [[[:var '?foo]]
                                      [[[:num-lit 1]]
                                       [[:num-lit 2]]
-                                      [[:num-lit 3]]]}])))
+                                      [[:num-lit 3]]]]])))
     (is (= (cstr/join "\n" ["(?foo ?bar) {"
                             "  (1 'a')"
                             "  (2 'b')"
                             "  (3 'c')"
                             "}"])
            (w/postwalk f/format-ast
-                       [:values-map {[[:var '?foo] [:var '?bar]]
+                       [:values/map [[[:var '?foo] [:var '?bar]]
                                      [[[:num-lit 1] [:str-lit "a"]]
                                       [[:num-lit 2] [:str-lit "b"]]
-                                      [[:num-lit 3] [:str-lit "c"]]]}])))
+                                      [[:num-lit 3] [:str-lit "c"]]]]])))
     (is (= (cstr/join "\n" ["(?foo ?bar) {"
                             "  (UNDEF 'a')"
                             "  (2 UNDEF)"
                             "}"])
            (w/postwalk f/format-ast
-                       [:values-map {[[:var '?foo] [:var '?bar]]
-                                     [[[:undef nil] [:str-lit "a"]]
-                                      [[:num-lit 2] [:undef nil]]]}])))))
+                       [:values/map [[[:var '?foo] [:var '?bar]]
+                                     [[[:values/undef nil] [:str-lit "a"]]
+                                      [[:num-lit 2] [:values/undef nil]]]]])))))

@@ -6,35 +6,43 @@
 
 (deftest format-test
   (testing "formatting paths"
-    (is (= "!foo:bar | ^baz:qux / quu:bee"
-         (->> '[:path-branch
-                {:op    alt
-                 :paths [[:path-branch
-                          {:op    not
-                           :paths [[:path-terminal [:prefix-iri :foo/bar]]]}]
-                         [:path-branch
-                          {:op    cat
-                           :paths [[:path-branch
-                                    {:op    inv
-                                     :paths [[:path-terminal
-                                              [:prefix-iri :baz/qux]]]}]
-                                   [:path-terminal
-                                    [:prefix-iri :quu/bee]]]}]]}]
-              (w/postwalk f/annotate-ast)
+    (is (= "(!foo:bar | (^baz:qux / quu:bee))"
+         (->> '[:path/branch
+                [[:path/op alt]
+                 [:path/args [[:path/branch
+                               [[:path/op not]
+                                [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]
+                              [:path/branch
+                               [[:path/op cat]
+                                [:path/args [[:path/branch
+                                              [[:path/op inv]
+                                               [:path/args [[:path/terminal
+                                                             [:prefix-iri :baz/qux]]]]]]
+                                             [:path/terminal
+                                              [:prefix-iri :quu/bee]]]]]]]]]]
+              #_(w/postwalk f/annotate-ast)
               (w/postwalk f/format-ast))))
-    (is (= "!foo:bar / (^baz:qux | quu:bee)"
-           (->> '[:path-branch
-                  {:op    cat
-                   :paths [[:path-branch
-                            {:op    not
-                             :paths [[:path-terminal [:prefix-iri :foo/bar]]]}]
-                           [:path-branch
-                            {:op    alt
-                             :paths [[:path-branch
-                                      {:op    inv
-                                       :paths [[:path-terminal
-                                                [:prefix-iri :baz/qux]]]}]
-                                     [:path-terminal
-                                      [:prefix-iri :quu/bee]]]}]]}]
-                (w/postwalk f/annotate-ast)
+    (is (= "(!foo:bar / (^baz:qux | quu:bee))"
+           (->> '[:path/branch
+                  [[:path/op cat]
+                   [:path/args [[:path/branch
+                                 [[:path/op not]
+                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]
+                                [:path/branch
+                                 [[:path/op alt]
+                                  [:path/args [[:path/branch
+                                                [[:path/op inv]
+                                                 [:path/args [[:path/terminal
+                                                               [:prefix-iri :baz/qux]]]]]]
+                                               [:path/terminal
+                                                [:prefix-iri :quu/bee]]]]]]]]]]
+                #_(w/postwalk f/annotate-ast)
+                (w/postwalk f/format-ast))))
+    (is (= "!(foo:bar?)"
+           (->> '[:path/branch
+                  [[:path/op not]
+                   [:path/args [[:path/branch
+                                 [[:path/op ?]
+                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]]]]]
+                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))))

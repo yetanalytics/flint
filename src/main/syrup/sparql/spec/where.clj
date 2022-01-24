@@ -66,4 +66,5 @@
                                          (s/conformer #(:v %))))
                    :min-count 1
                    :kind vector?)
-        :sub-empty (s/and vector? empty?)))
+        :where-sub/empty
+        (s/and vector? empty?)))

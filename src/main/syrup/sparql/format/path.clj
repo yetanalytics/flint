@@ -15,31 +15,41 @@
     (#{'not} op) 5
     :else max-precedence))
 
-(defmethod f/format-ast :path-branch [[_ {:keys [op paths path-precs]}]]
-  (let [op-prec   (get-precedence op)
-        path-strs (map (fn [path path-prec]
-                         (if (> op-prec path-prec)
-                           (str "(" path ")")
-                           path))
-                       paths
-                       path-precs)]
-    (case (keyword op)
-      :alt (cstr/join " | " path-strs)
-      :cat (cstr/join " / " path-strs)
-      :inv (str "^" (first path-strs))
-      :?   (str (first path-strs) "?")
-      :*   (str (first path-strs) "*")
-      :+   (str (first path-strs) "+")
-      :not (str "!" (first path-strs)))))
+(defmethod f/format-ast :path/op [[_ op]] (keyword op))
 
-(defmethod f/format-ast :path-terminal [[_ value]]
+(defmethod f/format-ast :path/args [[_ args]] args)
+
+(defmethod f/format-ast :path/branch [[_ [op args]]]
+  (let [
+        ;; op-prec   (get-precedence op)
+        ;; path-strs (map (fn [path path-prec]
+        ;;                  (if (> op-prec path-prec)
+        ;;                    (str "(" path ")")
+        ;;                    path))
+        ;;                paths
+        ;;                path-precs)
+        ]
+    (case op
+      :alt (str "(" (cstr/join " | " args) ")")
+      :cat (str "(" (cstr/join " / " args) ")")
+      :inv (str "^" (first args))
+      :?   (str (first args) "?")
+      :*   (str (first args) "*")
+      :+   (str (first args) "+")
+      :not (let [arg (first args)]
+             (if-some [arg (first (or (re-matches #"\^(.*)" arg)
+                                      (re-matches #"(.*)[\?\*\+]" arg)))]
+               (str "!(" arg ")")
+               (str "!" arg))))))
+
+(defmethod f/format-ast :path/terminal [[_ value]]
   value)
 
-(defmethod f/annotate-ast :path-branch [[kw {:keys [paths] :as branch}]]
-  (let [path-precs (map (fn [path]
-                          (if (and (vector? path)
-                                   (= :path-branch (first path)))
-                            (get-precedence (-> path second :op))
-                            max-precedence))
-                        paths)]
-    [kw (assoc branch :path-precs path-precs)]))
+;; (defmethod f/annotate-ast :path-branch [[kw {:keys [paths] :as branch}]]
+;;   (let [path-precs (map (fn [path]
+;;                           (if (and (vector? path)
+;;                                    (= :path-branch (first path)))
+;;                             (get-precedence (-> path second :op))
+;;                             max-precedence))
+;;                         paths)]
+;;     [kw (assoc branch :path-precs path-precs)]))
