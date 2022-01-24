@@ -38,11 +38,18 @@
                                                 [:prefix-iri :quu/bee]]]]]]]]]]
                 #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
-    (is (= "!(foo:bar?)"
+    (is (= "!(foo:bar | baz:qux)"
            (->> '[:path/branch
                   [[:path/op not]
                    [:path/args [[:path/branch
-                                 [[:path/op ?]
-                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]]]]]
+                                 [[:path/op alt]
+                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]
+                                               [:path/terminal [:prefix-iri :baz/qux]]]]]]]]]]
+                #_(w/postwalk f/annotate-ast)
+                (w/postwalk f/format-ast))))
+    (is (= "^a"
+           (->> '[:path/branch
+                  [[:path/op inv]
+                   [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
                 #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))))

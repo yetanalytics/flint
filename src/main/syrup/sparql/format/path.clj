@@ -36,11 +36,7 @@
       :?   (str (first args) "?")
       :*   (str (first args) "*")
       :+   (str (first args) "+")
-      :not (let [arg (first args)]
-             (if-some [arg (first (or (re-matches #"\^(.*)" arg)
-                                      (re-matches #"(.*)[\?\*\+]" arg)))]
-               (str "!(" arg ")")
-               (str "!" arg))))))
+      :not (str "!" (cstr/join " | " args)))))
 
 (defmethod f/format-ast :path/terminal [[_ value]]
   value)

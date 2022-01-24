@@ -107,10 +107,43 @@
                            :via  [::ps/path]
                            :in   [0]}
                           {:path [:path/branch :unary :op]
-                           :pred '#{'inv 'not '+ '* '?}
+                           :pred '#{'inv '+ '* '?}
+                           :val  'foo
+                           :via  [::ps/path]
+                           :in   [0]}
+                          {:path [:path/branch :unary-neg :op]
+                           :pred '#{'not}
                            :val  'foo
                            :via  [::ps/path]
                            :in   [0]}]
             ::s/spec ::ps/path
             ::s/value '(foo :bar/baz)}
-            (s/explain-data ::ps/path '(foo :bar/baz))))))
+           (s/explain-data ::ps/path '(foo :bar/baz))))
+    (is (= {::s/problems [{:path [:path/terminal]
+                           :pred `(comp not list?)
+                           :val  '(not (cat :foo/bar :bar/baz))
+                           :via  [::ps/path]
+                           :in   []}
+                          {:path [:path/branch :varardic :op]
+                           :pred '#{'cat 'alt}
+                           :val  'not
+                           :via  [::ps/path]
+                           :in   [0]}
+                          {:path [:path/branch :unary :op]
+                           :pred '#{'inv '+ '* '?}
+                           :val  'not
+                           :via  [::ps/path]
+                           :in   [0]}
+                          {:path [:path/branch :unary-neg :path :path/terminal]
+                           :pred `(comp not list?)
+                           :val  '(cat :foo/bar :bar/baz)
+                           :via  [::ps/path ::ps/path-neg ::ps/path-neg]
+                           :in   [1]}
+                          {:path [:path/branch :unary-neg :path :path/branch :varardic :op]
+                           :pred '#{'alt}
+                           :val  'cat
+                           :via  [::ps/path ::ps/path-neg ::ps/path-neg]
+                           :in   [1 0]}]
+            ::s/spec ::ps/path
+            ::s/value '(not (cat :foo/bar :bar/baz))}
+           (s/explain-data ::ps/path '(not (cat :foo/bar :bar/baz)))))))
