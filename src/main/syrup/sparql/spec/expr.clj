@@ -38,10 +38,10 @@
                                    'count 'count-distinct}
                              :arg-1 ::expr)
          :1-wild-ary  (s/cat :op #{'count 'count-distinct}
-                             :arg-1 (s/or :expr-terminal
+                             :arg-1 (s/or :expr/terminal
                                           (s/or :wildcard ax/wildcard?)))
          :1-var-ary   (s/cat :op #{'bound}
-                             :arg-1 (s/or :expr-terminal
+                             :arg-1 (s/or :expr/terminal
                                           (s/or :var ax/variable?)))
          :1-where-ary (s/cat :op #{'exists 'not-exists}
                              ;; Avoid mutually recursive `:require`
@@ -59,12 +59,12 @@
                              :vargs (s/+ ::expr))
          :2-kwarg-ary (s/cat :op #{'group-concat 'group-concat-distinct}
                              :arg-1 ::expr
-                             :arg-2 (s/? (s/& (s/cat :k #{:separator}
-                                                     :v string?)
+                             :arg-2 (s/? (s/& (s/cat :expr/k #{:separator}
+                                                     :expr/v string?)
                                               (s/conformer
                                                (fn [x]
-                                                 [:expr-terminal
-                                                  [:kwarg x]])))))
+                                                 [:expr/terminal
+                                                  [:expr/kwarg (into [] x)]])))))
          :3-ary       (s/cat :op #{'if}
                              :arg-1 ::expr
                              :arg-2 ::expr
@@ -79,17 +79,17 @@
                              :vargs (s/* ::expr)))
    (s/conformer second)
    (s/conformer (fn [{:keys [op arg-1 arg-2 arg-3 vargs]}]
-                  {:op   op
-                   :args (cond-> []
-                           arg-1 (conj arg-1)
-                           arg-2 (conj arg-2)
-                           arg-3 (conj arg-3)
-                           vargs (concat vargs))}))))
+                  [[:expr/op op]
+                   [:expr/args (cond-> []
+                                 arg-1 (conj arg-1)
+                                 arg-2 (conj arg-2)
+                                 arg-3 (conj arg-3)
+                                 vargs (concat vargs))]]))))
 
 (s/def ::expr
-  (s/or :expr-terminal expr-terminal-spec
-        :expr-branch expr-branch-spec))
+  (s/or :expr/terminal expr-terminal-spec
+        :expr/branch expr-branch-spec))
 
 (s/def ::expr-as-var
-  (s/or :expr-as-var (s/and vector?
+  (s/or :expr/as-var (s/and vector?
                             (s/tuple ::expr (s/or :var ax/variable?)))))

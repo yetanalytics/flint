@@ -36,17 +36,17 @@
   [m]
   (let [k (first (keys m))
         v (first (vals m))]
-    {(mapv (fn [vr] [:var vr]) k) v}))
+    [(mapv (fn [vr] [:var vr]) k) v]))
 
 (def values-clause-spec
   (s/and
-   (s/or :sparql-format
+   (s/or :values/sparql-format
          (s/and (s/map-of any? any? :min-count 1 :max-count 1)
                 (s/map-of (s/coll-of ax/variable?)
                           (s/coll-of (s/coll-of value-spec)))
                 matching-val-lengths*
                 (s/conformer conform-vars))
-         :clojure-format
+         :values/clojure-format
          (s/and (s/map-of any? any? :min-count 1)
                 (s/map-of ax/variable? (s/coll-of value-spec))
                 matching-val-lengths
@@ -54,4 +54,4 @@
                 (s/conformer conform-vars)))
    (s/conformer second)))
 
-(s/def ::values (s/or :values-map values-clause-spec))
+(s/def ::values (s/or :values/map values-clause-spec))

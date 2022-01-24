@@ -4,6 +4,11 @@
             [syrup.sparql.spec.triple :as triple]
             [syrup.sparql.spec.where  :as ws]))
 
+(defmacro smap->vec
+  [form]
+  `(s/and ~form
+          (s/conformer #(into [] %))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -49,48 +54,50 @@
 (s/def ::load-silent ::load)
 
 (def load-update-spec
-  (s/keys :req-un [(or ::load ::load-silent)]
-          :opt-un [::into]))
+  (smap->vec (s/keys :req-un [(or ::load ::load-silent)]
+                     :opt-un [::into])))
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
         :update-kw #{:default :named :all}))
+
 (s/def ::clear-silent ::clear)
 
 (def clear-update-spec
-  (s/keys :req-un [(or ::clear ::clear-silent)]))
+  (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)])))
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
         :update-kw #{:default :named :all}))
+
 (s/def ::drop-silent ::drop)
 
 (def drop-update-spec
-  (s/keys :req-un [(or ::drop ::drop-silent)]))
+  (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)])))
 
 (s/def ::create ax/iri-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
-  (s/keys :req-un [(or ::create ::create-silent)]))
+  (smap->vec (s/keys :req-un [(or ::create ::create-silent)])))
 
 (s/def ::add graph-or-default-spec)
 (s/def ::add-silent ::add)
 
 (def add-update-spec
-  (s/keys :req-un [(or ::add ::add-silent) ::to]))
+  (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to])))
 
 (s/def ::move graph-or-default-spec)
 (s/def ::move-silent ::move)
 
 (def move-update-spec
-  (s/keys :req-un [(or ::move ::move-silent) ::to]))
+  (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to])))
 
 (s/def ::copy graph-or-default-spec)
 (s/def ::copy-silent ::copy)
 
 (def copy-update-spec
-  (s/keys :req-un [(or ::copy ::copy-silent) ::to]))
+  (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
@@ -99,27 +106,27 @@
 (s/def ::insert-data triple-or-quads-spec)
 
 (def insert-data-update-spec
-  (s/keys :req-un [::insert-data]))
+  (smap->vec (s/keys :req-un [::insert-data])))
 
 (s/def ::delete-data triple-or-quads-spec)
 
 (def delete-data-update-spec
-  (s/keys :req-un [::delete-data]))
+  (smap->vec (s/keys :req-un [::delete-data])))
 
 (s/def ::delete-where triple-or-quads-spec)
 
 (def delete-where-update-spec
-  (s/keys :req-un [::delete-where]))
+  (smap->vec (s/keys :req-un [::delete-where])))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-spec)
 
 (def modify-update-spec
-  (s/keys :req-un [::ws/where]
-          :opt-un [::delete
-                   ::insert
-                   ::using
-                   ::with]))
+  (smap->vec (s/keys :req-un [::ws/where]
+                     :opt-un [::delete
+                              ::insert
+                              ::using
+                              ::with])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Update Request

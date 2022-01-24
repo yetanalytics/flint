@@ -3,13 +3,13 @@
             [syrup.sparql.spec.axiom :as ax]))
 
 (s/def ::path
-  (s/or :path-terminal
+  (s/or :path/terminal
         (s/and
          (comp not list?)
          (s/or :iri        ax/iri?
                :prefix-iri ax/prefix-iri?
                :rdf-type   ax/rdf-type?))
-        :path-branch
+        :path/branch
         (s/and
          list?
          (comp symbol? first)
@@ -22,5 +22,5 @@
                       :path ::path))
          (s/conformer second)
          (s/conformer (fn [{:keys [op path paths]}]
-                        {:op    op
-                         :paths (if path [path] paths)})))))
+                        [[:path/op op]
+                         [:path/args (if path [path] paths)]])))))
