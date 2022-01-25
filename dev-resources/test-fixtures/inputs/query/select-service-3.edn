@@ -1,0 +1,5 @@
+;; SERVICE SILENTcall
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select   [?name]
+ :where    [[:service-silent "<http://people.example.org/sparql>"
+             [["<http://example.org/people15>" :foaf/name ?name]]]]}

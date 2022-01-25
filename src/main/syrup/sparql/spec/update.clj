@@ -206,6 +206,4 @@
         :modify-update       modify-update-spec))
 
 (def update-request-spec
-  (s/or :update-request (s/coll-of update-spec
-                                   :min-count 1
-                                   :kind vector?)))
+  (s/or :update-request (s/coll-of update-spec :min-count 1)))

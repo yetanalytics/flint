@@ -21,3 +21,6 @@
 
 (deftest update-tests
   (make-tests us/update-spec "dev-resources/test-fixtures/inputs/update/"))
+
+(deftest update-request-tests
+  (make-tests us/update-request-spec "dev-resources/test-fixtures/inputs/update-request/"))
