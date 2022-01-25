@@ -25,21 +25,7 @@
                      "dev-resources/test-fixtures/inputs/query/"
                      "dev-resources/test-fixtures/outputs/query/"))
 
-;; (deftest update-tests
-;;   (make-tests us/update-spec "dev-resources/test-fixtures/inputs/update/"))
-
-(comment
-  (require '[clojure.spec.alpha :as s]
-           '[clojure.walk :as w]
-           '[syrup.sparql.spec.query :as qs]
-           '[syrup.sparql.format :as f])
-  (w/postwalk f/format-ast
-              (s/conform qs/describe-query-spec
-                         '{:describe ["<http://example.org>"]}))
-  
-  (println
-   (w/postwalk f/format-ast
-               (s/conform qs/query-spec
-                          '{:prefixes {:$ "<http://example/>"}
-                            :select   *
-                            :where    [[:s (cat :item :price) ?x]]}))))
+(deftest update-tests
+  (make-format-tests format-updates
+                     "dev-resources/test-fixtures/inputs/update/"
+                     "dev-resources/test-fixtures/outputs/update/"))
