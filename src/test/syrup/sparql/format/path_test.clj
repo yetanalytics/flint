@@ -63,3 +63,11 @@
                                                 [[:path/op ?]
                                                  [:path/args [[:path/terminal [:rdf-type 'a]]]]]]]]]]]]]]
                 (w/postwalk f/format-ast))))))
+
+(deftest invalid-test
+  (testing "attempting to format an invalid path"
+    (is (try (w/postwalk f/format-ast
+                         '[:path/branch
+                           [[:path/op oh-no]
+                            [:path/args [[:path/terminal [:rdf-type 'a]]]]]])
+             (catch IllegalArgumentException _ true)))))

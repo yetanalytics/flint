@@ -57,7 +57,20 @@
                               [:iri "<http://example.org>"]
                               [[:tvec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]]]
                 (w/postwalk f/format-ast)))))
-  (testing "format INSERT...DELETE"
+  (testing "format DELETE...INSERT"
+    (is (= (cstr/join "\n" ["INSERT {"
+                            "    ?a ?b ?c ."
+                            "}"
+                            "USING NAMED <http://example.org/2>"
+                            "WHERE {"
+                            "    ?a ?b ?c ."
+                            "}"])
+           (->> '[:modify-update
+                  [[:insert [[:tvec [[:var ?a] [:var ?b] [:var ?c]]]]]
+                   [:using [:update/named-iri [:named [:iri "<http://example.org/2>"]]]]
+                   [:where [:where-sub/where
+                            [[:tvec [[:var ?a] [:var ?b] [:var ?c]]]]]]]]
+                (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["WITH <http://example.org>"
                             "DELETE {"
                             "    ?x ?y ?z ."
@@ -74,7 +87,7 @@
                   [[:with [:iri "<http://example.org>"]]
                    [:delete [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]
                    [:insert [[:tvec [[:var ?a] [:var ?b] [:var ?c]]]]]
-                   [:using [:iri "<http://example.org/2>"]]
+                   [:using [:update/iri [:iri "<http://example.org/2>"]]]
                    [:where [:where-sub/where
                             [[:nform
                               [:spo [[[:var ?x]
@@ -112,7 +125,15 @@
       (is (= "CLEAR <http://example.org>"
              (->> '[:clear-update
                     [[:clear [:iri "<http://example.org>"]]]]
-                  (w/postwalk f/format-ast)))))
+                  (w/postwalk f/format-ast))))
+      (is (= "CLEAR SILENT <http://example.org>"
+             (->> '[:clear-update
+                    [[:clear-silent [:iri "<http://example.org>"]]]]
+                  (w/postwalk f/format-ast))))
+      (is (try (->> '[:clear-update
+                      [[:clear [:update/kw :bad]]]]
+                    (w/postwalk f/format-ast))
+               (catch IllegalArgumentException _ true))))
     (testing "- DROP"
       (is (= "DROP DEFAULT"
              (->> '[:drop-update
@@ -129,6 +150,10 @@
       (is (= "DROP <http://example.org>"
              (->> '[:drop-update
                     [[:drop [:iri "<http://example.org>"]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "DROP SILENT <http://example.org>"
+             (->> '[:drop-update
+                    [[:drop-silent [:iri "<http://example.org>"]]]]
                   (w/postwalk f/format-ast)))))
     (testing "- CREATE"
       (is (= "CREATE <http://example.org>"
