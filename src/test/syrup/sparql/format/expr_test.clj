@@ -16,6 +16,40 @@
                                [:expr/args [[:expr/terminal [:num-lit 2]]
                                             [:expr/terminal [:num-lit 3]]]]]]
                 (w/postwalk f/format-ast))))
+    (is (= "!false"
+           (->> '[:expr/branch [[:expr/op not]
+                                [:expr/args [[:expr/terminal [:bool-lit false]]]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "!(!false)"
+           (->> '[:expr/branch [[:expr/op not]
+                                [:expr/args [[:expr/branch [[:expr/op not]
+                                                            [:expr/args [[:expr/terminal [:bool-lit false]]]]]]]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "(1 IN (1, 2, 3))"
+           (->> '[:expr/branch [[:expr/op in]
+                                [:expr/args [[:expr/terminal [:num-lit 1]]
+                                             [:expr/terminal [:num-lit 1]]
+                                             [:expr/terminal [:num-lit 2]]
+                                             [:expr/terminal [:num-lit 3]]
+                                             ]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "(1 NOT IN (2, 3, 4))"
+           (->> '[:expr/branch [[:expr/op not-in]
+                                [:expr/args [[:expr/terminal [:num-lit 1]]
+                                             [:expr/terminal [:num-lit 2]]
+                                             [:expr/terminal [:num-lit 3]]
+                                             [:expr/terminal [:num-lit 4]]]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "(2 = 2)"
+           (->> '[:expr/branch [[:expr/op =]
+                                [:expr/args [[:expr/terminal [:num-lit 2]]
+                                             [:expr/terminal [:num-lit 2]]]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "(2 != 3)"
+           (->> '[:expr/branch [[:expr/op not=]
+                                [:expr/args [[:expr/terminal [:num-lit 2]]
+                                             [:expr/terminal [:num-lit 3]]]]]]
+                (w/postwalk f/format-ast))))
     (is (= "(2 + 3)"
            (->> [:expr/branch [[:expr/op '+]
                                [:expr/args [[:expr/terminal [:num-lit 2]]

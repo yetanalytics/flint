@@ -50,12 +50,13 @@
          :2-ary       (s/cat :op #{'lang-matches 'contains 'strlang 'strdt
                                    'strstarts 'strends 'strbefore 'strafter
                                    'sameterm
-                                   '= 'not= '< '> '<= '>= 'in 'not-in}
+                                   '= 'not= '< '> '<= '>=}
                              :arg-1 ::expr
                              :arg-2 ::expr)
          :2-plus-ary  (s/cat :op #{'regex 'substr
                                    'and 'or
-                                   '+ '- '* '/}
+                                   '+ '- '* '/
+                                   'in 'not-in}
                              :arg-1 ::expr
                              :vargs (s/+ ::expr))
          :2-kwarg-ary (s/cat :op #{'group-concat 'group-concat-distinct}

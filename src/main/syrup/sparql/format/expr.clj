@@ -8,9 +8,13 @@
 ;; format.where cannot directly be called here since it would cause a cyclic
 ;; dependency.
 
+(defn- exprs-list-op?
+  [op]
+  (#{'in 'not-in} op))
+
 (defn- infix-op?
   [op paths]
-  (and (#{'= 'not= '< '> '<= '>= 'and 'or 'in 'not-in '+ '- '* '/} op)
+  (and (#{'= 'not= '< '> '<= '>= 'and 'or #_'in #_'not-in '+ '- '* '/} op)
        (< 1 (count paths))))
 
 (defn- unary-op?
@@ -53,6 +57,14 @@
   [op]
   (#{'exists 'not-exists} op))
 
+(defn- parens-if-nests
+  "Super-basic precedence comparison to wrap parens if there's an inner
+   unary op, since expressions like `!!true` are illegal."
+  [arg]
+  (if (re-matches #"(\!|\+|\-).*" arg)
+    (str "(" arg ")")
+    arg))
+
 (defmethod f/format-ast :expr/kwarg [[_ [[_ k] [_ v]]]]
   (str (cstr/upper-case (name k)) " = '" v "'"))
 
@@ -64,8 +76,9 @@
   (let [op-str (op->str op)
         ?dist  (when (distinct-op? op) "DISTINCT ")]
     (cond
+      (exprs-list-op? op) (str "(" (first args) " " op-str " (" (cstr/join ", " (rest args)) "))")
       (infix-op? op args) (str "(" (cstr/join (str " " op-str " ") args) ")")
-      (unary-op? op args) (str op-str (first args))
+      (unary-op? op args) (str op-str (-> args first parens-if-nests))
       (semicolon-sep? op) (str op-str "(" ?dist (cstr/join "; " args) ")")
       (graph-pat-exp? op) (str op-str " " (first args))
       :else               (str op-str "(" ?dist (cstr/join ", " args) ")"))))
