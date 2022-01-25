@@ -13,7 +13,10 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"
-                            "ORDER BY ASC(?y)"])
+                            "ORDER BY ASC(?y)"
+                            "VALUES ?z {"
+                            "    1"
+                            "}"])
            (->> '[:select-query
                   [[:prefixes [[:prefix [:foo [:iri "<http://example.org/foo/>"]]]]]
                    [:select [:select/var-or-exprs [[:var ?x]]]]
@@ -21,7 +24,10 @@
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]
                    [:order-by [[:mod/asc-desc
                                 [[:mod/op asc]
-                                 [:mod/expr [:expr/terminal [:var ?y]]]]]]]]]
+                                 [:mod/expr [:expr/terminal [:var ?y]]]]]]]
+                   [:values [:values/map
+                             [[[:var ?z]]
+                              [[[:num-lit 1]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format CONSTRUCT query"
     (is (= (cstr/join "\n" ["CONSTRUCT ?x ?y ?z ."

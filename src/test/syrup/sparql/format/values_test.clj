@@ -8,9 +8,9 @@
 (deftest format-test
   (testing "Formatting VALUES clause"
     (is (= (cstr/join "\n" ["?foo {"
-                            "  1"
-                            "  2"
-                            "  3"
+                            "    1"
+                            "    2"
+                            "    3"
                             "}"])
            (w/postwalk f/format-ast
                        [:values/map [[[:var '?foo]]
@@ -18,9 +18,9 @@
                                       [[:num-lit 2]]
                                       [[:num-lit 3]]]]])))
     (is (= (cstr/join "\n" ["(?foo ?bar) {"
-                            "  (1 'a')"
-                            "  (2 'b')"
-                            "  (3 'c')"
+                            "    (1 'a')"
+                            "    (2 'b')"
+                            "    (3 'c')"
                             "}"])
            (w/postwalk f/format-ast
                        [:values/map [[[:var '?foo] [:var '?bar]]
@@ -28,8 +28,8 @@
                                       [[:num-lit 2] [:str-lit "b"]]
                                       [[:num-lit 3] [:str-lit "c"]]]]])))
     (is (= (cstr/join "\n" ["(?foo ?bar) {"
-                            "  (UNDEF 'a')"
-                            "  (2 UNDEF)"
+                            "    (UNDEF 'a')"
+                            "    (2 UNDEF)"
                             "}"])
            (w/postwalk f/format-ast
                        [:values/map [[[:var '?foo] [:var '?bar]]

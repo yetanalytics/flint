@@ -6,7 +6,8 @@
             [syrup.sparql.format.triple]
             [syrup.sparql.format.modifier]
             [syrup.sparql.format.select]
-            [syrup.sparql.format.where]))
+            [syrup.sparql.format.where]
+            [syrup.sparql.format.values]))
 
 (defmethod f/format-ast :construct [[_ construct]]
   (if (not-empty construct)

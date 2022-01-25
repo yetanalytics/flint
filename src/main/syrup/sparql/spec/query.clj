@@ -5,7 +5,8 @@
             [syrup.sparql.spec.triple   :as triple]
             [syrup.sparql.spec.modifier :as mod]
             [syrup.sparql.spec.select   :as ss]
-            [syrup.sparql.spec.where    :as ws]))
+            [syrup.sparql.spec.where    :as ws]
+            [syrup.sparql.spec.values   :as vs]))
 
 (def key-order-map
   {:bases           0
@@ -59,7 +60,8 @@
                               ::mod/order-by
                               ::mod/having
                               ::mod/limit
-                              ::mod/offset])))
+                              ::mod/offset
+                              ::vs/values])))
 
 (def triples-spec
   (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
