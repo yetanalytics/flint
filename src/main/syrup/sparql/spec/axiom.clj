@@ -27,6 +27,9 @@
 (defn rdf-type? [x]
   (boolean (#{'a :a} x)))
 
+(defn lang-map? [x]
+  (s/valid? (s/map-of keyword? string? :min-count 1 :max-count 1) x))
+
 ;; Composite specs
 
 (def iri-spec

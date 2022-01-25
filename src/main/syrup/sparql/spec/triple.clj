@@ -62,7 +62,8 @@
         :str-lit string?
         :num-lit number?
         :bool-lit boolean?
-        :dt-lit inst?))
+        :dt-lit inst?
+        :lmap-lit ax/lang-map?))
 
 ;; No property paths
 
@@ -93,7 +94,8 @@
         :str-lit string?
         :num-lit number?
         :bool-lit boolean?
-        :dt-lit inst?))
+        :dt-lit inst?
+        :lmap-lit ax/lang-map?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Combo Specs

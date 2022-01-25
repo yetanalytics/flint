@@ -7,7 +7,7 @@
 (deftest format-test
   (testing "format INSERT DATA"
     (is (= (cstr/join "\n" ["INSERT DATA {"
-                            "    foo:x dc:title 'Title' ."
+                            "    foo:x dc:title \"Title\" ."
                             "}"])
            (->> '[:insert-data-update
                   [:insert-data [[:tvec [[:prefix-iri :foo/x]
@@ -17,7 +17,7 @@
   (testing "format DELETE DATA"
     (is (= (cstr/join "\n" ["DELETE DATA {"
                             "    GRAPH <http://example.org> {"
-                            "        foo:x dc:title 'Title' ."
+                            "        foo:x dc:title \"Title\" ."
                             "    }"
                             "}"])
            (->> '[:delete-data-update

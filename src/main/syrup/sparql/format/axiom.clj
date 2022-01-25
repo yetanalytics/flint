@@ -22,7 +22,12 @@
   "a")
 
 (defmethod f/format-ast :str-lit [[_ str-value]]
-  (str "'" str-value "'"))
+  (str "\"" str-value "\""))
+
+(defmethod f/format-ast :lmap-lit [[_ lang-map]]
+  (let [ltag (-> lang-map keys first)
+        lval (-> lang-map vals first)]
+    (str "\"" lval "\"@" (name ltag))))
 
 (defmethod f/format-ast :num-lit [[_ num-value]]
   (str num-value))
@@ -32,7 +37,3 @@
 
 (defmethod f/format-ast :dt-lit [[_ dt-value]]
   (str (.toInstant dt-value) "^^<http://www.w3.org/2001/XMLSchema#dateTime>"))
-
-(defmethod f/format-ast :lmap-lit [[_ value]]
-  (let [[ltag lval] (first value)]
-    (str lval "@" (name ltag))))

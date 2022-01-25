@@ -8,6 +8,7 @@
         :num-lit number?
         :bool-lit boolean?
         :str-lit string?
+        :lmap-lit ax/lang-map?
         :values/undef nil?))
 
 (defn- matching-val-lengths*

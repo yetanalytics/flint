@@ -23,8 +23,10 @@
            (f/format-ast [:rdf-type 'a])))
     (is (= "a"
            (f/format-ast [:rdf-type :a])))
-    (is (= "'My String'"
+    (is (= "\"My String\""
            (f/format-ast [:str-lit "My String"])))
+    (is (= "\"My String\"@en"
+           (f/format-ast [:lmap-lit {:en "My String"}])))
     (is (= "123"
            (f/format-ast [:num-lit 123])))
     (is (= "123.4"
