@@ -13,7 +13,7 @@
          :dt-lit   inst?
          :num-lit  number?
          :bool-lit boolean?
-         :str-lit  string?
+         :str-lit  ax/valid-string?
          :lmap-lit ax/lang-map?)))
 
 (def expr-branch-spec

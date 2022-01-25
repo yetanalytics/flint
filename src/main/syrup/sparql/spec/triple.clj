@@ -59,7 +59,7 @@
         :prefix-iri ax/prefix-iri?
         :bnode ax/bnode?
         :nil nil?
-        :str-lit string?
+        :str-lit ax/valid-string?
         :num-lit number?
         :bool-lit boolean?
         :dt-lit inst?
@@ -91,7 +91,7 @@
   (s/or :iri ax/iri?
         :prefix-iri? ax/prefix-iri?
         :nil nil?
-        :str-lit string?
+        :str-lit ax/valid-string?
         :num-lit number?
         :bool-lit boolean?
         :dt-lit inst?

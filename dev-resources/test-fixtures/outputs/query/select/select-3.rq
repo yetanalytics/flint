@@ -1,4 +1,4 @@
 SELECT ?v
 WHERE {
-    ?v ?p "cat" .
+    ?v ?p "cat: \"meow\"" .
 }

@@ -27,8 +27,17 @@
 (defn rdf-type? [x]
   (boolean (#{'a :a} x)))
 
-(defn lang-map? [x]
-  (s/valid? (s/map-of keyword? string? :min-count 1 :max-count 1) x))
+(defn valid-string?
+  "Is `x` a string and does not contains unescaped `\"`, `\\`, `\\n`, nor
+   `\\r`? (This filtering is to avoid SPARQL injection attacks.)"
+  [x]
+  (boolean (and (string? x)
+                (re-matches #"([^\"\r\n\\]|(?:\\(?:\n|\r|\"|\\)))*" x))))
+
+(defn lang-map?
+  "Is `x` a singleton map between a language tag and valid string?"
+  [x]
+  (s/valid? (s/map-of keyword? valid-string? :min-count 1 :max-count 1) x))
 
 ;; Composite specs
 
