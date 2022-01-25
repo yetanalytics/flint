@@ -85,17 +85,90 @@
                                              [:o [[:var ?c]]]]]]]]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format graph management updates"
-    (is (= "LOAD <http://example.org/1>\nINTO <http://example.org/2>"
-           (->> '[:load-update
-                  [[:load [:update/named-graph [:iri "<http://example.org/1>"]]]
-                   [:into [:update/named-graph [:iri "<http://example.org/2>"]]]]]
-                (w/postwalk f/format-ast))))
-    (is (= "CLEAR DEFAULT"
-           (->> '[:clear-update
-                  [[:clear [:update/kw :default]]]]
-                (w/postwalk f/format-ast))))
-    (is (= "MOVE <http://example.org/1>\nTO <http://example.org/2>"
-           (->> '[:move-update
-                  [[:move [:update/named-graph [:iri "<http://example.org/1>"]]]
-                   [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
-                (w/postwalk f/format-ast))))))
+    (testing "- LOAD"
+      (is (= "LOAD <http://example.org/1>\nINTO <http://example.org/2>"
+             (->> '[:load-update
+                    [[:load [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:into [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "LOAD SILENT <http://example.org/1>\nINTO <http://example.org/2>"
+             (->> '[:load-update
+                    [[:load-silent [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:into [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast)))))
+    (testing "- CLEAR"
+      (is (= "CLEAR DEFAULT"
+             (->> '[:clear-update
+                    [[:clear [:update/kw :default]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "CLEAR NAMED"
+             (->> '[:clear-update
+                    [[:clear [:update/kw :named]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "CLEAR ALL"
+             (->> '[:clear-update
+                    [[:clear [:update/kw :all]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "CLEAR <http://example.org>"
+             (->> '[:clear-update
+                    [[:clear [:iri "<http://example.org>"]]]]
+                  (w/postwalk f/format-ast)))))
+    (testing "- DROP"
+      (is (= "DROP DEFAULT"
+             (->> '[:drop-update
+                    [[:drop [:update/kw :default]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "DROP NAMED"
+             (->> '[:drop-update
+                    [[:drop [:update/kw :named]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "DROP ALL"
+             (->> '[:drop-update
+                    [[:drop [:update/kw :all]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "DROP <http://example.org>"
+             (->> '[:drop-update
+                    [[:drop [:iri "<http://example.org>"]]]]
+                  (w/postwalk f/format-ast)))))
+    (testing "- CREATE"
+      (is (= "CREATE <http://example.org>"
+             (->> '[:create-update
+                    [[:create [:iri "<http://example.org>"]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "CREATE SILENT <http://example.org>"
+             (->> '[:create-update
+                    [[:create-silent [:iri "<http://example.org>"]]]]
+                  (w/postwalk f/format-ast)))))
+    (testing "- ADD"
+      (is (= "ADD <http://example.org/1>\nTO <http://example.org/2>"
+             (->> '[:add-update
+                    [[:add [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "ADD SILENT <http://example.org/1>\nTO <http://example.org/2>"
+             (->> '[:add-update
+                    [[:add-silent [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast)))))
+    (testing "- COPY"
+      (is (= "COPY <http://example.org/1>\nTO <http://example.org/2>"
+             (->> '[:copy-update
+                    [[:copy [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "COPY SILENT <http://example.org/1>\nTO <http://example.org/2>"
+             (->> '[:copy-update
+                    [[:copy-silent [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast)))))
+    (testing "- MOVE"
+      (is (= "MOVE <http://example.org/1>\nTO <http://example.org/2>"
+             (->> '[:move-update
+                    [[:move [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast))))
+      (is (= "MOVE SILENT <http://example.org/1>\nTO <http://example.org/2>"
+             (->> '[:move-update
+                    [[:move-silent [:update/named-graph [:iri "<http://example.org/1>"]]]
+                     [:to [:update/named-graph [:iri "<http://example.org/2>"]]]]]
+                  (w/postwalk f/format-ast)))))))

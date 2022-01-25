@@ -23,9 +23,6 @@
 (defmethod f/format-ast :ask [_]
   "ASK")
 
-(defmethod f/format-ast :where [[_ where]]
-  (str "WHERE " where))
-
 (defmethod f/format-ast :from [[_ iri]]
   (str "FROM " iri))
 

@@ -40,6 +40,9 @@
                             "    SERVICE ns:my-uri {"
                             "        ?s9 ?p9 ?o9 ."
                             "    }"
+                            "    SERVICE SILENT ns:my-uri {"
+                            "        ?s10 ?p10 ?o10 ."
+                            "    }"
                             "    BIND ((2 + 2) AS ?foo)"
                             "    FILTER (2 = ?bar)"
                             "    FILTER ns:myfn(2, ?baz)"
@@ -68,6 +71,9 @@
                    [:where/service
                     [[:prefix-iri :ns/my-uri]
                      [:where-sub/where [[:tvec [[:var ?s9] [:var ?p9] [:var ?o9]]]]]]]
+                   [:where/service-silent
+                    [[:prefix-iri :ns/my-uri]
+                     [:where-sub/where [[:tvec [[:var ?s10] [:var ?p10] [:var ?o10]]]]]]]
                    [:where/bind
                     [:expr/as-var
                      [[:expr/branch
