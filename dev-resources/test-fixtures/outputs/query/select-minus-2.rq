@@ -1,0 +1,9 @@
+PREFIX : <http://example.com/>
+SELECT *
+WHERE {
+    ?x :p ?n .
+    MINUS {
+        ?x :q ?m .
+        FILTER (?n = ?m)
+    }
+}

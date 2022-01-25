@@ -1,0 +1,5 @@
+PREFIX : <http://example/>
+SELECT (SUM(?x) AS TOTAL)
+WHERE {
+    :s (:item | :price) ?x .
+}
