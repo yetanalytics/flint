@@ -27,18 +27,18 @@
            (s/conform ts/triple-vec-spec '[?s ?p ?o])))
     (testing "with and without paths"
       (is (= '[:spo [[[:var ?s]
-                      [:po [[[:path [:path/branch [[:path/op cat]
-                                                   [:path/args
-                                                    [[:path/terminal [:prefix-iri :x/one]]
-                                                     [:path/terminal [:prefix-iri :x/two]]]]]]]
+                      [:po [[[:triple/path [:path/branch [[:path/op cat]
+                                                          [:path/args
+                                                           [[:path/terminal [:prefix-iri :x/one]]
+                                                            [:path/terminal [:prefix-iri :x/two]]]]]]]
                              [:o [[:var ?o]]]]]]]]]
              (s/conform ts/normal-form-spec
                         '{?s {(cat :x/one :x/two) #{?o}}})))
       (is (= '[[:var ?s]
-               [:path [:path/branch [[:path/op cat]
-                                     [:path/args
-                                      [[:path/terminal [:prefix-iri :x/one]]
-                                       [:path/terminal [:prefix-iri :x/two]]]]]]]
+               [:triple/path [:path/branch [[:path/op cat]
+                                            [:path/args
+                                             [[:path/terminal [:prefix-iri :x/one]]
+                                              [:path/terminal [:prefix-iri :x/two]]]]]]]
                [:var ?o]]
              (s/conform ts/triple-vec-spec
                         '[?s (cat :x/one :x/two) ?o])))

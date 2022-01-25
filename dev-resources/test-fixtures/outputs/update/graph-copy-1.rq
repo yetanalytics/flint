@@ -1,2 +1,2 @@
 COPY DEFAULT
-TO GRAPH <http://example.org/named>
+TO <http://example.org/named>

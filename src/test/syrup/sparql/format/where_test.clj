@@ -17,13 +17,15 @@
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["{"
                             "    ?s1 ?p1 ?o1 ."
-                            "    ?s2 ?p2 ?o2a, ?o2b"
+                            "    ?s2 ?p2 ?o2a , ?o2b ."
                             "    {"
                             "        ?s3 ?p3 ?o3 ."
                             "    }"
                             "    {"
                             "        ?s4 ?p4 ?o4 ."
-                            "    } UNION {"
+                            "    }"
+                            "    UNION"
+                            "    {"
                             "        ?s5 ?p5 ?o5 ."
                             "    }"
                             "    OPTIONAL {"
@@ -42,7 +44,7 @@
                             "    FILTER (2 = ?bar)"
                             "    FILTER ns:myfn(2, ?baz)"
                             "    VALUES (?x ?y) {"
-                            "      (1 2)"
+                            "        (1 2)"
                             "    }"
                             "}"])
            (->> '[:where-sub/where

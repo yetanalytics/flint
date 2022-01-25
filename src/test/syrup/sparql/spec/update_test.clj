@@ -18,7 +18,12 @@
            (s/conform us/delete-data-update-spec
                       '{:delete-data [[:graph
                                        "<http://example.org>"
-                                       [[:foo/x :dc/title "Title"]]]]})))))
+                                       [[:foo/x :dc/title "Title"]]]]})))
+    (is (= '[[:move [:update/default-graph :default]]
+             [:to [:update/named-graph [:iri "<http://example.org>"]]]]
+           (s/conform us/move-update-spec
+                      '{:move :default
+                        :to "<http://example.org>"})))))
 
 (deftest invalid-update-test
   (testing "invalid updates"

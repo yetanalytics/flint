@@ -9,9 +9,10 @@
   (testing "formatting triples"
     (is (= (cstr/join
             "\n"
-            ["<http://example.org/supercalifragilisticexpialidocious>"
-             "    ?p1 ?o1, ?o2; ?p2 ?o1, ?o2 ."
-             "?s2 ?p1 ?o1, ?o2; ?p2 ?o1, ?o2"])
+            ["<http://example.org/supercalifragilisticexpialidocious> ?p1 ?o1 , ?o2 ;"
+             "                                                        ?p2 ?o1 , ?o2 ."
+             "?s2 ?p1 ?o1 , ?o2 ;"
+             "    ?p2 ?o1 , ?o2 ."])
            (w/postwalk
             f/format-ast
             '[:nform [:spo [[[:iri "<http://example.org/supercalifragilisticexpialidocious>"]

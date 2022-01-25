@@ -33,5 +33,5 @@
            (f/format-ast [:num-lit 123.4])))
     (is (= "true"
            (f/format-ast [:bool-lit true])))
-    (is (= "2022-01-20T16:22:19Z^^<http://www.w3.org/2001/XMLSchema#dateTime>"
+    (is (= "\"2022-01-20T16:22:19Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
            (f/format-ast [:dt-lit #inst "2022-01-20T16:22:19Z"])))))

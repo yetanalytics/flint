@@ -25,7 +25,7 @@
   "DEFAULT")
 
 (defmethod f/format-ast :update/named-graph [[_ iri]]
-  (str "GRAPH " iri))
+  iri)
 
 (defmethod f/format-ast :quads [[_ [_ var-or-iri triples]]]
   (str "GRAPH " var-or-iri " " (format-quads triples)))

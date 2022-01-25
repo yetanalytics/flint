@@ -30,13 +30,15 @@
                               [[[:num-lit 1]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format CONSTRUCT query"
-    (is (= (cstr/join "\n" ["CONSTRUCT ?x ?y ?z ."
+    (is (= (cstr/join "\n" ["CONSTRUCT {"
+                            "    ?x ?y ?z ."
+                            "}"
                             "FROM <http://example.org/my-graph/>"
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
            (->> '[:construct-query
-                  [[:construct [:tvec [[:var ?x] [:var ?y] [:var ?z]]]]
+                  [[:construct [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]
                    [:from [:iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast))))
@@ -66,7 +68,7 @@
                             "    ?x ?y ?z ."
                             "}"])
            (->> '[:describe-query
-                  [[:describe [[:var ?x] [:var ?y]]]
+                  [[:describe [:describe/vars-or-iris [[:var ?x] [:var ?y]]]]
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
                    [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
