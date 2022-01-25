@@ -1,5 +1,4 @@
-;; SELECT with sequential and Kleene star property path
-{:prefixes {:rdfs "<http://www.w3.org/2000/01/rdf-schema#>"
-            :rdf  "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
- :select   [?x ?type]
- :where    [[?x (cat :rdf/type (* :rdfs/subClassOf)) ?type]]}
+;; SELECT with SUM and sequential property path
+{:prefixes {:$ "<http://example/>"}
+ :select   [[(sum ?x) ?total]]
+ :where    [[:s (cat :item :price) ?x]]}

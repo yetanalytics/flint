@@ -21,8 +21,3 @@
 
 (deftest update-tests
   (make-tests us/update-spec "dev-resources/test-fixtures/inputs/update/"))
-
-(comment
-  (s/explain qs/select-query-spec
-             '{:select [?v]
-              :where  [[?v ?p {:en "cat"}]]}))

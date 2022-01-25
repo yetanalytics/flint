@@ -1,5 +1,3 @@
-;; SELECT with shared subject in WHERE
-{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :select   [[(concat ?G " " ?S) ?name]]
- :where    [{?P {:foaf/givenName #{?G}
-                 :foaf/surname #{?S}}}]}
+;; SELECT with var + num literal WHERE
+{:select [?v]
+ :where  [[?v ?p 42]]}

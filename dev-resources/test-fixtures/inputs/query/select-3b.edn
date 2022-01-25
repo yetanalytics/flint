@@ -1,3 +1,0 @@
-;; SELECT with var + num literal WHERE
-{:select [?v]
- :where  [[?v ?p 42]]}
