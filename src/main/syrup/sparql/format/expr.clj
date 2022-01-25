@@ -3,6 +3,11 @@
             [syrup.sparql.format :as f]
             [syrup.sparql.format.axiom]))
 
+;; NOTE: Any deps that call this namespace should also call the format.where
+;; ns, to properly format EXISTS and NOT EXISTS.
+;; format.where cannot directly be called here since it would cause a cyclic
+;; dependency.
+
 (defn- infix-op?
   [op paths]
   (and (#{'= 'not= '< '> '<= '>= 'and 'or 'in 'not-in '+ '- '* '/} op)
@@ -44,7 +49,11 @@
   [op]
   (#{'group-concat 'group-concat-distinct} op))
 
-(defmethod f/format-ast :expr/kwarg [[_ [k v]]]
+(defn- graph-pat-exp?
+  [op]
+  (#{'exists 'not-exists} op))
+
+(defmethod f/format-ast :expr/kwarg [[_ [[_ k] [_ v]]]]
   (str (cstr/upper-case (name k)) " = '" v "'"))
 
 (defmethod f/format-ast :expr/op [[_ op]] op)
@@ -58,6 +67,7 @@
       (infix-op? op args) (str "(" (cstr/join (str " " op-str " ") args) ")")
       (unary-op? op args) (str op-str (first args))
       (semicolon-sep? op) (str op-str "(" ?dist (cstr/join "; " args) ")")
+      (graph-pat-exp? op) (str op-str " " (first args))
       :else               (str op-str "(" ?dist (cstr/join ", " args) ")"))))
 
 (defmethod f/format-ast :expr/terminal [[_ terminal]]

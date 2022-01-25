@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.walk :as w]
             [syrup.sparql.format :as f]
-            [syrup.sparql.format.expr]))
+            [syrup.sparql.format.expr]
+            [syrup.sparql.format.where]))
 
 (deftest format-test
   (testing "expression formatting"
@@ -28,7 +29,6 @@
                                 [[:expr/op '+]
                                  [:expr/args [[:expr/terminal [:num-lit 3]]
                                               [:expr/terminal [:num-lit 3]]]]]]]]]]
-                #_(w/postwalk f/annotate-ast)
                 (w/postwalk f/format-ast))))
     (is (= "(2 - (6 - 2))" ; => -2
            (->> [:expr/branch
@@ -106,14 +106,16 @@
     (is (= "GROUP_CONCAT(?foo; SEPARATOR = ';')"
            (->> [:expr/branch [[:expr/op 'group-concat]
                                [:expr/args [[:expr/terminal [:var '?foo]]
-                                            [:expr/terminal [:kwarg {:k :separator
-                                                                     :v ";"}]]]]]]
+                                            [:expr/terminal [:expr/kwarg
+                                                             [[:expr/k :separator]
+                                                              [:expr/v ";"]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= "GROUP_CONCAT(DISTINCT ?foo; SEPARATOR = ';')"
            (->> [:expr/branch [[:expr/op 'group-concat-distinct]
                                [:expr/args [[:expr/terminal [:var '?foo]]
-                                            [:expr/terminal [:kwarg {:k :separator
-                                                                     :v ";"}]]]]]]
+                                            [:expr/terminal [:expr/kwarg
+                                                             [[:expr/k :separator]
+                                                              [:expr/v ";"]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= "ENCODE_FOR_URI(?foo)"
            (->> [:expr/branch [[:expr/op 'encode-for-uri]
@@ -122,6 +124,20 @@
     (is (= "isIRI(?foo)"
            (->> [:expr/branch [[:expr/op 'iri?]
                                [:expr/args [[:expr/terminal [:var '?foo]]]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "EXISTS {\n    ?x ?y ?z .\n}"
+           (->> '[:expr/branch [[:expr/op exists]
+                                [:expr/args [[:where-sub/where
+                                              [[:tvec [[:var ?x]
+                                                       [:var ?y]
+                                                       [:var ?z]]]]]]]]]
+                (w/postwalk f/format-ast))))
+    (is (= "NOT EXISTS {\n    ?x ?y ?z .\n}"
+           (->> '[:expr/branch [[:expr/op not-exists]
+                                [:expr/args [[:where-sub/where
+                                              [[:tvec [[:var ?x]
+                                                       [:var ?y]
+                                                       [:var ?z]]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "expr AS var formatting"
     (is (= "(2 + 2) AS ?foo"
