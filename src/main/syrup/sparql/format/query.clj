@@ -11,11 +11,14 @@
 
 (defmethod f/format-ast :construct [[_ construct]]
   (if (not-empty construct)
-    (str "CONSTRUCT " construct)
+    (str "CONSTRUCT {\n" (f/indent-str (cstr/join "\n" construct)) "\n}")
     "CONSTRUCT"))
 
+(defmethod f/format-ast :describe/vars-or-iris [[_ var-or-iris]]
+  (cstr/join " " var-or-iris))
+
 (defmethod f/format-ast :describe [[_ describe]]
-  (str "DESCRIBE " (cstr/join " " describe)))
+  (str "DESCRIBE " describe))
 
 (defmethod f/format-ast :ask [_]
   "ASK")

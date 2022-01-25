@@ -1,4 +1,4 @@
 SELECT ?v
 WHERE {
-    ?v ?p "cat"@en
+    ?v ?p "cat"@en .
 }

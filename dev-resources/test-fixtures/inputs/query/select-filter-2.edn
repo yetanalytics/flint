@@ -1,6 +1,6 @@
 ;; SELECT with FILTER (`<` expression)
-{:prefxes {:dc "<http://purl.org/dc/elements/1.1/>"
-           :ns "<http://example.org/ns#>"}
+{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
+            :ns "<http://example.org/ns#>"}
  :select  [?title ?price]
  :where   [[?x :ns/price ?price]
            [:filter (< ?price 30.5)]

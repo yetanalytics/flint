@@ -7,6 +7,9 @@
 (defmethod f/format-ast :select/var-or-exprs [[_ value]]
   (cstr/join " " value))
 
+(defmethod f/format-ast :select/expr-as-var [[_ expr-as-var]]
+  (str "(" expr-as-var ")"))
+
 (defmethod f/format-ast :select [[_ select]]
   (str "SELECT " select))
 

@@ -1,5 +1,6 @@
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT (concat(?G, " ", ?S) AS ?name)
+SELECT (CONCAT(?G, " ", ?S) AS ?name)
 WHERE {
-    ?P foaf:givenName ?G ; foaf:surname ?S
+    ?P foaf:givenName ?G ;
+       foaf:surname ?S .
 }

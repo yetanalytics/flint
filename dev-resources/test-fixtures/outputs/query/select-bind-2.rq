@@ -3,7 +3,7 @@ PREFIX ns: <http://example.org/ns#>
 SELECT ?title ?price
 WHERE {
     {
-        ?x ns:price ?p .
+        ?x ns:price ?price .
         ?x ns:discount ?discount .
         BIND ((?p * (1 - ?discount)) AS ?price)
     }

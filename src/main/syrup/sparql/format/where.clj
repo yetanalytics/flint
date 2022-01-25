@@ -25,7 +25,7 @@
   pattern)
 
 (defmethod f/format-ast :where/union [[_ patterns]]
-  (cstr/join " UNION " patterns))
+  (cstr/join "\nUNION\n" patterns))
 
 (defmethod f/format-ast :where/optional [[_ pattern]]
   (str "OPTIONAL " pattern))

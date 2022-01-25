@@ -81,7 +81,7 @@
                               ::mod/offset])))
 
 (s/def ::describe
-  (s/or :vars-or-iris (s/coll-of ax/var-or-iri-spec :min-count 1)
+  (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec :min-count 1)
         :wildcard ax/wildcard?))
 
 (def describe-query-spec

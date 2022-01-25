@@ -51,7 +51,7 @@
         :iri ax/iri?
         :prefix-iri ax/prefix-iri?
         :rdf-type ax/rdf-type?
-        :path ::path/path))
+        :triple/path ::path/path))
 
 (def obj-spec
   (s/or :var ax/variable?

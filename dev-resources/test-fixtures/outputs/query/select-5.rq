@@ -1,4 +1,4 @@
 SELECT ?v
 WHERE {
-    ?v ?p 42
+    ?v ?p 42 .
 }

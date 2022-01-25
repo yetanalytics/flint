@@ -1,9 +1,12 @@
-;; SELECT with both FROM and FROM NAMED
-{:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"
-              :dc   "<http://purl.org/dc/elements/1.1/>"}
- :select     [?who ?g ?mbox]
- :from       "<http://example.org/dft.ttl>"
- :from-named ["<http://example.org/alice>"
-              "<http://example.org/bob>"]
- :where      [[?g :dc/publisher ?who]
-              [:graph ?g [[?x :foaf/mbox ?mbox]]]]}
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT ?who ?g ?mbox
+FROM <http://example.org/dft.ttl>
+FROM NAMED <http://example.org/alice>
+FROM NAMED <http://example.org/bob>
+WHERE {
+    ?g dc:publisher ?who .
+    GRAPH ?g {
+        ?x foaf:mbox ?mbox .
+    }
+}

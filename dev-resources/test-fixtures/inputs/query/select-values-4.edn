@@ -1,7 +1,7 @@
 ;; VALUES clause as a solution modifier
 {:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
             :ns "<http://example.org/ns#>"
-            :$  "<http://example.org/ns#>"}
+            :$  "<http://example.org/book/>"}
  :select [?book ?title ?price]
  :where [{?book {:dc/title #{?title}
                  :ns/price #{?price}}}]

@@ -1,5 +1,5 @@
 PREFIX : <http://example/>
-SELECT *
+SELECT (SUM(?x) AS ?total)
 WHERE {
-    :s (:item | :price) ?x .
+    :s (:item / :price) ?x .
 }

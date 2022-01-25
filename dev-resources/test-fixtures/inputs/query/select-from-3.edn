@@ -4,4 +4,5 @@
  :from-named ["<http://example.org/foaf/aliceFoaf>"
               "<http://example.org/foaf/bobFoaf>"]
  :where      [[:graph ?src [[?x :foaf/mbox "mailto:bob@work.example"]
-                            [?x :foaf/name ?bobNick]]]]}
+                            [?x :foaf/name ?bobNick]]]
+              [?x :foaf/name ?name]]}

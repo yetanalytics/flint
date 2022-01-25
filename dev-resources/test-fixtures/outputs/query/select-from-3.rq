@@ -5,7 +5,7 @@ FROM NAMED <http://example.org/foaf/bobFoaf>
 WHERE {
     GRAPH ?src {
         ?x foaf:mbox "mailto:bob@work.example" .
-        ?x foaf:name ?bobNick
+        ?x foaf:name ?bobNick .
     }
-    ?x foaf:name ?name
+    ?x foaf:name ?name .
 }

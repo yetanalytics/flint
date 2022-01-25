@@ -1,9 +1,9 @@
 ;; SELECT with BIND
-{:prefxes {:dc "<http://purl.org/dc/elements/1.1/>"
-           :ns "<http://example.org/ns#>"}
-  :select  [?title ?price]
-  :where   [[?x :ns/price ?price]
-            [?x :ns/discount ?discount]
-            [:bind [(* ?p (- 1 ?discount)) ?price]]
-            [:filter (< ?price 20)]
-            [?x :dc/title ?title]]}
+{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
+            :ns "<http://example.org/ns#>"}
+ :select  [?title ?price]
+ :where   [[?x :ns/price ?price]
+           [?x :ns/discount ?discount]
+           [:bind [(* ?p (- 1 ?discount)) ?price]]
+           [:filter (< ?price 20)]
+           [?x :dc/title ?title]]}

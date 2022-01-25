@@ -36,4 +36,4 @@
   (str bool-value))
 
 (defmethod f/format-ast :dt-lit [[_ dt-value]]
-  (str (.toInstant dt-value) "^^<http://www.w3.org/2001/XMLSchema#dateTime>"))
+  (str "\"" (.toInstant dt-value) "\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"))
