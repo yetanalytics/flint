@@ -1,8 +1,9 @@
 (ns syrup.sparql.spec.update
   (:require [clojure.spec.alpha :as s]
-            [syrup.sparql.spec.axiom  :as ax]
-            [syrup.sparql.spec.triple :as triple]
-            [syrup.sparql.spec.where  :as ws]))
+            [syrup.sparql.spec.axiom    :as ax]
+            [syrup.sparql.spec.triple   :as triple]
+            [syrup.sparql.spec.where    :as ws]
+            [syrup.sparql.spec.prologue :as pro]))
 
 (def key-order-map
   {:bases        0
@@ -102,7 +103,7 @@
 
 (def load-update-spec
   (smap->vec (s/keys :req-un [(or ::load ::load-silent)]
-                     :opt-un [::into])))
+                     :opt-un [::pro/bases ::pro/prefixes ::into])))
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
@@ -111,7 +112,8 @@
 (s/def ::clear-silent ::clear)
 
 (def clear-update-spec
-  (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)])))
+  (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
@@ -120,31 +122,36 @@
 (s/def ::drop-silent ::drop)
 
 (def drop-update-spec
-  (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)])))
+  (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::create ax/iri-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
-  (smap->vec (s/keys :req-un [(or ::create ::create-silent)])))
+  (smap->vec (s/keys :req-un [(or ::create ::create-silent)]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::add graph-or-default-spec)
 (s/def ::add-silent ::add)
 
 (def add-update-spec
-  (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to])))
+  (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::move graph-or-default-spec)
 (s/def ::move-silent ::move)
 
 (def move-update-spec
-  (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to])))
+  (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::copy graph-or-default-spec)
 (s/def ::copy-silent ::copy)
 
 (def copy-update-spec
-  (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to])))
+  (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
@@ -153,17 +160,20 @@
 (s/def ::insert-data triple-or-quads-novar-spec)
 
 (def insert-data-update-spec
-  (smap->vec (s/keys :req-un [::insert-data])))
+  (smap->vec (s/keys :req-un [::insert-data]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::delete-data triple-or-quads-novar-spec)
 
 (def delete-data-update-spec
-  (smap->vec (s/keys :req-un [::delete-data])))
+  (smap->vec (s/keys :req-un [::delete-data]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::delete-where triple-or-quads-spec)
 
 (def delete-where-update-spec
-  (smap->vec (s/keys :req-un [::delete-where])))
+  (smap->vec (s/keys :req-un [::delete-where]
+                     :opt-un [::pro/bases ::pro/prefixes])))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-spec)
@@ -171,7 +181,9 @@
 (def modify-update-spec
   (smap->vec (s/keys :req-un [(or ::delete ::insert)
                               ::ws/where]
-                     :opt-un [::delete
+                     :opt-un [::pro/bases
+                              ::pro/prefixes
+                              ::delete
                               ::insert
                               ::with
                               ::using])))

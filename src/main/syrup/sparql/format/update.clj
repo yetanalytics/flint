@@ -2,6 +2,7 @@
   (:require [clojure.string :as cstr]
             [syrup.sparql.format :as f]
             [syrup.sparql.format.axiom]
+            [syrup.sparql.format.prologue]
             [syrup.sparql.format.triple]
             [syrup.sparql.format.where]))
 
@@ -82,25 +83,25 @@
   (str "COPY SILENT " copy-silent))
 
 (defmethod f/format-ast :load-update [[_ load-update]]
-  (cstr/join " " load-update))
+  (cstr/join "\n" load-update))
 
 (defmethod f/format-ast :clear-update [[_ clear-update]]
-  (cstr/join " " clear-update))
+  (cstr/join "\n" clear-update))
 
 (defmethod f/format-ast :drop-update [[_ drop-update]]
-  (cstr/join " " drop-update))
+  (cstr/join "\n" drop-update))
 
 (defmethod f/format-ast :create-update [[_ create-update]]
-  (cstr/join " " create-update))
+  (cstr/join "\n" create-update))
 
 (defmethod f/format-ast :add-update [[_ add-update]]
-  (cstr/join " " add-update))
+  (cstr/join "\n" add-update))
 
 (defmethod f/format-ast :move-update [[_ move-update]]
-  (cstr/join " " move-update))
+  (cstr/join "\n" move-update))
 
 (defmethod f/format-ast :copy-update [[_ copy-update]]
-  (cstr/join " " copy-update))
+  (cstr/join "\n" copy-update))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -128,13 +129,13 @@
   (str "INSERT " (format-quads insert)))
 
 (defmethod f/format-ast :insert-data-update [[_ id-update]]
-  id-update)
+  (cstr/join "\n" id-update))
 
 (defmethod f/format-ast :delete-data-update [[_ dd-update]]
-  dd-update)
+  (cstr/join "\n" dd-update))
 
 (defmethod f/format-ast :delete-where-update [[_ dw-update]]
-  dw-update)
+  (cstr/join "\n" dw-update))
 
 (defmethod f/format-ast :modify-update [[_ mod-update]]
   (cstr/join "\n" mod-update))
