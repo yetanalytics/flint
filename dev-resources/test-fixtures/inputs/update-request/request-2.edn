@@ -1,15 +1,15 @@
 [{:prefixes {:dc       "<http://purl.org/dc/elements/1.1/>"
              :dcmitype "<http://purl.org/dc/dcmitype/>"
              :xsd      "<http://www.w3.org/2001/XMLSchema#>"}
-  :insert [[:graph "<http://example/bookStore2>"
-            [[?book ?p ?v]]]]
-  :where [[:graph "<http://example/bookStore>"
-           [[?book :dc/date ?date]
-            [:filter (< ?date #inst "2000-01-01T00:00:00Z")]
-            [?book ?p ?v]]]]}
- {:with "<http://example/bookStore>"
+  :insert   [[:graph "<http://example/bookStore2>"
+              [[?book ?p ?v]]]]
+  :where    [[:graph "<http://example/bookStore>"
+              [[?book :dc/date ?date]
+               [:filter (< ?date #inst "2000-01-01T00:00:00Z")]
+               [?book ?p ?v]]]]}
+ {:with   "<http://example/bookStore>"
   :delete [[?book ?p ?v]]
-  :where [{?book {:dc/date #{?date}
-                  :dc/type #{:dcmitype/PhysicalObject}}}
-          [:filter (< ?date #inst "2000-01-01T00:00:00Z")]
-          [?book ?p ?v]]}]
+  :where  [{?book {:dc/date #{?date}
+                   :dc/type #{:dcmitype/PhysicalObject}}}
+           [:filter (< ?date #inst "2000-01-01T00:00:00Z")]
+           [?book ?p ?v]]}]
