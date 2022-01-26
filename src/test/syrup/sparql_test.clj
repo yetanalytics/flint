@@ -3,7 +3,7 @@
             [clojure.string :as cstr]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [syrup.sparql :refer [format-query format-updates]]))
+            [syrup.sparql :as spql :refer [format-query format-updates]]))
 
 (defmacro make-format-tests [f in-dir-name]
   (let [in-files#  (->> in-dir-name io/file file-seq (filter #(.isFile %)))
@@ -33,3 +33,18 @@
 (deftest update-request-tests
   (make-format-tests (partial apply format-updates)
                      "dev-resources/test-fixtures/inputs/update-request/"))
+
+(deftest exception-tests
+  (testing "API functions throwing exceptions"
+    (is (= ::spql/invalid-query
+           (try (format-query {})
+                (catch clojure.lang.ExceptionInfo e
+                  (-> e ex-data :kind)))))
+    (is (= ::spql/invalid-update
+           (try (format-updates {})
+                (catch clojure.lang.ExceptionInfo e
+                  (-> e ex-data :kind)))))
+    (is (= ::spql/invalid-update-request
+           (try (format-updates {} {})
+                (catch clojure.lang.ExceptionInfo e
+                  (-> e ex-data :kind)))))))
