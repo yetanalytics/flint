@@ -1,30 +1,63 @@
 (ns syrup.sparql.spec.axiom
   (:require [clojure.spec.alpha :as s]))
 
-;; Use a regex defined by the SPARQL grammar instead of copying from
+;; Use regexes defined by the SPARQL grammar instead of copying from
 ;; xapi-schema or other non-SPARQL library.
-;; TODO: Test that SPARQL IRIs and xapi-schema IRIs are compatible
+
 (def iri-regex
-  #"<([^<>\"{}|\^\\`\s])*>")
+  #"<([^<>{}\"\\|\^`\s])*>")
 
-(defn iri? [s]
-  (boolean (and (string? s) (re-matches iri-regex s))))
+(def prefix-iri-ns-regex
+  #"[A-Za-z_]([\w\-\.]*[\w\-])?")
 
-(defn prefix-iri? [s]
-  (boolean (and (keyword? s) (not (#{:a :*} s)))))
+(def prefix-iri-name-regex
+  #"[\w\-]+")
 
-(defn variable? [x]
+(def variable-regex
+  #"\?\w+")
+
+(def bnode-regex
+  #"_(\w([\w\.]*\w)?)?")
+
+(def valid-str-regex
+  #"([^\"\r\n\\]|(?:\\(?:\n|\r|\"|\\)))*")
+
+(defn iri?
+  "Is `x` a wrapped (i.e. starts with `<` and ends with `>`) IRI?
+   Note that `x` can be an otherwise non-IRI (e.g. `<foo>`)."
+  [x]
+  (boolean (and (string? x)
+                (re-matches iri-regex x))))
+
+(defn prefix-iri?
+  "Is `x` a potentially namespaced keyword?"
+  [x]
+  (boolean (and (keyword? x)
+                (not (#{:a :*} x))
+                (or (->> x namespace nil?)
+                    (->> x namespace (re-matches prefix-iri-ns-regex)))
+                (->> x name (re-matches prefix-iri-name-regex)))))
+
+(defn variable?
+  "Is `x` a symbol that starts with `?`?"
+  [x]
   (boolean (and (symbol? x)
-                (->> x name (re-matches #"\?.*")))))
+                (->> x name (re-matches variable-regex)))))
 
-(defn bnode? [x]
+(defn bnode?
+  "Is `x` a symbol that starts with `_` and has zero or more trailing chars?"
+  [x]
   (boolean (and (symbol? x)
-                (->> x name (re-matches #"_.*")))))
+                (->> x name (re-matches bnode-regex)))))
 
-(defn wildcard? [x]
+(defn wildcard?
+  "Is `x` a symbol or keyword that is `*`?"
+  [x]
   (boolean (#{'* :*} x)))
 
-(defn rdf-type? [x]
+(defn rdf-type?
+  "Is `x` a symbol or keyword that is `a`?"
+  [x]
   (boolean (#{'a :a} x)))
 
 (defn valid-string?
@@ -32,7 +65,7 @@
    `\\r`? (This filtering is to avoid SPARQL injection attacks.)"
   [x]
   (boolean (and (string? x)
-                (re-matches #"([^\"\r\n\\]|(?:\\(?:\n|\r|\"|\\)))*" x))))
+                (re-matches valid-str-regex x))))
 
 (defn lang-map?
   "Is `x` a singleton map between a language tag and valid string?"
