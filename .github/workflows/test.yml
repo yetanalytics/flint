@@ -6,13 +6,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        target: [test-clj]
+    # strategy:
+    #   matrix:
+    #     target: [test-clj]
     
     steps:
     - name: Setup CI Environment
       uses: yetanalytics/actions/setup-env@v0.0.2
     
-    - name: Run Makefile target ${{ matrix.target }}
-      run: make ${{ matrix.target }}
+    - name: Run Makefile target test-clj
+      run: make test-clj
