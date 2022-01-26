@@ -8,19 +8,25 @@
 ;; format.where cannot directly be called here since it would cause a cyclic
 ;; dependency.
 
-(defn- exprs-list-op?
+(defn- elist-op?
   [op]
   (#{'in 'not-in} op))
 
 (defn- infix-op?
-  [op paths]
-  (and (#{'= 'not= '< '> '<= '>= 'and 'or #_'in #_'not-in '+ '- '* '/} op)
-       (< 1 (count paths))))
+  [op]
+  (#{'= 'not= '< '> '<= '>= 'and 'or '+ '- '* '/} op))
 
 (defn- unary-op?
-  [op paths]
-  (and (#{'+ '- 'not} op)
-       (= 1 (count paths))))
+  [op]
+  (#{'not} op))
+
+(defn- semicolon-sep?
+  [op]
+  (#{'group-concat 'group-concat-distinct} op))
+
+(defn- graph-pat-exp?
+  [op]
+  (#{'exists 'not-exists} op))
 
 (defn- op->str
   [op]
@@ -49,14 +55,6 @@
   [op]
   (re-matches #"(.+)-distinct" (name op)))
 
-(defn- semicolon-sep?
-  [op]
-  (#{'group-concat 'group-concat-distinct} op))
-
-(defn- graph-pat-exp?
-  [op]
-  (#{'exists 'not-exists} op))
-
 (defn- parens-if-nests
   "Super-basic precedence comparison to wrap parens if there's an inner
    unary op, since expressions like `!!true` are illegal."
@@ -76,12 +74,12 @@
   (let [op-str (op->str op)
         ?dist  (when (distinct-op? op) "DISTINCT ")]
     (cond
-      (exprs-list-op? op) (str "(" (first args) " " op-str " (" (cstr/join ", " (rest args)) "))")
-      (infix-op? op args) (str "(" (cstr/join (str " " op-str " ") args) ")")
-      (unary-op? op args) (str op-str (-> args first parens-if-nests))
+      (elist-op? op) (str "(" (first args) " " op-str " (" (cstr/join ", " (rest args)) "))")
+      (infix-op? op) (str "(" (cstr/join (str " " op-str " ") args) ")")
+      (unary-op? op) (str op-str (-> args first parens-if-nests))
       (semicolon-sep? op) (str op-str "(" ?dist (cstr/join "; " args) ")")
       (graph-pat-exp? op) (str op-str " " (first args))
-      :else               (str op-str "(" ?dist (cstr/join ", " args) ")"))))
+      :else (str op-str "(" ?dist (cstr/join ", " args) ")"))))
 
 (defmethod f/format-ast :expr/terminal [[_ terminal]]
   terminal)
