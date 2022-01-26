@@ -15,4 +15,4 @@ jobs:
       uses: yetanalytics/actions/setup-env@v0.0.2
     
     - name: Run Makefile target test-clj
-      run: clj -X:test:run-clj
+      run: make test-clj
