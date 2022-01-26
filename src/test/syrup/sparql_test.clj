@@ -18,7 +18,8 @@
                             edn#      (edn/read-string (slurp in-file#))
                             spql#     (slurp out-file#)]
                         `(testing ~(str in-name# " -> " out-name#)
-                           (is (= ~spql# (~f (quote ~edn#)))))))
+                           (is (= ~(cstr/trimr spql#)
+                                  (~f (quote ~edn#)))))))
                     in-files#)]
     `(testing "file:" ~@tests#)))
 

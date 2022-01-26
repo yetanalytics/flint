@@ -2,8 +2,8 @@
 {:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
             :ns "<http://example.org/ns#>"
             :$  "<http://example.org/book/>"}
- :select [?book ?title ?price]
- :where [[:values {[?book ?title] [[nil "SPARQL Tutorial"]
-                                   [:book2 nil]]}]
-         {?book {:dc/title #{?title}
-                 :ns/price #{?price}}}]}
+ :select   [?book ?title ?price]
+ :where    [[:values {[?book ?title] [[nil "SPARQL Tutorial"]
+                                      [:book2 nil]]}]
+            {?book {:dc/title #{?title}
+                    :ns/price #{?price}}}]}
