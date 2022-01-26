@@ -1,0 +1,6 @@
+;; SELECT with FILTER nested inside of MINUS
+{:prefixes {:$ "<http://example.com/>"}
+ :select   *
+ :where    [[?x :p ?n]
+            [:minus [[?x :q ?m]
+                     [:filter (= ?n ?m)]]]]}

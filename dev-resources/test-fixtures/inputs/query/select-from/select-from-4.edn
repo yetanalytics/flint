@@ -1,0 +1,10 @@
+;; SELECT with FROM NAMED and fixed GRAPH iri
+{:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"
+              :data "<http://example.org/foaf/>"}
+ :select     [?nick]
+ :from-named ["<http://example.org/foaf/aliceFoaf>"
+              "<http://example.org/foaf/bobFoaf>"]
+ :where      [[:graph
+               :data/bobFoaf
+               [[?x :foaf/mbox "mailto:bob@work.example"]
+                [?x :foaf/name ?nick]]]]}

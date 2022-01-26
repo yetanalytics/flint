@@ -1,0 +1,5 @@
+;; INSERT DATA with GRAPH
+{:prefixes    {:dc "<http://purl.org/dc/elements/1.1/>"
+               :ns "<http://example.org/ns#>"}
+ :insert-data [[:graph "<http://example/bookStore>"
+                [["<http://example/book1>" :ns/price 42]]]]}

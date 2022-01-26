@@ -1,0 +1,5 @@
+;; SELECT with OPTIONAL
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select   [?name ?mbox]
+ :where    [[?x :foaf/name ?name]
+            [:optional [[?x :foaf/mbox ?mbox]]]]}

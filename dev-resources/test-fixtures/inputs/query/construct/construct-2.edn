@@ -1,0 +1,12 @@
+;; CONSTRUCT with UNION
+{:prefixes  {:foaf  "<http://xmlns.com/foaf/0.1/>"
+             :vcard "<http://www.w3.org/2001/vcard-rdf/3.0#>"}
+ :construct [[?x :vcard/N _v]
+             [_v :vcard/givenName ?gname]
+             [_v :vcard/familyName ?fname]]
+ :where     [[:union
+              [[?x :foaf/firstname ?gname]]
+              [[?x :foaf/givenname ?gname]]]
+             [:union
+              [[?x :foaf/surname ?fname]]
+              [[?x :foaf/family_name ?fname]]]]}

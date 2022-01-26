@@ -1,0 +1,8 @@
+;; SELECT with VALUES
+{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
+            :ns "<http://example.org/ns#>"
+            :$  "<http://example.org/book/>"}
+ :select   [?book ?title ?price]
+ :where    [[:values {?book [:book1 :book3]}]
+            {?book {:dc/title #{?title}
+                    :ns/price #{?price}}}]}

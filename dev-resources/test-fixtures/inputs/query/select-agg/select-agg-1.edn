@@ -1,0 +1,6 @@
+;; SELECT with AVG and GROUP BY
+{:prefixes {:$ "<http://data.example/>"}
+ :select   [[(avg ?y) ?avg]]
+ :where    [{?a {:x #{?x}
+                 :y #{?y}}}]
+ :group-by [?x]}

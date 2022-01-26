@@ -1,0 +1,3 @@
+;; SELECT with var + string literal WHERE
+{:select [?v]
+ :where  [[?v ?p "cat: \\\"meow\\\""]]}

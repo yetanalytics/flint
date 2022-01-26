@@ -1,0 +1,7 @@
+;; SELECT with FILTER (`<` expression)
+{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
+            :ns "<http://example.org/ns#>"}
+ :select  [?title ?price]
+ :where   [[?x :ns/price ?price]
+           [:filter (< ?price 30.5)]
+           [?x :dc/title ?title]]}

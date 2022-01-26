@@ -1,0 +1,4 @@
+;; CONSTRUCT WHERE
+{:prefixes  {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :construct []
+ :where     [[?x :foaf/name ?name]]}

@@ -1,0 +1,4 @@
+;; SELECT DISTINCT with prefixed IRI
+{:prefixes        {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select-distinct [?name]
+ :where           [[?x :foaf/name ?name]]}

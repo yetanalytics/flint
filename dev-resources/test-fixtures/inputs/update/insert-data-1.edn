@@ -1,0 +1,5 @@
+;; INSERT DATA
+{:prefixes    {:dc "<http://purl.org/dc/elements/1.1/>"}
+ :insert-data [{"<http://example/book1>"
+                {:dc/title   #{"A new book"}
+                 :dc/creator #{"A. N. Other"}}}]}

@@ -1,0 +1,5 @@
+;; SELECT with Kleene plus property path
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"
+            :$    "<http://example/>"}
+ :select   [?person]
+ :where    [[:x (+ :foaf/knows) ?person]]}

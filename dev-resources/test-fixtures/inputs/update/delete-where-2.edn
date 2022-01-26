@@ -1,0 +1,9 @@
+;; DELETE WHERE with GRAPH
+{:prefixes     {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :delete-where [[:graph
+                 "<http://example.com/names>"
+                 [{?person {:foaf/givenName #{"Fred"}
+                            ?property1      #{?value1}}}]]
+                [:graph
+                 "<http://example.com/addresses>"
+                 [[?person ?property2 ?value2]]]]}

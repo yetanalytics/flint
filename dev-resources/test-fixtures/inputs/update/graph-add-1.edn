@@ -1,0 +1,3 @@
+;; ADD update
+{:add :default
+ :to  "<http://example.org/named>"}

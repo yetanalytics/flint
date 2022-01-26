@@ -1,0 +1,8 @@
+;; CONSTRUCT with ORDER BY and LIMIT
+{:prefixes  {:foaf "<http://xmlns.com/foaf/0.1/>"
+             :site "<http://example.org/stats#>"}
+ :construct [[_ :foaf/name ?name]]
+ :where     [{_ {:foaf/name #{?name}
+                 :site/hits #{?hits}}}]
+ :order-by  [(desc ?hits)]
+ :limit     2}

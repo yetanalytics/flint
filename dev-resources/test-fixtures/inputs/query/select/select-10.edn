@@ -1,0 +1,5 @@
+;; BASE in prologue
+{:bases    ["<http://example.org/book/>"]
+ :prefixes {:dc "<http://purl.org/dc/elements/1.1/>"}
+ :select   [?title]
+ :where    [["<book1>" :dc/title ?title]]}

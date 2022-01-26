@@ -1,0 +1,5 @@
+;; SELECT with AVG, MIN, and GROUP BY
+{:prefixes {:$ "<http://example.com/data/#>"}
+ :select   [?g [(avg ?p) ?avg] [(/ (+ (min ?p) (max ?p)) 2) ?c]]
+ :where    [[?g :p ?p]]
+ :group-by [?g]}

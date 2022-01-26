@@ -1,0 +1,4 @@
+;; SELECT with sequential property path
+{:prefixes {:$ "<http://example/>"}
+ :select   *
+ :where    [[:s (cat :item :price) ?x]]}

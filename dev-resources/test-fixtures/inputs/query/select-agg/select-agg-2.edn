@@ -1,0 +1,6 @@
+;; SELECT with AVG, GROUP BY and HAVING
+{:prefixes {:$ "<http://data.example/>"}
+ :select   [[(avg ?size) ?asize]]
+ :where    [[?x :size ?size]]
+ :group-by [?x]
+ :having   [(> (avg ?size) 10)]}

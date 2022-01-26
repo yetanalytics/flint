@@ -1,0 +1,6 @@
+;; DELETE followed by INSERT
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :with     "<http://example/addresses>"
+ :delete   [[?person :foaf/givenName "Bill"]]
+ :insert   [[?person :foaf/givenName "William"]]
+ :where    [[?person :foaf/givenName "Bill"]]}

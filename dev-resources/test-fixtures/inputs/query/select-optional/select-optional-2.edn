@@ -1,0 +1,6 @@
+;; SELECT with multiple OPTIONALs
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select   [?name ?mbox ?hpage]
+ :where    [[?x :foaf/name ?name]
+            [:optional [[?x :foaf/mbox ?mbox]]]
+            [:optional [[?x :foaf/homepage ?hpage]]]]}

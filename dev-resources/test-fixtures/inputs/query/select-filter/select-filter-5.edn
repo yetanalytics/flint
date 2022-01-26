@@ -1,0 +1,6 @@
+;; SELECT with nested FILTERs
+{:prefixes {:$ "<http://example.com/>"}
+ :select   *
+ :where    [[?x :p ?n]
+            [:filter (not-exists [[?x :q ?m]
+                                  [:filter (= ?n ?m)]])]]}

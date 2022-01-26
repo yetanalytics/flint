@@ -1,0 +1,4 @@
+;; DESCRIBE with multiple vars and iris
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :describe [?x ?y "<http://example.org>"]
+ :where    [[?x :foaf/knows ?y]]}

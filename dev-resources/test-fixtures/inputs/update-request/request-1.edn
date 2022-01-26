@@ -1,0 +1,11 @@
+;; DELETE DATA followed by INSERT DATA
+[{:prefixes    {:dc "<http://purl.org/dc/elements/1.1/>"}
+  :delete-data [[:graph "<http://example/bookStore>"
+                 [["<http://example/book1>"
+                   :dc/title
+                   "Fundamentals of Compiler Desing"]]]]}
+ {:prefixes    {:dc "<http://purl.org/dc/elements/1.1/>"}
+  :insert-data [[:graph "<http://example/bookStore>"
+                 [["<http://example/book1>"
+                   :dc/title
+                   "Fundamentals of Compiler Design"]]]]}]

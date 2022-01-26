@@ -1,0 +1,2 @@
+;; Basic DESCRIBE
+{:describe ["<http://example.org>"]}

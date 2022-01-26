@@ -1,0 +1,5 @@
+PREFIX : <http://example/>
+SELECT *
+WHERE {
+    :s (:item / :price) ?x .
+}

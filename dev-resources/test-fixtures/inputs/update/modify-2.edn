@@ -1,0 +1,6 @@
+;; DELETE with WHERE (normal form)
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :with     "<http://example/addresses>"
+ :delete   [[?person ?property ?value]]
+ :where    [{?person {?property       #{?value}
+                      :foaf/givenName #{"Fred"}}}]}

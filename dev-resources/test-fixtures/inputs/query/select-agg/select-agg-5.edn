@@ -1,0 +1,8 @@
+;; SELECT with SUM, GROUP BY and HAVING
+{:prefixes {:$ "<http://books.example/>"}
+ :select   [[(sum ?lprice) ?totalPrice]]
+ :where    [[?org :affiliates ?auth]
+            [?auth :writesBook ?book]
+            [?book :price ?lprice]]
+ :group-by [?org]
+ :having   [(> (sum ?lprice) 10)]}

@@ -1,0 +1,18 @@
+;; SELECT with FROM NAMED and multiple GRAPHs
+{:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"
+              :data "<http://example.org/foaf/>"
+              :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}
+ :select     [?mbox ?nick ?ppd]
+ :from-named ["<http://example.org/foaf/aliceFoaf>"
+              "<http://example.org/foaf/bobFoaf>"]
+ :where      [[:graph
+               :data/aliceFoaf
+               [{?alice {:foaf/mbox  #{"mailto:alice@work.example"}
+                         :foaf/knows #{?whom}}
+                 ?whom  {:foaf/mbox    #{?mbox}
+                         :rdfs/seeAlso #{?ppd}}
+                 ?ppd   {a #{:foaf/PersonalProfileDocument}}}]]
+              [:graph
+               ?ppd
+               [{?w {:foaf/mbox #{?mbox}
+                     :foaf/nick #{?nick}}}]]]}
