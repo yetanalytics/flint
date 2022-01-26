@@ -49,6 +49,8 @@
 ;; Query
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Cannot use `s/merge` since conformance does not work properly with it
+
 (def select-query-spec
   (smap->vec (s/keys :req-un [(or ::ss/select
                                   ::ss/select-distinct

@@ -98,6 +98,8 @@
 ;; Graph Management specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Cannot use `s/merge` since conformance does not work properly with it
+
 (s/def ::load ax/iri-spec)
 (s/def ::load-silent ::load)
 
@@ -205,5 +207,6 @@
         :delete-where-update delete-where-update-spec
         :modify-update       modify-update-spec))
 
+;; single-branch `s/or` is used to conform values
 (def update-request-spec
   (s/or :update-request (s/coll-of update-spec :min-count 1)))

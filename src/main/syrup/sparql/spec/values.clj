@@ -55,4 +55,5 @@
                 (s/conformer conform-vars)))
    (s/conformer second)))
 
+;; single-branch `s/or` is used to conform values
 (s/def ::values (s/or :values/map values-clause-spec))

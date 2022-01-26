@@ -21,5 +21,8 @@
   (s/coll-of ::ex/expr
              :min-count 1))
 
+;; single-branch `s/or`s are used to conform values
+
 (s/def ::limit (s/or :num-lit int?))
+
 (s/def ::offset (s/or :num-lit int?))

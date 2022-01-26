@@ -104,6 +104,8 @@
 ;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
 ;; NOTE: RDF collections not supported (yet?)
 
+;; single-branch `s/or`s are used to conform values
+
 (def obj-set-spec
   (s/or :o (s/coll-of obj-spec
                       :min-count 1
