@@ -1,0 +1,21 @@
+name: CI
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target: [test-clj]
+    
+    steps:
+    - name: Checkout project
+      uses: actions/checkout@v2
+
+    - name: Setup CI Environment
+      uses: yetanalytics/actions/setup-env@v0.0.2
+    
+    - name: Run Makefile target ${{ matrix.target }}
+      run: make ${{ matrix.target }}
