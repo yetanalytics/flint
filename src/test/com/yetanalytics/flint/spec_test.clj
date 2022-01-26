@@ -1,7 +1,7 @@
 (ns com.yetanalytics.flint.spec-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.edn :as edn]
-            [clojure.java.io :as io]
+            [clojure.edn        :as edn]
+            [clojure.java.io    :as io]
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.query  :as qs]
             [com.yetanalytics.flint.spec.update :as us]))

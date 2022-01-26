@@ -1,7 +1,7 @@
 (ns com.yetanalytics.flint.format.update-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.string :as cstr]
-            [clojure.walk :as w]
+            [clojure.walk   :as w]
             [com.yetanalytics.flint.format :as f]))
 
 (deftest format-test

@@ -1,10 +1,10 @@
 (ns com.yetanalytics.flint-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.string :as cstr]
-            [clojure.edn :as edn]
+            [clojure.string  :as cstr]
+            [clojure.edn     :as edn]
             [clojure.java.io :as io]
-            [com.yetanalytics.flint :as flint
-             :refer [format-query format-updates]]))
+            [com.yetanalytics.flint :as flint :refer [format-query
+                                                      format-updates]]))
 
 (defmacro make-format-tests [f in-dir-name]
   (let [in-files#  (->> in-dir-name io/file file-seq (filter #(.isFile %)))

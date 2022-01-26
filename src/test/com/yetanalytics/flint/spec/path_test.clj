@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.axiom :as ax]
-            [com.yetanalytics.flint.spec.path :as ps]))
+            [com.yetanalytics.flint.spec.path  :as ps]))
 
 (deftest conform-path-test
   (testing "Path"

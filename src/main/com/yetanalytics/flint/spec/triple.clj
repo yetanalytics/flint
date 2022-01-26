@@ -3,7 +3,7 @@
             [clojure.walk :as w]
             [clojure.string :as cstr]
             [com.yetanalytics.flint.spec.axiom :as ax]
-            [com.yetanalytics.flint.spec.path :as path]))
+            [com.yetanalytics.flint.spec.path  :as ps]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
@@ -51,7 +51,7 @@
         :iri ax/iri?
         :prefix-iri ax/prefix-iri?
         :rdf-type ax/rdf-type?
-        :triple/path ::path/path))
+        :triple/path ::ps/path))
 
 (def obj-spec
   (s/or :var ax/variable?

@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.axiom :as ax]
-            [com.yetanalytics.flint.spec.expr :as es]))
+            [com.yetanalytics.flint.spec.expr  :as es]))
 
 (deftest conform-expr-test
   (testing "Conforming expression"

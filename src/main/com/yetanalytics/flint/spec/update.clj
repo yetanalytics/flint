@@ -1,9 +1,9 @@
 (ns com.yetanalytics.flint.spec.update
   (:require [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.axiom    :as ax]
-            [com.yetanalytics.flint.spec.triple   :as triple]
-            [com.yetanalytics.flint.spec.where    :as ws]
-            [com.yetanalytics.flint.spec.prologue :as pro]))
+            [com.yetanalytics.flint.spec.prologue :as ps]
+            [com.yetanalytics.flint.spec.triple   :as ts]
+            [com.yetanalytics.flint.spec.where    :as ws]))
 
 (def key-order-map
   {:bases        0
@@ -65,12 +65,12 @@
 ;; Quads
 
 (def triples-spec
-  (s/coll-of (s/or :triple/vec triple/triple-vec-nopath-spec
-                   :triple/nform triple/normal-form-nopath-spec)))
+  (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
+                   :triple/nform ts/normal-form-nopath-spec)))
 
 (def triples-novar-spec
-  (s/coll-of (s/or :triple/vec triple/triple-vec-novar-spec
-                   :triple/nform triple/normal-form-novar-spec)))
+  (s/coll-of (s/or :triple/vec ts/triple-vec-novar-spec
+                   :triple/nform ts/normal-form-novar-spec)))
 
 (def quad-spec
   (s/and vector?
@@ -85,13 +85,13 @@
                   triples-novar-spec)))
 
 (def triple-or-quads-spec
-  (s/coll-of (s/or :triple/vec  triple/triple-vec-nopath-spec
-                   :triple/nform triple/normal-form-nopath-spec
+  (s/coll-of (s/or :triple/vec  ts/triple-vec-nopath-spec
+                   :triple/nform ts/normal-form-nopath-spec
                    :triple/quads quad-spec)))
 
 (def triple-or-quads-novar-spec
-  (s/coll-of (s/or :triple/vec  triple/triple-vec-novar-spec
-                   :triple/nform triple/normal-form-novar-spec
+  (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-spec
+                   :triple/nform ts/normal-form-novar-spec
                    :triple/quads quad-novar-spec)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -105,7 +105,7 @@
 
 (def load-update-spec
   (smap->vec (s/keys :req-un [(or ::load ::load-silent)]
-                     :opt-un [::pro/bases ::pro/prefixes ::into])))
+                     :opt-un [::ps/bases ::ps/prefixes ::into])))
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
@@ -115,7 +115,7 @@
 
 (def clear-update-spec
   (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
@@ -125,35 +125,35 @@
 
 (def drop-update-spec
   (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::create ax/iri-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
   (smap->vec (s/keys :req-un [(or ::create ::create-silent)]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::add graph-or-default-spec)
 (s/def ::add-silent ::add)
 
 (def add-update-spec
   (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::move graph-or-default-spec)
 (s/def ::move-silent ::move)
 
 (def move-update-spec
   (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::copy graph-or-default-spec)
 (s/def ::copy-silent ::copy)
 
 (def copy-update-spec
   (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
@@ -163,19 +163,19 @@
 
 (def insert-data-update-spec
   (smap->vec (s/keys :req-un [::insert-data]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::delete-data triple-or-quads-novar-spec)
 
 (def delete-data-update-spec
   (smap->vec (s/keys :req-un [::delete-data]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::delete-where triple-or-quads-spec)
 
 (def delete-where-update-spec
   (smap->vec (s/keys :req-un [::delete-where]
-                     :opt-un [::pro/bases ::pro/prefixes])))
+                     :opt-un [::ps/bases ::ps/prefixes])))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-spec)
@@ -183,8 +183,8 @@
 (def modify-update-spec
   (smap->vec (s/keys :req-un [(or ::delete ::insert)
                               ::ws/where]
-                     :opt-un [::pro/bases
-                              ::pro/prefixes
+                     :opt-un [::ps/bases
+                              ::ps/prefixes
                               ::delete
                               ::insert
                               ::with

@@ -1,9 +1,9 @@
 (ns com.yetanalytics.flint
   (:require [clojure.spec.alpha :as s]
-            [clojure.walk :as w]
-            [com.yetanalytics.flint.format :as f]
-            [com.yetanalytics.flint.spec.query :as qs]
+            [clojure.walk       :as w]
+            [com.yetanalytics.flint.spec.query  :as qs]
             [com.yetanalytics.flint.spec.update :as us]
+            [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.query]
             [com.yetanalytics.flint.format.update]))
 

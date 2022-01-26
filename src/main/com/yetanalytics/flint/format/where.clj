@@ -3,9 +3,9 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.axiom]
             [com.yetanalytics.flint.format.expr]
-            [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.modifier]
             [com.yetanalytics.flint.format.select]
+            [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.values]))
 
 (defn format-select-query

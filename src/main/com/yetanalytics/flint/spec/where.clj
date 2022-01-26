@@ -1,11 +1,11 @@
 (ns com.yetanalytics.flint.spec.where
   (:require [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.spec.axiom :as ax]
-            [com.yetanalytics.flint.spec.expr :as ex]
-            [com.yetanalytics.flint.spec.triple :as triple]
+            [com.yetanalytics.flint.spec.axiom    :as ax]
+            [com.yetanalytics.flint.spec.expr     :as es]
             [com.yetanalytics.flint.spec.modifier :as ms]
-            [com.yetanalytics.flint.spec.select :as ss]
-            [com.yetanalytics.flint.spec.values :as vs]))
+            [com.yetanalytics.flint.spec.select   :as ss]
+            [com.yetanalytics.flint.spec.triple   :as ts]
+            [com.yetanalytics.flint.spec.values   :as vs]))
 
 (s/def ::select
   (s/and (s/keys :req-un [(or ::ss/select
@@ -26,8 +26,8 @@
         ::select
         :where-sub/where
         (s/coll-of (s/or
-                    :triple/vec     triple/triple-vec-spec
-                    :triple/nform   triple/normal-form-spec
+                    :triple/vec     ts/triple-vec-spec
+                    :triple/nform   ts/normal-form-spec
                     :where/recurse  (s/& (s/cat :k #{:where}
                                                 :v ::where)
                                          (s/conformer #(:v %)))
@@ -56,10 +56,10 @@
                                                (s/conformer
                                                 (fn [x] [(:v1 x) (:v2 x)])))
                     :where/filter   (s/& (s/cat :k #{:filter}
-                                                :v ::ex/expr)
+                                                :v ::es/expr)
                                          (s/conformer #(:v %)))
                     :where/bind     (s/& (s/cat :k #{:bind}
-                                                :v ::ex/expr-as-var)
+                                                :v ::es/expr-as-var)
                                          (s/conformer #(:v %)))
                     :where/values   (s/& (s/cat :k #{:values}
                                                 :v ::vs/values)

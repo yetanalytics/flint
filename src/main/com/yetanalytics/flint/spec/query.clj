@@ -1,10 +1,10 @@
 (ns com.yetanalytics.flint.spec.query
   (:require [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.axiom    :as ax]
-            [com.yetanalytics.flint.spec.prologue :as pro]
-            [com.yetanalytics.flint.spec.triple   :as triple]
-            [com.yetanalytics.flint.spec.modifier :as mod]
+            [com.yetanalytics.flint.spec.modifier :as ms]
+            [com.yetanalytics.flint.spec.prologue :as ps]
             [com.yetanalytics.flint.spec.select   :as ss]
+            [com.yetanalytics.flint.spec.triple   :as ts]
             [com.yetanalytics.flint.spec.where    :as ws]
             [com.yetanalytics.flint.spec.values   :as vs]))
 
@@ -56,31 +56,31 @@
                                   ::ss/select-distinct
                                   ::ss/select-reduced)
                               ::ws/where]
-                     :opt-un [::pro/bases ::pro/prefixes
+                     :opt-un [::ps/bases ::ps/prefixes
                               ::from ::from-named
-                              ::mod/group-by
-                              ::mod/order-by
-                              ::mod/having
-                              ::mod/limit
-                              ::mod/offset
+                              ::ms/group-by
+                              ::ms/order-by
+                              ::ms/having
+                              ::ms/limit
+                              ::ms/offset
                               ::vs/values])))
 
 (def triples-spec
-  (s/coll-of (s/or :triple/vec triple/triple-vec-nopath-spec
-                   :triple/nform triple/normal-form-nopath-spec)
+  (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
+                   :triple/nform ts/normal-form-nopath-spec)
              :min-count 0))
 
 (s/def ::construct triples-spec)
 
 (def construct-query-spec
   (smap->vec (s/keys :req-un [::construct ::ws/where]
-                     :opt-un [::pro/bases ::pro/prefixes
+                     :opt-un [::ps/bases ::ps/prefixes
                               ::from ::from-named
-                              ::mod/group-by
-                              ::mod/order-by
-                              ::mod/having
-                              ::mod/limit
-                              ::mod/offset])))
+                              ::ms/group-by
+                              ::ms/order-by
+                              ::ms/having
+                              ::ms/limit
+                              ::ms/offset])))
 
 (s/def ::describe
   (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec :min-count 1)
@@ -88,26 +88,26 @@
 
 (def describe-query-spec
   (smap->vec (s/keys :req-un [::describe]
-                     :opt-un [::pro/bases ::pro/prefixes
+                     :opt-un [::ps/bases ::ps/prefixes
                               ::from ::from-named
                               ::ws/where
-                              ::mod/group-by
-                              ::mod/order-by
-                              ::mod/having
-                              ::mod/limit
-                              ::mod/offset])))
+                              ::ms/group-by
+                              ::ms/order-by
+                              ::ms/having
+                              ::ms/limit
+                              ::ms/offset])))
 
 (s/def ::ask empty?)
 
 (def ask-query-spec
   (smap->vec (s/keys :req-un [::ask ::ws/where]
-                     :opt-un [::pro/bases ::pro/prefixes
+                     :opt-un [::ps/bases ::ps/prefixes
                               ::from ::from-named
-                              ::mod/group-by
-                              ::mod/order-by
-                              ::mod/having
-                              ::mod/limit
-                              ::mod/offset])))
+                              ::ms/group-by
+                              ::ms/order-by
+                              ::ms/having
+                              ::ms/limit
+                              ::ms/offset])))
 
 (def query-spec
   (s/or :select-query    select-query-spec
