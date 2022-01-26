@@ -5,16 +5,16 @@
 
 (deftest conform-update-test
   (testing "conforming updates"
-    (is (= '[[:insert-data [[:tvec [[:prefix-iri :foo/x]
-                                    [:prefix-iri :dc/title]
-                                    [:str-lit "Title"]]]]]]
+    (is (= '[[:insert-data [[:triple/vec [[:prefix-iri :foo/x]
+                                          [:prefix-iri :dc/title]
+                                          [:str-lit "Title"]]]]]]
            (s/conform us/insert-data-update-spec
                       '{:insert-data [[:foo/x :dc/title "Title"]]})))
-    (is (= '[[:delete-data [[:quads [:graph
-                                     [:iri "<http://example.org>"]
-                                     [[:tvec [[:prefix-iri :foo/x]
-                                              [:prefix-iri :dc/title]
-                                              [:str-lit "Title"]]]]]]]]]
+    (is (= '[[:delete-data [[:triple/quads [:graph
+                                            [:iri "<http://example.org>"]
+                                            [[:triple/vec [[:prefix-iri :foo/x]
+                                                           [:prefix-iri :dc/title]
+                                                           [:str-lit "Title"]]]]]]]]]
            (s/conform us/delete-data-update-spec
                       '{:delete-data [[:graph
                                        "<http://example.org>"

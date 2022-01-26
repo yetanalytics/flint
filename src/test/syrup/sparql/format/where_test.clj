@@ -12,8 +12,8 @@
                             "    ?s ?p ?o ."
                             "}"])
            (->> '[:where-sub/where
-                  [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]
-                   [:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]
+                  [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]
+                   [:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["{"
                             "    ?s1 ?p1 ?o1 ."
@@ -51,29 +51,29 @@
                             "    }"
                             "}"])
            (->> '[:where-sub/where
-                  [[:tvec [[:var ?s1] [:var ?p1] [:var ?o1]]]
-                   [:nform [:spo [[[:var ?s2]
+                  [[:triple/vec [[:var ?s1] [:var ?p1] [:var ?o1]]]
+                   [:triple/nform [:spo [[[:var ?s2]
                                    [:po [[[:var ?p2]
                                           [:o [[:var ?o2a] [:var ?o2b]]]]]]]]]]
                    [:where/recurse
-                    [:where-sub/where [[:tvec [[:var ?s3] [:var ?p3] [:var ?o3]]]]]]
+                    [:where-sub/where [[:triple/vec [[:var ?s3] [:var ?p3] [:var ?o3]]]]]]
                    [:where/union
                     [[:where-sub/where
-                      [[:tvec [[:var ?s4] [:var ?p4] [:var ?o4]]]]]
-                     [:where-sub/where [[:tvec [[:var ?s5] [:var ?p5] [:var ?o5]]]]]]]
+                      [[:triple/vec [[:var ?s4] [:var ?p4] [:var ?o4]]]]]
+                     [:where-sub/where [[:triple/vec [[:var ?s5] [:var ?p5] [:var ?o5]]]]]]]
                    [:where/optional
-                    [:where-sub/where [[:tvec [[:var ?s6] [:var ?p6] [:var ?o6]]]]]]
+                    [:where-sub/where [[:triple/vec [[:var ?s6] [:var ?p6] [:var ?o6]]]]]]
                    [:where/minus
-                    [:where-sub/where [[:tvec [[:var ?s7] [:var ?p7] [:var ?o7]]]]]]
+                    [:where-sub/where [[:triple/vec [[:var ?s7] [:var ?p7] [:var ?o7]]]]]]
                    [:where/graph
                     [[:prefix-iri :ns/my-graph]
-                     [:where-sub/where [[:tvec [[:var ?s8] [:var ?p8] [:var ?o8]]]]]]]
+                     [:where-sub/where [[:triple/vec [[:var ?s8] [:var ?p8] [:var ?o8]]]]]]]
                    [:where/service
                     [[:prefix-iri :ns/my-uri]
-                     [:where-sub/where [[:tvec [[:var ?s9] [:var ?p9] [:var ?o9]]]]]]]
+                     [:where-sub/where [[:triple/vec [[:var ?s9] [:var ?p9] [:var ?o9]]]]]]]
                    [:where/service-silent
                     [[:prefix-iri :ns/my-uri]
-                     [:where-sub/where [[:tvec [[:var ?s10] [:var ?p10] [:var ?o10]]]]]]]
+                     [:where-sub/where [[:triple/vec [[:var ?s10] [:var ?p10] [:var ?o10]]]]]]]
                    [:where/bind
                     [:expr/as-var
                      [[:expr/branch

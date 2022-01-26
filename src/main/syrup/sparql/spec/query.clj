@@ -64,8 +64,8 @@
                               ::vs/values])))
 
 (def triples-spec
-  (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
-                   :nform triple/normal-form-nopath-spec)
+  (s/coll-of (s/or :triple/vec triple/triple-vec-nopath-spec
+                   :triple/nform triple/normal-form-nopath-spec)
              :min-count 0))
 
 (s/def ::construct triples-spec)

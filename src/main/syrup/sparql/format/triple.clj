@@ -7,10 +7,10 @@
 (defmethod f/format-ast :triple/path [[_ path]]
   path)
 
-(defmethod f/format-ast :tvec [[_ [s p o]]]
+(defmethod f/format-ast :triple/vec [[_ [s p o]]]
   (str s " " p " " o " ."))
 
-(defmethod f/format-ast :nform [[_ nform]]
+(defmethod f/format-ast :triple/nform [[_ nform]]
   nform)
 
 (defmethod f/format-ast :spo [[_ spo]]

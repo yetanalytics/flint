@@ -162,16 +162,16 @@
     (is (= "EXISTS {\n    ?x ?y ?z .\n}"
            (->> '[:expr/branch [[:expr/op exists]
                                 [:expr/args [[:where-sub/where
-                                              [[:tvec [[:var ?x]
-                                                       [:var ?y]
-                                                       [:var ?z]]]]]]]]]
+                                              [[:triple/vec [[:var ?x]
+                                                             [:var ?y]
+                                                             [:var ?z]]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= "NOT EXISTS {\n    ?x ?y ?z .\n}"
            (->> '[:expr/branch [[:expr/op not-exists]
                                 [:expr/args [[:where-sub/where
-                                              [[:tvec [[:var ?x]
-                                                       [:var ?y]
-                                                       [:var ?z]]]]]]]]]
+                                              [[:triple/vec [[:var ?x]
+                                                             [:var ?y]
+                                                             [:var ?z]]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "expr AS var formatting"
     (is (= "(2 + 2) AS ?foo"

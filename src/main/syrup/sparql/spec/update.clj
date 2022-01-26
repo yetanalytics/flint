@@ -65,12 +65,12 @@
 ;; Quads
 
 (def triples-spec
-  (s/coll-of (s/or :tvec triple/triple-vec-nopath-spec
-                   :nform triple/normal-form-nopath-spec)))
+  (s/coll-of (s/or :triple/vec triple/triple-vec-nopath-spec
+                   :triple/nform triple/normal-form-nopath-spec)))
 
 (def triples-novar-spec
-  (s/coll-of (s/or :tvec triple/triple-vec-novar-spec
-                   :nform triple/normal-form-novar-spec)))
+  (s/coll-of (s/or :triple/vec triple/triple-vec-novar-spec
+                   :triple/nform triple/normal-form-novar-spec)))
 
 (def quad-spec
   (s/and vector?
@@ -85,14 +85,14 @@
                   triples-novar-spec)))
 
 (def triple-or-quads-spec
-  (s/coll-of (s/or :tvec  triple/triple-vec-nopath-spec
-                   :nform triple/normal-form-nopath-spec
-                   :quads quad-spec)))
+  (s/coll-of (s/or :triple/vec  triple/triple-vec-nopath-spec
+                   :triple/nform triple/normal-form-nopath-spec
+                   :triple/quads quad-spec)))
 
 (def triple-or-quads-novar-spec
-  (s/coll-of (s/or :tvec  triple/triple-vec-novar-spec
-                   :nform triple/normal-form-novar-spec
-                   :quads quad-novar-spec)))
+  (s/coll-of (s/or :triple/vec  triple/triple-vec-novar-spec
+                   :triple/nform triple/normal-form-novar-spec
+                   :triple/quads quad-novar-spec)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs

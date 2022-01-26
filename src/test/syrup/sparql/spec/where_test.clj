@@ -6,10 +6,10 @@
 (deftest conform-where-test
   (testing "Conform WHERE clause"
     (is (= '[:where-sub/select [[:select [:select/var-or-exprs [[:var ?s]]]]
-                                [:where [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
+                                [:where [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
            (s/conform ::ws/where '{:select [?s] :where [[?s ?p ?o]]})))
     (is (= '[:where-sub/select [[:select [:select/var-or-exprs [[:var ?s]]]]
-                                [:where [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]
+                                [:where [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]
                                 [:group-by [[:mod/expr-as-var
                                              [:expr/as-var
                                               [[:expr/branch
@@ -23,32 +23,32 @@
     (is (= '[:where-sub/where
              [[:where/union
                [[:where-sub/where
-                 [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]
-                  [:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]
-                [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
+                 [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]
+                  [:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]
+                [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
            (s/conform ::ws/where '[[:union [[?s ?p ?o] [?s ?p ?o]] [[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/optional
-               [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
+               [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
            (s/conform ::ws/where [[:optional '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/minus
-               [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
+               [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]
            (s/conform ::ws/where [[:minus '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/graph
                [[:prefix-iri :foo/my-graph]
-                [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
+                [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
            (s/conform ::ws/where [[:graph :foo/my-graph '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/service
                [[:prefix-iri :foo/my-uri]
-                [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
+                [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
            (s/conform ::ws/where [[:service :foo/my-uri '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/service-silent
                [[:prefix-iri :foo/my-uri]
-                [:where-sub/where [[:tvec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
+                [:where-sub/where [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]]]]]
            (s/conform ::ws/where [[:service-silent :foo/my-uri '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/bind

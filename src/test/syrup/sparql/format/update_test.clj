@@ -10,9 +10,9 @@
                             "    foo:x dc:title \"Title\" ."
                             "}"])
            (->> '[:insert-data-update
-                  [[:insert-data [[:tvec [[:prefix-iri :foo/x]
-                                          [:prefix-iri :dc/title]
-                                          [:str-lit "Title"]]]]]]]
+                  [[:insert-data [[:triple/vec [[:prefix-iri :foo/x]
+                                                [:prefix-iri :dc/title]
+                                                [:str-lit "Title"]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format DELETE DATA"
     (is (= (cstr/join "\n" ["DELETE DATA {"
@@ -21,9 +21,10 @@
                             "    }"
                             "}"])
            (->> '[:delete-data-update
-                  [[:delete-data [[:quads [:graph
-                                           [:iri "<http://example.org>"]
-                                           [[:tvec [[:prefix-iri :foo/x]
+                  [[:delete-data
+                    [[:triple/quads [:graph
+                                     [:iri "<http://example.org>"]
+                                     [[:triple/vec [[:prefix-iri :foo/x]
                                                     [:prefix-iri :dc/title]
                                                     [:str-lit "Title"]]]]]]]]]]
                 (w/postwalk f/format-ast)))))
@@ -33,8 +34,8 @@
                             "    ?i ?j ?k ."
                             "}"])
            (->> '[:delete-where-update
-                  [[:delete-where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]
-                                   [:tvec [[:var ?i] [:var ?j] [:var ?k]]]]]]]
+                  [[:delete-where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]
+                                   [:triple/vec [[:var ?i] [:var ?j] [:var ?k]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["DELETE WHERE {"
                             "    ?x ?y ?z ."
@@ -46,16 +47,16 @@
                             "}"])
            (->> '[:delete-where-update
                   [[:delete-where
-                    [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]
-                     [:nform [:spo [[[:var ?i]
+                    [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]
+                     [:triple/nform [:spo [[[:var ?i]
                                      [:po [[[:var ?j]
                                             [:o [[:var ?k]]]]]]]
                                     [[:var ?s]
                                      [:po [[[:var ?p]
                                             [:o [[:var ?o]]]]]]]]]]
-                     [:quads [:graph
-                              [:iri "<http://example.org>"]
-                              [[:tvec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]]]
+                     [:triple/quads [:graph
+                                     [:iri "<http://example.org>"]
+                                     [[:triple/vec [[:var ?q] [:var ?r] [:var ?s]]]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format DELETE...INSERT"
     (is (= (cstr/join "\n" ["INSERT {"
@@ -66,10 +67,10 @@
                             "    ?a ?b ?c ."
                             "}"])
            (->> '[:modify-update
-                  [[:insert [[:tvec [[:var ?a] [:var ?b] [:var ?c]]]]]
+                  [[:insert [[:triple/vec [[:var ?a] [:var ?b] [:var ?c]]]]]
                    [:using [:update/named-iri [:named [:iri "<http://example.org/2>"]]]]
                    [:where [:where-sub/where
-                            [[:tvec [[:var ?a] [:var ?b] [:var ?c]]]]]]]]
+                            [[:triple/vec [[:var ?a] [:var ?b] [:var ?c]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["WITH <http://example.org>"
                             "DELETE {"
@@ -85,11 +86,11 @@
                             "}"])
            (->> '[:modify-update
                   [[:with [:iri "<http://example.org>"]]
-                   [:delete [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]
-                   [:insert [[:tvec [[:var ?a] [:var ?b] [:var ?c]]]]]
+                   [:delete [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]
+                   [:insert [[:triple/vec [[:var ?a] [:var ?b] [:var ?c]]]]]
                    [:using [:update/iri [:iri "<http://example.org/2>"]]]
                    [:where [:where-sub/where
-                            [[:nform
+                            [[:triple/nform
                               [:spo [[[:var ?x]
                                       [:po [[[:var ?y]
                                              [:o [[:var ?z]]]]]]]

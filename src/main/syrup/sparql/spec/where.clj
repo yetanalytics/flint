@@ -26,8 +26,8 @@
         ::select
         :where-sub/where
         (s/coll-of (s/or
-                    :tvec     triple/triple-vec-spec
-                    :nform    triple/normal-form-spec
+                    :triple/vec     triple/triple-vec-spec
+                    :triple/nform   triple/normal-form-spec
                     :where/recurse  (s/& (s/cat :k #{:where}
                                                 :v ::where)
                                          (s/conformer #(:v %)))

@@ -4,16 +4,16 @@
             [syrup.sparql.format.axiom]))
 
 (defmulti format-values-clause
-  (fn [vars _] (if (= 1 (count vars)) :single :default)))
+  (fn [vars _] (if (= 1 (count vars)) :values/single :values/default)))
 
-(defmethod format-values-clause :single
+(defmethod format-values-clause :values/single
   [var values]
   (let [kstr  (first var)
         vstrs (map (fn [v-tuple] (str "    " (first v-tuple))) values)
         vstr  (str "{\n" (cstr/join "\n" vstrs) "\n}")]
     (str kstr " " vstr)))
 
-(defmethod format-values-clause :default
+(defmethod format-values-clause :values/default
   [vars values]
   (let [kstr  (str "(" (cstr/join " " vars) ")")
         vstrs (map (fn [v-tuple] (str "    (" (cstr/join " " v-tuple) ")"))

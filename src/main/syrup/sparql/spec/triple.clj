@@ -101,6 +101,9 @@
 ;; Combo Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
+;; NOTE: RDF collections not supported (yet?)
+
 (def obj-set-spec
   (s/or :o (s/coll-of obj-spec
                       :min-count 1
@@ -143,10 +146,3 @@
 
 (def triple-vec-novar-spec
   (spec->novar-spec triple-vec-spec))
-
-;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
-;; NOTE: RDF collections not supported (yet?)
-
-(comment
-  ;; Hack to shut up `unused-public-var` warnings
-  pred-objs-nopath-spec)

@@ -21,7 +21,7 @@
                   [[:prefixes [[:prefix [:foo [:iri "<http://example.org/foo/>"]]]]]
                    [:select [:select/var-or-exprs [[:var ?x]]]]
                    [:from [:iri "<http://example.org/my-graph/>"]]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]
                    [:order-by [[:mod/asc-desc
                                 [[:mod/op asc]
                                  [:mod/expr [:expr/terminal [:var ?y]]]]]]]
@@ -38,9 +38,9 @@
                             "    ?x ?y ?z ."
                             "}"])
            (->> '[:construct-query
-                  [[:construct [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]
+                  [[:construct [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]
                    [:from [:iri "<http://example.org/my-graph/>"]]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "FROM <http://example.org/my-graph/>"
@@ -50,7 +50,7 @@
            (->> '[:construct-query
                   [[:construct []]
                    [:from [:iri "<http://example.org/my-graph/>"]]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "WHERE {"
@@ -58,7 +58,7 @@
                             "}"])
            (->> '[:construct-query
                   [[:construct []]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format DESCRIBE query"
     (is (= (cstr/join "\n" ["DESCRIBE ?x ?y"
@@ -71,7 +71,7 @@
                   [[:describe [:describe/vars-or-iris [[:var ?x] [:var ?y]]]]
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast)))))
   (testing "format ASK query"
     (is (= (cstr/join "\n" ["ASK"
@@ -84,7 +84,7 @@
                   [[:ask []]
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast))))
     (is (= (cstr/join "\n" ["ASK"
                             "WHERE {"
@@ -92,5 +92,5 @@
                             "}"])
            (->> '[:ask-query
                   [[:ask []]
-                   [:where [:where-sub/where [[:tvec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
                 (w/postwalk f/format-ast))))))
