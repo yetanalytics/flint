@@ -12,44 +12,44 @@
   [select-query]
   (cstr/join "\n" select-query))
 
-(defmethod f/format-ast :where-sub/select [[_ sub-select]]
+(defmethod f/format-ast :where-sub/select [_ [_ sub-select]]
   (str "{\n" (f/indent-str (format-select-query sub-select)) "\n}"))
 
-(defmethod f/format-ast :where-sub/where [[_ sub-where]]
+(defmethod f/format-ast :where-sub/where [_ [_ sub-where]]
   (str "{\n" (f/indent-str (cstr/join "\n" sub-where)) "\n}"))
 
-(defmethod f/format-ast :where-sub/empty [_]
+(defmethod f/format-ast :where-sub/empty [_ _]
   "{}")
 
-(defmethod f/format-ast :where/recurse [[_ pattern]]
+(defmethod f/format-ast :where/recurse [_ [_ pattern]]
   pattern)
 
-(defmethod f/format-ast :where/union [[_ patterns]]
+(defmethod f/format-ast :where/union [_ [_ patterns]]
   (cstr/join "\nUNION\n" patterns))
 
-(defmethod f/format-ast :where/optional [[_ pattern]]
+(defmethod f/format-ast :where/optional [_ [_ pattern]]
   (str "OPTIONAL " pattern))
 
-(defmethod f/format-ast :where/minus [[_ pattern]]
+(defmethod f/format-ast :where/minus [_ [_ pattern]]
   (str "MINUS " pattern))
 
-(defmethod f/format-ast :where/graph [[_ [iri pattern]]]
+(defmethod f/format-ast :where/graph [_ [_ [iri pattern]]]
   (str "GRAPH " iri " " pattern))
 
-(defmethod f/format-ast :where/service [[_ [iri pattern]]]
+(defmethod f/format-ast :where/service [_ [_ [iri pattern]]]
   (str "SERVICE " iri " " pattern))
 
-(defmethod f/format-ast :where/service-silent [[_ [iri pattern]]]
+(defmethod f/format-ast :where/service-silent [_ [_ [iri pattern]]]
   (str "SERVICE SILENT " iri " " pattern))
 
-(defmethod f/format-ast :where/filter [[_ expr]]
+(defmethod f/format-ast :where/filter [_ [_ expr]]
   (str "FILTER " expr))
 
-(defmethod f/format-ast :where/bind [[_ expr-as-var]]
+(defmethod f/format-ast :where/bind [_ [_ expr-as-var]]
   (str "BIND (" expr-as-var ")"))
 
-(defmethod f/format-ast :where/values [[_ values]]
+(defmethod f/format-ast :where/values [_ [_ values]]
   (str "VALUES " values))
 
-(defmethod f/format-ast :where [[_ where]]
+(defmethod f/format-ast :where [_ [_ where]]
   (str "WHERE " where))

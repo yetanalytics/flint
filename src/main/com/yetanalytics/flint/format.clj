@@ -30,6 +30,6 @@
 
 (defmulti format-ast
   "Convert the AST node into a string."
-  dispatch-ast-node)
+  (fn [_ x] (dispatch-ast-node x)))
 
-(defmethod format-ast :default [ast-node] ast-node)
+(defmethod format-ast :default [_ ast-node] ast-node)

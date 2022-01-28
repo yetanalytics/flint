@@ -14,7 +14,7 @@
              "?s2 ?p1 ?o1 , ?o2 ;"
              "    ?p2 ?o1 , ?o2 ."])
            (w/postwalk
-            f/format-ast
+            (partial f/format-ast {})
             '[:triple/nform [:spo [[[:iri "<http://example.org/supercalifragilisticexpialidocious>"]
                              [:po [[[:var ?p1]
                                     [:o [[:var ?o1] [:var ?o2]]]]
@@ -27,5 +27,5 @@
                                     [:o [[:var ?o1] [:var ?o2]]]]]]]]]])))
     (is (= "?s ?p ?o ."
            (w/postwalk
-            f/format-ast
+            (partial f/format-ast {})
             '[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]])))))

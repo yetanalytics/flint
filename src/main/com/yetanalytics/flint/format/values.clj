@@ -21,11 +21,11 @@
         vstr  (str "{\n" (cstr/join "\n" vstrs) "\n}")]
     (str kstr " " vstr)))
 
-(defmethod f/format-ast :values/undef [_]
+(defmethod f/format-ast :values/undef [_ _]
   "UNDEF")
 
-(defmethod f/format-ast :values/map [[_ [vars values]]]
+(defmethod f/format-ast :values/map [_ [_ [vars values]]]
   (format-values-clause vars values))
 
-(defmethod f/format-ast :values [[_ values-map]]
+(defmethod f/format-ast :values [_ [_ values-map]]
   (str "VALUES " values-map))

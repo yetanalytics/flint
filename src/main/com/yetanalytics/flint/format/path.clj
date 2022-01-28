@@ -3,9 +3,9 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.axiom]))
 
-(defmethod f/format-ast :path/op [[_ op]] (keyword op))
+(defmethod f/format-ast :path/op [_ [_ op]] (keyword op))
 
-(defmethod f/format-ast :path/args [[_ args]] args)
+(defmethod f/format-ast :path/args [_ [_ args]] args)
 
 (defn- parens-if-nests
   "Super-basic precedence comparison to wrap parens if there's an inner
@@ -15,7 +15,7 @@
     (str "(" arg ")")
     arg))
 
-(defmethod f/format-ast :path/branch [[_ [op args]]]
+(defmethod f/format-ast :path/branch [_ [_ [op args]]]
   (case op
     :alt (str "(" (cstr/join " | " args) ")")
     :cat (str "(" (cstr/join " / " args) ")")
@@ -25,5 +25,5 @@
     :+   (-> args first parens-if-nests (str "+"))
     :not (str "!" (cstr/join " | " args))))
 
-(defmethod f/format-ast :path/terminal [[_ value]]
+(defmethod f/format-ast :path/terminal [_ [_ value]]
   value)

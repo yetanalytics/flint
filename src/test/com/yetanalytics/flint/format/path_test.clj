@@ -4,6 +4,9 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.path]))
 
+(defn- format-ast [ast]
+  (w/postwalk (partial f/format-ast {}) ast))
+
 (deftest format-test
   (testing "formatting paths"
     (is (= "(!foo:bar | (^baz:qux / quu:bee))"
@@ -20,7 +23,7 @@
                                                                [:prefix-iri :baz/qux]]]]]]
                                                [:path/terminal
                                                 [:prefix-iri :quu/bee]]]]]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= "(!foo:bar / (^baz:qux | quu:bee))"
            (->> '[:path/branch
                   [[:path/op cat]
@@ -35,7 +38,7 @@
                                                                [:prefix-iri :baz/qux]]]]]]
                                                [:path/terminal
                                                 [:prefix-iri :quu/bee]]]]]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= "!(foo:bar | baz:qux)"
            (->> '[:path/branch
                   [[:path/op not]
@@ -43,17 +46,17 @@
                                  [[:path/op alt]
                                   [:path/args [[:path/terminal [:prefix-iri :foo/bar]]
                                                [:path/terminal [:prefix-iri :baz/qux]]]]]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= "^a"
            (->> '[:path/branch
                   [[:path/op inv]
                    [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= "a?"
            (->> '[:path/branch
                   [[:path/op ?]
                    [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= "((a?)*)+"
            (->> '[:path/branch
                   [[:path/op +]
@@ -62,7 +65,7 @@
                                   [:path/args [[:path/branch
                                                 [[:path/op ?]
                                                  [:path/args [[:path/terminal [:rdf-type 'a]]]]]]]]]]]]]]
-                (w/postwalk f/format-ast))))))
+                format-ast)))))
 
 (deftest invalid-test
   (testing "attempting to format an invalid path"

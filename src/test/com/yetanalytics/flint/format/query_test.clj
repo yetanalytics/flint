@@ -5,6 +5,9 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.query]))
 
+(defn- format-ast [ast]
+  (w/postwalk (partial f/format-ast {}) ast))
+
 (deftest format-test
   (testing "format SELECT query"
     (is (= (cstr/join "\n" ["PREFIX foo: <http://example.org/foo/>"
@@ -28,7 +31,7 @@
                    [:values [:values/map
                              [[[:var ?z]]
                               [[[:num-lit 1]]]]]]]]
-                (w/postwalk f/format-ast)))))
+                format-ast))))
   (testing "format CONSTRUCT query"
     (is (= (cstr/join "\n" ["CONSTRUCT {"
                             "    ?x ?y ?z ."
@@ -41,7 +44,7 @@
                   [[:construct [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]
                    [:from [:iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "FROM <http://example.org/my-graph/>"
                             "WHERE {"
@@ -51,7 +54,7 @@
                   [[:construct []]
                    [:from [:iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "WHERE {"
                             "    ?x ?y ?z ."
@@ -59,7 +62,7 @@
            (->> '[:construct-query
                   [[:construct []]
                    [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/format-ast)))))
+                format-ast))))
   (testing "format DESCRIBE query"
     (is (= (cstr/join "\n" ["DESCRIBE ?x ?y"
                             "FROM NAMED <http://example.org/my-graph/>"
@@ -72,7 +75,7 @@
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
                    [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/format-ast)))))
+                format-ast))))
   (testing "format ASK query"
     (is (= (cstr/join "\n" ["ASK"
                             "FROM NAMED <http://example.org/my-graph/>"
@@ -85,7 +88,7 @@
                    [:from-named [[:iri "<http://example.org/my-graph/>"]
                                  [:iri "<http://example.org/my-graph-2/>"]]]
                    [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/format-ast))))
+                format-ast)))
     (is (= (cstr/join "\n" ["ASK"
                             "WHERE {"
                             "    ?x ?y ?z ."
@@ -93,4 +96,4 @@
            (->> '[:ask-query
                   [[:ask []]
                    [:where [:where-sub/where [[:triple/vec [[:var ?x] [:var ?y] [:var ?z]]]]]]]]
-                (w/postwalk f/format-ast))))))
+                format-ast)))))
