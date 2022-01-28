@@ -5,34 +5,80 @@
             [com.yetanalytics.flint.spec.update :as us]
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.query]
-            [com.yetanalytics.flint.format.update]))
+            [com.yetanalytics.flint.format.update]
+            [com.yetanalytics.flint.prefix :as pre]))
+
+(def xsd-iri-prefix
+  "<http://www.w3.org/2001/XMLSchema#>")
+
+(defn- get-xsd-prefix
+  [prefixes]
+  (reduce-kv (fn [_ k v]
+               (if (= xsd-iri-prefix v)
+                 (reduced (name k))
+                 nil))
+             nil
+             prefixes))
+
+(defn- conform-sparql [spec sparql error-kw]
+  (let [ast (s/conform spec sparql)]
+    (if (= ::s/invalid ast)
+      (throw (ex-info "Cannot conform according to spec!"
+                      {:kind  error-kw
+                       :error (s/explain-data spec sparql)}))
+      ast)))
+
+(defn- conform-prefixes* [?prefixes ast]
+  (let [prefixes (or ?prefixes {})]
+    (if-some [prefix-errs (pre/validate-prefixes prefixes ast)]
+      (throw (ex-info "Invalid prefixes exist!"
+                      {:kind  ::invalid-prefixes
+                       :error prefix-errs}))
+      prefixes)))
+
+(defn- conform-prefixes [sparql ast]
+  (let [prefixes (or (:prefixes sparql) {})]
+    (conform-prefixes* prefixes ast)))
+
+;; TODO: Same for BASEs
+(defn- conform-multi-prefixes [sparqls asts]
+  (let [prefix-coll (map :prefixes sparqls)
+        fst-prefix  (first prefix-coll)
+        rst-prefixs (rest prefix-coll)]
+    (if-not (or (and (some? fst-prefix)
+                     (every? nil? rst-prefixs))
+                (every? #(= fst-prefix %) rst-prefixs))
+      (throw (ex-info "Must either have one global prefix set or identical prefixes!"
+                      {:kind ::invalid-multi-prefixes
+                       :prefixes prefix-coll}))
+      (conform-prefixes* fst-prefix asts))))
 
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
    does not conform to spec."
   [query]
-  (let [ast (s/conform qs/query-spec query)]
-    (if-not (= ::s/invalid ast)
-      (w/postwalk (partial f/format-ast {}) ast)
-      (throw (ex-info "Query does not conform to spec!"
-                      {:kind  ::invalid-query
-                       :error (s/explain-data qs/query-spec query)})))))
+  (let [ast      (conform-sparql qs/query-spec query ::invalid-query)
+        prefixes (conform-prefixes query ast)
+        ?xsd-pre (get-xsd-prefix prefixes)
+        opts     (cond-> {}
+                   ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
+    (w/postwalk (partial f/format-ast opts) ast)))
 
 (defn format-updates
   "Format `update` (and potentially `updates`) into a SPARQL Update Request
    string. Throws an exception if the updates do not conform to spec."
   [update & updates]
   (if (not-empty updates)
-    (let [ups (concat [update] updates)
-          ast (s/conform us/update-request-spec ups)]
-      (if-not (= ::s/invalid ast)
-        (w/postwalk (partial f/format-ast {}) ast)
-        (throw (ex-info "Update request does not conform to spec!"
-                        {:kind  ::invalid-update-request
-                         :error (s/explain-data us/update-request-spec ups)}))))
-    (let [ast (s/conform us/update-spec update)]
-      (if-not (= ::s/invalid ast)
-        (w/postwalk (partial f/format-ast {}) ast)
-        (throw (ex-info "Update does not conform to spec!"
-                        {:kind ::invalid-update
-                         :error (s/explain-data us/update-spec update)}))))))
+    (let [ups      (concat [update] updates)
+          ast      (conform-sparql us/update-request-spec ups ::invalid-update-request)
+          prefixes (conform-multi-prefixes ups ast)
+          ?xsd-pre (get-xsd-prefix prefixes)
+          opts     (cond-> {}
+                     ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
+      (w/postwalk (partial f/format-ast opts) ast))
+    (let [ast      (conform-sparql us/update-spec update ::invalid-update)
+          prefixes (conform-prefixes update ast)
+          ?xsd-pre (get-xsd-prefix prefixes)
+          opts     (cond-> {}
+                     ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
+      (w/postwalk (partial f/format-ast opts) ast))))

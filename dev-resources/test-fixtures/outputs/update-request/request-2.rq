@@ -9,7 +9,7 @@ INSERT {
 WHERE {
     GRAPH <http://example/bookStore> {
         ?book dc:date ?date .
-        FILTER (?date < "2000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+        FILTER (?date < "2000-01-01T00:00:00Z"^^xsd:dateTime)
         ?book ?p ?v .
     }
 };
@@ -20,6 +20,6 @@ DELETE {
 WHERE {
     ?book dc:date ?date ;
           dc:type dcmitype:PhysicalObject .
-    FILTER (?date < "2000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+    FILTER (?date < "2000-01-01T00:00:00Z"^^xsd:dateTime)
     ?book ?p ?v .
 }
