@@ -10,6 +10,14 @@
               identity
               ast))
 
+(defn- invalid-prefix?
+  "Does the prefix of `prefix-iri` exist in the `prefixes` map/set?
+   (Or for non-namespaced `prefix-iri`, does `:$` exist?)"
+  [prefixes prefix-iri]
+  (if-some [pre (namespace prefix-iri)]
+    (not (contains? prefixes (keyword pre)))
+    (not (contains? prefixes :$))))
+
 (defn validate-prefixes
   "Given a map (or set) of keyword IRI prefixes, along with a conformed
    AST, traverse the AST looking for prefixes that were not included in
@@ -23,14 +31,17 @@
         (if (and (->> anode vector?)
                  (->> anode count (= 2))
                  (->> anode first (= :prefix-iri))
-                 (->> anode second namespace keyword (contains? prefixes) not))
+                 (->> anode second (invalid-prefix? prefixes)))
           (recur (zip/next loc)
-                 (conj errs {:iri (second anode)
-                             :prefixes   prefixes
-                             :path       (->> loc
+                 (let [piri (second anode)]
+                   (conj errs {:iri      piri
+                               :prefix   (or (some->> piri namespace keyword)
+                                             :$)
+                               :prefixes prefixes
+                               :path     (->> loc
                                               zip/path
                                               (filter #(-> % first keyword?))
-                                              (mapv #(-> % first)))}))
+                                              (mapv #(-> % first)))})))
           (recur (zip/next loc)
                  errs)))
       (not-empty errs))))
