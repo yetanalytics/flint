@@ -1,6 +1,6 @@
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dc:       <http://purl.org/dc/elements/1.1/>
 PREFIX dcmitype: <http://purl.org/dc/dcmitype/>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX xsd:      <http://www.w3.org/2001/XMLSchema#>
 INSERT {
     GRAPH <http://example/bookStore2> {
         ?book ?p ?v .
@@ -9,7 +9,7 @@ INSERT {
 WHERE {
     GRAPH <http://example/bookStore> {
         ?book dc:date ?date .
-        FILTER (?date < "2000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+        FILTER (?date < "2000-01-01T00:00:00Z"^^xsd:dateTime)
         ?book ?p ?v .
     }
 };
@@ -20,6 +20,6 @@ DELETE {
 WHERE {
     ?book dc:date ?date ;
           dc:type dcmitype:PhysicalObject .
-    FILTER (?date < "2000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>)
+    FILTER (?date < "2000-01-01T00:00:00Z"^^xsd:dateTime)
     ?book ?p ?v .
 }
