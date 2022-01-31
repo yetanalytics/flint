@@ -1,4 +1,4 @@
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dc:  <http://purl.org/dc/elements/1.1/>
 PREFIX app: <http://example.org/ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 CONSTRUCT {

@@ -13,5 +13,21 @@
   (let [prefix-name (if (= :$ prefix) "" (name prefix))]
     (str "PREFIX " prefix-name ": " iri)))
 
+(defn- align-prefixes
+  [prefixes]
+  (let [pre-groups  (map (fn [pre] (re-matches #"(PREFIX (.*)\:) \<.*\>" pre))
+                         prefixes)
+        pre-lens    (map (fn [grps] (count (get grps 2)))
+                         pre-groups)
+        longest-len (apply max pre-lens)
+        paddings    (map (fn [len] (cstr/join "" (repeat (- longest-len len) " ")))
+                         pre-lens)
+        pre-strs    (map second pre-groups)]
+    (map (fn [pre pre-str pad]
+           (cstr/replace-first pre #"PREFIX[^\<\>]*\:" (str pre-str pad)))
+         prefixes
+         pre-strs
+         paddings)))
+
 (defmethod f/format-ast :prefixes [_ [_ prefixes]]
-  (cstr/join "\n" prefixes))
+  (cstr/join "\n" (align-prefixes prefixes)))
