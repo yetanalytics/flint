@@ -25,15 +25,15 @@
     `(testing "file:" ~@tests#)))
 
 (deftest query-tests
-  (make-format-tests format-query
+  (make-format-tests (fn [q] (format-query q :pretty? true))
                      "dev-resources/test-fixtures/inputs/query/"))
 
 (deftest update-tests
-  (make-format-tests format-updates
+  (make-format-tests (fn [up] (format-updates [up] :pretty? true))
                      "dev-resources/test-fixtures/inputs/update/"))
 
 (deftest update-request-tests
-  (make-format-tests (partial apply format-updates)
+  (make-format-tests (fn [ups] (format-updates ups :pretty? true))
                      "dev-resources/test-fixtures/inputs/update-request/"))
 
 (deftest exception-tests
@@ -43,10 +43,10 @@
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-update
-           (try (format-updates {})
+           (try (format-updates [{}])
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-update-request
-           (try (format-updates {} {})
+           (try (format-updates [{} {}])
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))))
