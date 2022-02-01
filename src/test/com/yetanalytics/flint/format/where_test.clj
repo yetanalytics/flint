@@ -14,7 +14,7 @@
            (->> '[:where-sub/where
                   [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]
                    [:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]
-                (w/postwalk (partial f/format-ast {})))))
+                (w/postwalk (partial f/format-ast {:pretty? true})))))
     (is (= (cstr/join "\n" ["{"
                             "    ?s1 ?p1 ?o1 ."
                             "    ?s2 ?p2 ?o2a , ?o2b ."
@@ -97,4 +97,4 @@
                    [:where/values
                     [:values/map [[[:var ?x] [:var ?y]]
                                   [[[:num-lit 1] [:num-lit 2]]]]]]]]
-                (w/postwalk (partial f/format-ast {})))))))
+                (w/postwalk (partial f/format-ast {:pretty? true})))))))

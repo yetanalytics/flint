@@ -2,10 +2,11 @@
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.string :as cstr]
             [clojure.walk   :as w]
-            [com.yetanalytics.flint.format :as f]))
+            [com.yetanalytics.flint.format :as f]
+            [com.yetanalytics.flint.format.update]))
 
 (defn- format-ast [ast]
-  (w/postwalk (partial f/format-ast {}) ast))
+  (w/postwalk (partial f/format-ast {:pretty? true}) ast))
 
 (deftest format-test
   (testing "format INSERT DATA"

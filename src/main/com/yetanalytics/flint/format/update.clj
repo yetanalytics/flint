@@ -6,8 +6,10 @@
             [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.where]))
 
-(defn- format-quads [quads]
-  (str "{\n" (f/indent-str (cstr/join "\n" quads)) "\n}"))
+(defn- format-quads [quads pretty?]
+  (if pretty?
+    (str "{\n" (f/indent-str (cstr/join "\n" quads)) "\n}")
+    (str "{ " (cstr/join " " quads) " }")))
 
 (defmethod f/format-ast :update/kw [_ [_ kw]]
   (case kw
@@ -27,8 +29,8 @@
 (defmethod f/format-ast :update/named-graph [_ [_ iri]]
   iri)
 
-(defmethod f/format-ast :triple/quads [_ [_ [_ var-or-iri triples]]]
-  (str "GRAPH " var-or-iri " " (format-quads triples)))
+(defmethod f/format-ast :triple/quads [{:keys [pretty?]} [_ [_ var-or-iri triples]]]
+  (str "GRAPH " var-or-iri " " (format-quads triples pretty?)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -82,26 +84,40 @@
 (defmethod f/format-ast :copy-silent [_ [_ copy-silent]]
   (str "COPY SILENT " copy-silent))
 
-(defmethod f/format-ast :load-update [_ [_ load-update]]
-  (cstr/join "\n" load-update))
+(defmethod f/format-ast :load-update [{:keys [pretty?]} [_ load-update]]
+  (if pretty?
+    (cstr/join "\n" load-update)
+    (cstr/join " " load-update)))
 
-(defmethod f/format-ast :clear-update [_ [_ clear-update]]
-  (cstr/join "\n" clear-update))
+(defmethod f/format-ast :clear-update [{:keys [pretty?]} [_ clear-update]]
+  (if pretty?
+    (cstr/join "\n" clear-update)
+    (cstr/join " " clear-update)))
 
-(defmethod f/format-ast :drop-update [_ [_ drop-update]]
-  (cstr/join "\n" drop-update))
+(defmethod f/format-ast :drop-update [{:keys [pretty?]} [_ drop-update]]
+  (if pretty?
+    (cstr/join "\n" drop-update)
+    (cstr/join " " drop-update)))
 
-(defmethod f/format-ast :create-update [_ [_ create-update]]
-  (cstr/join "\n" create-update))
+(defmethod f/format-ast :create-update [{:keys [pretty?]} [_ create-update]]
+  (if pretty?
+    (cstr/join "\n" create-update)
+    (cstr/join " " create-update)))
 
-(defmethod f/format-ast :add-update [_ [_ add-update]]
-  (cstr/join "\n" add-update))
+(defmethod f/format-ast :add-update [{:keys [pretty?]} [_ add-update]]
+  (if pretty?
+    (cstr/join "\n" add-update)
+    (cstr/join " " add-update)))
 
-(defmethod f/format-ast :move-update [_ [_ move-update]]
-  (cstr/join "\n" move-update))
+(defmethod f/format-ast :move-update [{:keys [pretty?]} [_ move-update]]
+  (if pretty?
+    (cstr/join "\n" move-update)
+    (cstr/join " " move-update)))
 
-(defmethod f/format-ast :copy-update [_ [_ copy-update]]
-  (cstr/join "\n" copy-update))
+(defmethod f/format-ast :copy-update [{:keys [pretty?]} [_ copy-update]]
+  (if pretty?
+    (cstr/join "\n" copy-update)
+    (cstr/join " " copy-update)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -113,36 +129,46 @@
 (defmethod f/format-ast :with [_ [_ with]]
   (str "WITH " with))
 
-(defmethod f/format-ast :insert-data [_ [_ insert-data]]
-  (str "INSERT DATA " (format-quads insert-data)))
+(defmethod f/format-ast :insert-data [{:keys [pretty?]} [_ insert-data]]
+  (str "INSERT DATA " (format-quads insert-data pretty?)))
 
-(defmethod f/format-ast :delete-data [_ [_ delete-data]]
-  (str "DELETE DATA " (format-quads delete-data)))
+(defmethod f/format-ast :delete-data [{:keys [pretty?]} [_ delete-data]]
+  (str "DELETE DATA " (format-quads delete-data pretty?)))
 
-(defmethod f/format-ast :delete-where [_ [_ delete-where]]
-  (str "DELETE WHERE " (format-quads delete-where)))
+(defmethod f/format-ast :delete-where [{:keys [pretty?]} [_ delete-where]]
+  (str "DELETE WHERE " (format-quads delete-where pretty?)))
 
-(defmethod f/format-ast :delete [_ [_ delete]]
-  (str "DELETE " (format-quads delete)))
+(defmethod f/format-ast :delete [{:keys [pretty?]} [_ delete]]
+  (str "DELETE " (format-quads delete pretty?)))
 
-(defmethod f/format-ast :insert [_ [_ insert]]
-  (str "INSERT " (format-quads insert)))
+(defmethod f/format-ast :insert [{:keys [pretty?]} [_ insert]]
+  (str "INSERT " (format-quads insert pretty?)))
 
-(defmethod f/format-ast :insert-data-update [_ [_ id-update]]
-  (cstr/join "\n" id-update))
+(defmethod f/format-ast :insert-data-update [{:keys [pretty?]} [_ id-update]]
+  (if pretty?
+    (cstr/join "\n" id-update)
+    (cstr/join " " id-update)))
 
-(defmethod f/format-ast :delete-data-update [_ [_ dd-update]]
-  (cstr/join "\n" dd-update))
+(defmethod f/format-ast :delete-data-update [{:keys [pretty?]} [_ dd-update]]
+  (if pretty?
+    (cstr/join "\n" dd-update)
+    (cstr/join " " dd-update)))
 
-(defmethod f/format-ast :delete-where-update [_ [_ dw-update]]
-  (cstr/join "\n" dw-update))
+(defmethod f/format-ast :delete-where-update [{:keys [pretty?]} [_ dw-update]]
+  (if pretty?
+    (cstr/join "\n" dw-update)
+    (cstr/join " " dw-update)))
 
-(defmethod f/format-ast :modify-update [_ [_ mod-update]]
-  (cstr/join "\n" mod-update))
+(defmethod f/format-ast :modify-update [{:keys [pretty?]} [_ mod-update]]
+  (if pretty?
+    (cstr/join "\n" mod-update)
+    (cstr/join " " mod-update)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Updates
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod f/format-ast :update-request [_ [_ updates]]
-  (cstr/join ";\n" updates))
+(defmethod f/format-ast :update-request [{:keys [pretty?]} [_ updates]]
+  (if pretty?
+    (cstr/join ";\n" updates)
+    (cstr/join "; " updates)))

@@ -6,7 +6,7 @@
             [com.yetanalytics.flint.format.where]))
 
 (defn- format-ast [expr-ast]
-  (w/postwalk (partial f/format-ast {}) expr-ast))
+  (w/postwalk (partial f/format-ast {:pretty? true}) expr-ast))
 
 (deftest format-test
   (testing "expression formatting"

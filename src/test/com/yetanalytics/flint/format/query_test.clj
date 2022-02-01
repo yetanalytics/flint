@@ -6,7 +6,7 @@
             [com.yetanalytics.flint.format.query]))
 
 (defn- format-ast [ast]
-  (w/postwalk (partial f/format-ast {}) ast))
+  (w/postwalk (partial f/format-ast {:pretty? true}) ast))
 
 (deftest format-test
   (testing "format SELECT query"

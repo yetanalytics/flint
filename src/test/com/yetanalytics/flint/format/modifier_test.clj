@@ -64,4 +64,3 @@
     (is (= "OFFSET 2"
            (->> '[:offset [:num-lit 2]]
                 format-ast)))))
-

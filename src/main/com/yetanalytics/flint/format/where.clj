@@ -12,11 +12,15 @@
   [select-query]
   (cstr/join "\n" select-query))
 
-(defmethod f/format-ast :where-sub/select [_ [_ sub-select]]
-  (str "{\n" (f/indent-str (format-select-query sub-select)) "\n}"))
+(defmethod f/format-ast :where-sub/select [{:keys [pretty?]} [_ sub-select]]
+  (if pretty?
+    (str "{\n" (f/indent-str (format-select-query sub-select)) "\n}")
+    (str "{ " (format-select-query sub-select) " }")))
 
-(defmethod f/format-ast :where-sub/where [_ [_ sub-where]]
-  (str "{\n" (f/indent-str (cstr/join "\n" sub-where)) "\n}"))
+(defmethod f/format-ast :where-sub/where [{:keys [pretty?]} [_ sub-where]]
+  (if pretty?
+    (str "{\n" (f/indent-str (cstr/join "\n" sub-where)) "\n}")
+    (str "{ " (cstr/join " " sub-where) " }")))
 
 (defmethod f/format-ast :where-sub/empty [_ _]
   "{}")
@@ -24,8 +28,10 @@
 (defmethod f/format-ast :where/recurse [_ [_ pattern]]
   pattern)
 
-(defmethod f/format-ast :where/union [_ [_ patterns]]
-  (cstr/join "\nUNION\n" patterns))
+(defmethod f/format-ast :where/union [{:keys [pretty?]} [_ patterns]]
+  (if pretty?
+    (cstr/join "\nUNION\n" patterns)
+    (cstr/join " UNION " patterns)))
 
 (defmethod f/format-ast :where/optional [_ [_ pattern]]
   (str "OPTIONAL " pattern))
