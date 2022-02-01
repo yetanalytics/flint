@@ -29,7 +29,7 @@
          " .")))
 
 (defmethod f/format-ast :po [{:keys [pretty?]} [_ po]]
-  (let [join-sep (if pretty? " ;\n" "; ")]
+  (let [join-sep (if pretty? " ;\n" " ; ")]
     (->> po
          (map (fn [[p o]] (str p " " o)))
          (cstr/join join-sep))))

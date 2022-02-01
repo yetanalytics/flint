@@ -13,7 +13,7 @@
       (let [vstrs (map (fn [v-tuple] (str "    " (first v-tuple))) values)
             vstr  (str "{\n" (cstr/join "\n" vstrs) "\n}")]
         (str kstr " " vstr))
-      (let [vstrs (map (fn [v-tuple] (str " " (first v-tuple))) values)
+      (let [vstrs (map (fn [v-tuple] (first v-tuple)) values)
             vstr  (str "{ " (cstr/join " " vstrs) " }")]
         (str kstr " " vstr)))))
 
@@ -25,7 +25,7 @@
                        values)
             vstr  (str "{\n" (cstr/join "\n" vstrs) "\n}")]
         (str kstr " " vstr))
-      (let [vstrs (map (fn [v-tuple] (str " (" (cstr/join " " v-tuple) ")"))
+      (let [vstrs (map (fn [v-tuple] (str "(" (cstr/join " " v-tuple) ")"))
                        values)
             vstr  (str "{ " (cstr/join " " vstrs) " }")]
         (str kstr " " vstr)))))

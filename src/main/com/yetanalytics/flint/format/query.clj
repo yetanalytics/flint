@@ -13,7 +13,7 @@
   (if (not-empty construct)
     (if pretty?
       (str "CONSTRUCT {\n" (f/indent-str (cstr/join "\n" construct)) "\n}")
-      (str "CONSTRUCT { " " }"))
+      (str "CONSTRUCT { " (cstr/join " " construct) " }"))
     "CONSTRUCT"))
 
 (defmethod f/format-ast :describe/vars-or-iris [_ [_ var-or-iris]]
