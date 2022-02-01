@@ -8,27 +8,21 @@
 
 (defmethod format-values-clause :values/single
   [var values pretty?]
-  (let [kstr (first var)]
-    (if pretty?
-      (let [vstrs (map (fn [v-tuple] (str "    " (first v-tuple))) values)
-            vstr  (str "{\n" (cstr/join "\n" vstrs) "\n}")]
-        (str kstr " " vstr))
-      (let [vstrs (map (fn [v-tuple] (first v-tuple)) values)
-            vstr  (str "{ " (cstr/join " " vstrs) " }")]
-        (str kstr " " vstr)))))
+  (let [kstr     (first var)
+        vstrs    (map first values)
+        vstr     (-> vstrs
+                     (f/join-clauses pretty?)
+                     (f/wrap-in-braces pretty?))]
+    (str kstr " " vstr)))
 
 (defmethod format-values-clause :values/default
   [vars values pretty?]
-  (let [kstr (str "(" (cstr/join " " vars) ")")]
-    (if pretty?
-      (let [vstrs (map (fn [v-tuple] (str "    (" (cstr/join " " v-tuple) ")"))
-                       values)
-            vstr  (str "{\n" (cstr/join "\n" vstrs) "\n}")]
-        (str kstr " " vstr))
-      (let [vstrs (map (fn [v-tuple] (str "(" (cstr/join " " v-tuple) ")"))
-                       values)
-            vstr  (str "{ " (cstr/join " " vstrs) " }")]
-        (str kstr " " vstr)))))
+  (let [kstr  (str "(" (cstr/join " " vars) ")")
+        vstrs (map #(str "(" (cstr/join " " %) ")") values)
+        vstr  (-> vstrs
+                 (f/join-clauses pretty?)
+                 (f/wrap-in-braces pretty?))]
+    (str kstr " " vstr)))
 
 (defmethod f/format-ast :values/undef [_ _]
   "UNDEF")

@@ -8,21 +8,15 @@
             [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.values]))
 
-(defn format-select-query
-  [select-query pretty?]
-  (if pretty?
-    (cstr/join "\n" select-query)
-    (cstr/join " " select-query)))
-
 (defmethod f/format-ast :where-sub/select [{:keys [pretty?]} [_ sub-select]]
-  (if pretty?
-    (str "{\n" (f/indent-str (format-select-query sub-select pretty?)) "\n}")
-    (str "{ " (format-select-query sub-select pretty?) " }")))
+  (-> sub-select
+      (f/join-clauses pretty?)
+      (f/wrap-in-braces pretty?)))
 
 (defmethod f/format-ast :where-sub/where [{:keys [pretty?]} [_ sub-where]]
-  (if pretty?
-    (str "{\n" (f/indent-str (cstr/join "\n" sub-where)) "\n}")
-    (str "{ " (cstr/join " " sub-where) " }")))
+  (-> sub-where
+      (f/join-clauses pretty?)
+      (f/wrap-in-braces pretty?)))
 
 (defmethod f/format-ast :where-sub/empty [_ _]
   "{}")

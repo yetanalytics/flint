@@ -24,6 +24,22 @@
   [s]
   (str "    " (cstr/replace s #"\n" "\n    ")))
 
+(defn wrap-in-braces
+  "Wrap the `clause` string in curly braces. If `pretty?` is true,
+   also add line breaks and indent `clause`."
+  [clause pretty?]
+  (if pretty?
+    (str "{\n" (indent-str clause) "\n}")
+    (str "{ " clause " }")))
+
+(defn join-clauses
+  "Join the `clauses` coll. If `pretty?` is true, separate by line
+   breaks; otherwise separate by space."
+  [clauses pretty?]
+  (if pretty?
+    (cstr/join "\n" clauses)
+    (cstr/join " " clauses )))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Multimethods
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

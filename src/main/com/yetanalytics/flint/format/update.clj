@@ -7,9 +7,9 @@
             [com.yetanalytics.flint.format.where]))
 
 (defn- format-quads [quads pretty?]
-  (if pretty?
-    (str "{\n" (f/indent-str (cstr/join "\n" quads)) "\n}")
-    (str "{ " (cstr/join " " quads) " }")))
+  (-> quads
+      (f/join-clauses pretty?)
+      (f/wrap-in-braces pretty?)))
 
 (defmethod f/format-ast :update/kw [_ [_ kw]]
   (case kw
@@ -85,39 +85,25 @@
   (str "COPY SILENT " copy-silent))
 
 (defmethod f/format-ast :load-update [{:keys [pretty?]} [_ load-update]]
-  (if pretty?
-    (cstr/join "\n" load-update)
-    (cstr/join " " load-update)))
+  (f/join-clauses load-update pretty?))
 
 (defmethod f/format-ast :clear-update [{:keys [pretty?]} [_ clear-update]]
-  (if pretty?
-    (cstr/join "\n" clear-update)
-    (cstr/join " " clear-update)))
+  (f/join-clauses clear-update pretty?))
 
 (defmethod f/format-ast :drop-update [{:keys [pretty?]} [_ drop-update]]
-  (if pretty?
-    (cstr/join "\n" drop-update)
-    (cstr/join " " drop-update)))
+  (f/join-clauses drop-update pretty?))
 
 (defmethod f/format-ast :create-update [{:keys [pretty?]} [_ create-update]]
-  (if pretty?
-    (cstr/join "\n" create-update)
-    (cstr/join " " create-update)))
+  (f/join-clauses create-update pretty?))
 
 (defmethod f/format-ast :add-update [{:keys [pretty?]} [_ add-update]]
-  (if pretty?
-    (cstr/join "\n" add-update)
-    (cstr/join " " add-update)))
+  (f/join-clauses add-update pretty?))
 
 (defmethod f/format-ast :move-update [{:keys [pretty?]} [_ move-update]]
-  (if pretty?
-    (cstr/join "\n" move-update)
-    (cstr/join " " move-update)))
+  (f/join-clauses move-update pretty?))
 
 (defmethod f/format-ast :copy-update [{:keys [pretty?]} [_ copy-update]]
-  (if pretty?
-    (cstr/join "\n" copy-update)
-    (cstr/join " " copy-update)))
+  (f/join-clauses copy-update pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -145,24 +131,16 @@
   (str "INSERT " (format-quads insert pretty?)))
 
 (defmethod f/format-ast :insert-data-update [{:keys [pretty?]} [_ id-update]]
-  (if pretty?
-    (cstr/join "\n" id-update)
-    (cstr/join " " id-update)))
+  (f/join-clauses id-update pretty?))
 
 (defmethod f/format-ast :delete-data-update [{:keys [pretty?]} [_ dd-update]]
-  (if pretty?
-    (cstr/join "\n" dd-update)
-    (cstr/join " " dd-update)))
+  (f/join-clauses dd-update pretty?))
 
 (defmethod f/format-ast :delete-where-update [{:keys [pretty?]} [_ dw-update]]
-  (if pretty?
-    (cstr/join "\n" dw-update)
-    (cstr/join " " dw-update)))
+  (f/join-clauses dw-update pretty?))
 
 (defmethod f/format-ast :modify-update [{:keys [pretty?]} [_ mod-update]]
-  (if pretty?
-    (cstr/join "\n" mod-update)
-    (cstr/join " " mod-update)))
+  (f/join-clauses mod-update pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Updates

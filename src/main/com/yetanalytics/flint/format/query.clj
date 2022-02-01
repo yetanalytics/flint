@@ -11,9 +11,9 @@
 
 (defmethod f/format-ast :construct [{:keys [pretty?]} [_ construct]]
   (if (not-empty construct)
-    (if pretty?
-      (str "CONSTRUCT {\n" (f/indent-str (cstr/join "\n" construct)) "\n}")
-      (str "CONSTRUCT { " (cstr/join " " construct) " }"))
+    (str "CONSTRUCT " (-> construct
+                          (f/join-clauses pretty?)
+                          (f/wrap-in-braces pretty?)))
     "CONSTRUCT"))
 
 (defmethod f/format-ast :describe/vars-or-iris [_ [_ var-or-iris]]
@@ -29,24 +29,17 @@
   (str "FROM " iri))
 
 (defmethod f/format-ast :from-named [{:keys [pretty?]} [_ iri-coll]]
-  (let [join-sep (if pretty? "\n" " ")]
-    (->> iri-coll
-         (map (fn [iri] (str "FROM NAMED " iri)))
-         (cstr/join join-sep))))
-
-(defn format-query [query pretty?]
-  (if pretty?
-    (cstr/join "\n" query)
-    (cstr/join " " query)))
+  (-> (map (fn [iri] (str "FROM NAMED " iri)) iri-coll)
+      (f/join-clauses pretty?)))
 
 (defmethod f/format-ast :select-query [{:keys [pretty?]} [_ select-query]]
-  (format-query select-query pretty?))
+  (f/join-clauses select-query pretty?))
 
 (defmethod f/format-ast :construct-query [{:keys [pretty?]} [_ construct-query]]
-  (format-query construct-query pretty?))
+  (f/join-clauses construct-query pretty?))
 
 (defmethod f/format-ast :describe-query [{:keys [pretty?]} [_ describe-query]]
-  (format-query describe-query pretty?))
+  (f/join-clauses describe-query pretty?))
 
 (defmethod f/format-ast :ask-query [{:keys [pretty?]} [_ ask-query]]
-  (format-query ask-query pretty?))
+  (f/join-clauses ask-query pretty?))
