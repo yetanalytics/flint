@@ -127,28 +127,3 @@
                           xsd-prefixes)]
     (-> (map f/format-ast asts opt-maps)
         (uf/join-updates pretty?))))
-
-(comment
-  (format-update
-   '{:prefixes
-     {:dc "<http://purl.org/dc/elements/1.1/>"
-      :xsd "<http://www.w3.org/2001/XMLSchema#>"}
-     :insert [[:graph "<http://example/bookStore2>" [[?book ?p ?v]]]]
-     :where
-     [[:graph
-       "<http://example/bookStore>"
-       [[?book :dc/date ?date]
-        [:filter (> ?date #inst "1970-01-01T00:00:00.000-00:00")]
-        [?book ?p ?v]]]]})
-  (format-updates
-   '[{:prefixes    {:dc "<http://purl.org/dc/elements/1.1/>"}
-      :delete-data [[:graph "<http://example/bookStore>"
-                     [["<http://example/book1>"
-                       :dc/title
-                       "Fundamentals of Compiler Desing"]]]]}
-     {:prefixes    {:dc "<http://purl.org/dc/elements/1.1/>"}
-      :insert-data [[:graph "<http://example/bookStore>"
-                     [["<http://example/book1>"
-                       :dc/title
-                       "Fundamentals of Compiler Design"]]]]}]
-   :pretty? true))
