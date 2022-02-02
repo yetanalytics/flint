@@ -1,7 +1,9 @@
 {:paths ["src/main"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}}
  :aliases
- {:test {:extra-paths ["src/test" "dev-resources"]
+ {:dev {:extra-paths ["src/dev"]
+        :extra-deps  {org.apache.jena/jena-arq {:mvn/version "4.3.2"}}}
+  :test {:extra-paths ["src/test" "dev-resources"]
          :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
                        cloverage/cloverage    {:mvn/version "1.2.2"}
                        io.github.cognitect-labs/test-runner
