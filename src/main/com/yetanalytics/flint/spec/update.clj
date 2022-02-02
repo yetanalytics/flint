@@ -206,7 +206,3 @@
         :delete-data-update  delete-data-update-spec
         :delete-where-update delete-where-update-spec
         :modify-update       modify-update-spec))
-
-;; single-branch `s/or` is used to conform values
-(def update-request-spec
-  (s/or :update-request (s/coll-of update-spec :min-count 1)))

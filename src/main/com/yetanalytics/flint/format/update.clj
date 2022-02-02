@@ -146,7 +146,9 @@
 ;; Updates
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod f/format-ast :update-request [{:keys [pretty?]} [_ updates]]
+(defn join-updates
+  "Given a coll of `updates`, return a semicolon-joined UpdateRequest string."
+  [updates pretty?]
   (if pretty?
     (cstr/join ";\n" updates)
     (cstr/join "; " updates)))

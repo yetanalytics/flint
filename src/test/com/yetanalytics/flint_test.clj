@@ -76,7 +76,7 @@
            (try (format-updates [{}])
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))
-    (is (= ::flint/invalid-update-request
+    (is (= ::flint/invalid-update
            (try (format-updates [{} {}])
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))))
