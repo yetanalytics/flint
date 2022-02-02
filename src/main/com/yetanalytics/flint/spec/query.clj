@@ -9,7 +9,7 @@
             [com.yetanalytics.flint.spec.values   :as vs]))
 
 (def key-order-map
-  {:bases           0
+  {:base            0
    :prefixes        1
    :select          2
    :select-distinct 2
@@ -56,7 +56,7 @@
                                   ::ss/select-distinct
                                   ::ss/select-reduced)
                               ::ws/where]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ms/group-by
                               ::ms/order-by
@@ -74,7 +74,7 @@
 
 (def construct-query-spec
   (smap->vec (s/keys :req-un [::construct ::ws/where]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ms/group-by
                               ::ms/order-by
@@ -88,7 +88,7 @@
 
 (def describe-query-spec
   (smap->vec (s/keys :req-un [::describe]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ws/where
                               ::ms/group-by
@@ -101,7 +101,7 @@
 
 (def ask-query-spec
   (smap->vec (s/keys :req-un [::ask ::ws/where]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ms/group-by
                               ::ms/order-by

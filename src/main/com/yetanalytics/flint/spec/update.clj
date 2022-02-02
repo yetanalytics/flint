@@ -6,7 +6,7 @@
             [com.yetanalytics.flint.spec.where    :as ws]))
 
 (def key-order-map
-  {:bases        0
+  {:base         0
    :prefixes     1
    ;; Graph management
    :load         2
@@ -105,7 +105,7 @@
 
 (def load-update-spec
   (smap->vec (s/keys :req-un [(or ::load ::load-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes ::into])))
+                     :opt-un [::ps/base ::ps/prefixes ::into])))
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
@@ -115,7 +115,7 @@
 
 (def clear-update-spec
   (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
@@ -125,35 +125,35 @@
 
 (def drop-update-spec
   (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::create ax/iri-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
   (smap->vec (s/keys :req-un [(or ::create ::create-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::add graph-or-default-spec)
 (s/def ::add-silent ::add)
 
 (def add-update-spec
   (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::move graph-or-default-spec)
 (s/def ::move-silent ::move)
 
 (def move-update-spec
   (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::copy graph-or-default-spec)
 (s/def ::copy-silent ::copy)
 
 (def copy-update-spec
   (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
@@ -163,19 +163,19 @@
 
 (def insert-data-update-spec
   (smap->vec (s/keys :req-un [::insert-data]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::delete-data triple-or-quads-novar-spec)
 
 (def delete-data-update-spec
   (smap->vec (s/keys :req-un [::delete-data]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::delete-where triple-or-quads-spec)
 
 (def delete-where-update-spec
   (smap->vec (s/keys :req-un [::delete-where]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-spec)
@@ -183,7 +183,7 @@
 (def modify-update-spec
   (smap->vec (s/keys :req-un [(or ::delete ::insert)
                               ::ws/where]
-                     :opt-un [::ps/bases
+                     :opt-un [::ps/base
                               ::ps/prefixes
                               ::delete
                               ::insert

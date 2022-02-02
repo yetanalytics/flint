@@ -9,10 +9,8 @@
 
 (deftest format-test
   (testing "Formatting prologues"
-    (is (= (cstr/join "\n" ["BASE <http://foo.org>"
-                            "BASE <http://bar.org>"])
-           (->> [:bases [[:base [:iri "<http://foo.org>"]]
-                         [:base [:iri "<http://bar.org>"]]]]
+    (is (= "BASE <http://foo.org>"
+           (->> [:base [:iri "<http://foo.org>"]]
                 format-ast)))
     (is (= (cstr/join "\n" ["PREFIX :     <http://default.org>"
                             "PREFIX foo:  <http://foo.org>"
