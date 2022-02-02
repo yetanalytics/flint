@@ -20,7 +20,7 @@
     BASE <http://foe.org/>
     PREFIX boe: <boe>
 
-    DELETE WHERE { ?x boe:decken ?y . ?z <joe> ?w . }")
+    DELETE WHERE { ?x boe:goe ?y . ?z <joe> ?w . }")
   
   (UpdateFactory/create
    "BASE <http://foo.org/>
