@@ -44,12 +44,12 @@
 
 (s/def ::from
   (s/and (s/or :single ax/iri-spec
-               :coll   (s/and (s/coll-of ax/iri-spec :count 1)
+               :coll   (s/and (s/coll-of ax/iri-spec :count 1 :kind vector?)
                               (s/conformer first)))
          (s/conformer second)))
 
 (s/def ::from-named
-  (s/coll-of ax/iri-spec :min-count 1))
+  (s/coll-of ax/iri-spec :min-count 1 :kind vector?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query
@@ -74,7 +74,8 @@
 (def triples-spec
   (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
                    :triple/nform ts/normal-form-nopath-spec)
-             :min-count 0))
+             :min-count 0
+             :kind vector?))
 
 (s/def ::construct triples-spec)
 
@@ -89,7 +90,9 @@
                               ::ms/offset])))
 
 (s/def ::describe
-  (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec :min-count 1)
+  (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec
+                                          :min-count 1
+                                          :kind vector?)
         :wildcard ax/wildcard?))
 
 (def describe-query-spec
