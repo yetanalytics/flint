@@ -42,8 +42,14 @@
 ;; Dataset Clause specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(s/def ::from ax/iri-spec)
-(s/def ::from-named (s/coll-of ax/iri-spec :min-count 1))
+(s/def ::from
+  (s/and (s/or :single ax/iri-spec
+               :coll   (s/and (s/coll-of ax/iri-spec :count 1)
+                              (s/conformer first)))
+         (s/conformer second)))
+
+(s/def ::from-named
+  (s/coll-of ax/iri-spec :min-count 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query

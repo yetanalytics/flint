@@ -2,7 +2,7 @@
 {:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"
               :dc   "<http://purl.org/dc/elements/1.1/>"}
  :select     [?who ?g ?mbox]
- :from       "<http://example.org/dft.ttl>"
+ :from       ["<http://example.org/dft.ttl>"]
  :from-named ["<http://example.org/alice>"
               "<http://example.org/bob>"]
  :where      [[?g :dc/publisher ?who]
