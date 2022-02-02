@@ -18,6 +18,17 @@
     (not (contains? prefixes (keyword pre)))
     (not (contains? prefixes :$))))
 
+(defn- prefix-error-map
+  [prefix-iri prefixes zip-loc]
+  {:iri      prefix-iri
+   :prefix   (or (some->> prefix-iri namespace keyword)
+                 :$)
+   :prefixes prefixes
+   :path     (->> zip-loc
+                  zip/path
+                  (filter #(-> % first keyword?))
+                  (mapv #(-> % first)))})
+
 (defn validate-prefixes
   "Given a map (or set) of keyword IRI prefixes, along with a conformed
    AST, traverse the AST looking for prefixes that were not included in
@@ -33,15 +44,7 @@
                  (->> anode first (= :prefix-iri))
                  (->> anode second (invalid-prefix? prefixes)))
           (recur (zip/next loc)
-                 (let [piri (second anode)]
-                   (conj errs {:iri      piri
-                               :prefix   (or (some->> piri namespace keyword)
-                                             :$)
-                               :prefixes prefixes
-                               :path     (->> loc
-                                              zip/path
-                                              (filter #(-> % first keyword?))
-                                              (mapv #(-> % first)))})))
+                 (conj errs (prefix-error-map (second anode) prefixes loc)))
           (recur (zip/next loc)
                  errs)))
       (not-empty errs))))
