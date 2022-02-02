@@ -72,14 +72,15 @@
         prefix-kws  (->> prefix-errs (map :prefix) distinct sort)
         prefix-strs (->> prefix-kws
                          (map name)
-                         (map (fn [s] (if (#{"$"} s) ":$" (format "\"%s\"" s)))))
+                         (map (partial format ":%s")))
         prefix-str  (if (= 1 (count prefix-strs))
                       (first prefix-strs)
                       (format "%s and %s"
                               (cstr/join ", " (butlast prefix-strs))
                               (last prefix-strs)))]
-    (format "%d IRIs%s cannot be expanded due to missing prefixes %s!"
+    (format "%d IRI%s%s cannot be expanded due to missing prefixes %s!"
             iri-count
+            (if (= 1 iri-count) "" "s")
             index-str
             prefix-str)))
 
@@ -90,17 +91,3 @@
    (prefix-error-msg* prefix-errs ""))
   ([prefix-errs index]
    (prefix-error-msg* prefix-errs (format " at index %d" index))))
-
-(comment
-  (spec-error-msg
-   {::s/problems [{:path [:select-query :select-distinct]}
-                  {:path [:select-query :select]}
-                  {:path [:construct-query :construct]}]}
-   0))
-
-(comment
-  (prefix-error-msg
-   [{:prefix :$}
-    {:prefix :foo}
-    {:prefix :foo}
-    {:prefix :bar}]))

@@ -3,7 +3,8 @@
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.query  :as qs]
             [com.yetanalytics.flint.spec.update :as us]
-            [com.yetanalytics.flint.error       :as err]))
+            [com.yetanalytics.flint.error       :as err]
+            [com.yetanalytics.flint.prefix      :as pre]))
 
 (deftest top-level-keyword-test
   (testing "all top level keywords are accounted for"
@@ -90,3 +91,36 @@
            (->> ['{:copy "http://example.org" :to "foo.org"} '{}]
                 (map (partial s/explain-data us/update-spec))
                 (map-indexed (fn [idx ed] (err/spec-error-msg ed idx))))))))
+
+(deftest prefix-error-msg-test
+  (testing "prefix error messages"
+    (is (= "1 IRI cannot be expanded due to missing prefixes :dc!"
+           (->> '{:select [?x]
+                  :where [[?x :dc/title "Foo"]]}
+                (s/conform qs/query-spec)
+                (pre/validate-prefixes {})
+                (err/prefix-error-msg))))
+    (is (= (str "4 IRIs cannot be expanded due to missing prefixes "
+                ":$, :dc and :foaf!")
+           (->> '{:select [?x]
+                  :where [[?x :boo "Boo"]
+                          [?x :dc/title "Foo"]
+                          [:union
+                           [[?x :foaf/name "Bar"]]
+                           [[?x :foaf/name "Buu"]]]]}
+                (s/conform qs/query-spec)
+                (pre/validate-prefixes {})
+                (err/prefix-error-msg))))
+    (is (= (str "3 IRIs cannot be expanded due to missing prefixes "
+                ":$ and :dc!")
+           (->> '{:delete-data [[:fish :dc/title :food]]}
+                (s/conform us/update-spec)
+                (pre/validate-prefixes {})
+                (err/prefix-error-msg))))
+    (is (= (str "3 IRIs at index 0 cannot be expanded due to missing prefixes "
+                ":$ and :dc!")
+           (->> ['{:delete-data [[:fish :dc/title :food]]}]
+                (map (partial s/conform us/update-spec))
+                (map (partial pre/validate-prefixes {}))
+                (map-indexed (fn [idx err] (err/prefix-error-msg err idx)))
+                first)))))
