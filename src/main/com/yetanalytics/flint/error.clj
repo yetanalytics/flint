@@ -18,37 +18,45 @@
     :insert-data :delete-data :delete-where :insert :delete
     :from :from-named
     :where
-    :group-by :order-by :having :limit :offset :values})
+    :group-by :order-by :having :limit :offset :values
+    :to :into :with :using})
 
 (defn- spec-clause-strs
-  [spec-ed]
-  (let [spec-paths  (->> spec-ed ::s/problems (map :path))
-        clause-kws  (->> spec-paths
-                         (map #(some top-level-keywords %))
-                         distinct)
-        clause-strs (->> clause-kws
-                         (map name)
-                         (map #(cstr/replace-first % #"-" " "))
-                         (map cstr/upper-case))]
-    clause-strs))
+  [spec-paths]
+  (->> spec-paths
+       (map #(some top-level-keywords %))
+       (filter some?)
+       distinct
+       (map name)
+       (map #(cstr/replace-first % #"-" " "))
+       (map cstr/upper-case)))
 
 (defn- spec-error-msg*
   [spec-ed index-str]
-  (let [clause-strs (spec-clause-strs spec-ed)
-        num-clauses (count clause-strs)]
-    (cond
-      (= 1 num-clauses)
-      (format "Syntax errors exist%s in the %s clause!"
-              index-str
-              (first clause-strs))
-      (< 1 num-clauses)
-      (format "Syntax errors exist%s in the %s and %s clauses!"
-              index-str
-              (cstr/join ", " (butlast clause-strs))
-              (last clause-strs))
-      :else
-      (format "Syntax errors exist%s in an unknown clause!"
-              index-str))))
+  (let [spec-paths  (->> spec-ed ::s/problems (map :path))]
+    (if (every? #(= 1 (count %)) spec-paths)
+      ;; Every spec path is of the form `[:select-query]`, `[:ask-query]`,
+      ;; etc. This is indicative that no top-level clasues exist for spec
+      ;; to traverse through.
+      (format "Syntax errors exist%s due to missing clauses!"
+              index-str)
+      ;; Here, "missing clause" errors will not show up in the error msg.
+      ;; But they will re-emerge once the user fixes the other errors.
+      (let [clause-strs (spec-clause-strs spec-paths)
+            num-clauses (count clause-strs)]
+        (cond
+          (= 1 num-clauses)
+          (format "Syntax errors exist%s in the %s clause!"
+                  index-str
+                  (first clause-strs))
+          (< 1 num-clauses)
+          (format "Syntax errors exist%s in the %s and %s clauses!"
+                  index-str
+                  (cstr/join ", " (butlast clause-strs))
+                  (last clause-strs))
+          :else
+          (format "Syntax errors exist%s in an unknown clause!"
+                  index-str))))))
 
 (defn spec-error-msg
   "Return an error message specifying the invalid clauses and, if

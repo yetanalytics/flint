@@ -6,31 +6,34 @@
             [com.yetanalytics.flint.spec.where    :as ws]))
 
 (def key-order-map
-  {:base         0
-   :prefixes     1
+  {:base          0
+   :prefixes      1
    ;; Graph management
-   :load         2
-   :load-silent  2
-   :clear        2
-   :clear-silent 2
-   :drop         2
-   :drop-silent  2
-   :add          2
-   :add-silent   2
-   :move         2
-   :move-silent  2
-   :copy         2
-   :copy-silent  2
-   :to           3
+   :load          2
+   :load-silent   2
+   :clear         2
+   :clear-silent  2
+   :drop          2
+   :drop-silent   2
+   :add           2
+   :add-silent    2
+   :create        2
+   :create-silent 2
+   :move          2
+   :move-silent   2
+   :copy          2
+   :copy-silent   2
+   :to            3
+   :into          3
    ;; Graph modification
-   :insert-data  2
-   :delete-data  2
-   :delete-where 2
-   :with         2
-   :delete       3
-   :insert       4
-   :using        5
-   :where        6})
+   :insert-data   2
+   :delete-data   2
+   :delete-where  2
+   :with          2
+   :delete        3
+   :insert        4
+   :using         5
+   :where         6})
 
 (defn- qkey-comp
   [k1 k2]

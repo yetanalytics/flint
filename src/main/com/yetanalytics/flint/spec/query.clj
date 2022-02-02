@@ -24,7 +24,8 @@
    :order-by        7
    :having          8
    :limit           9
-   :offset          10})
+   :offset          10
+   :values          11})
 
 (defn- qkey-comp
   [k1 k2]
