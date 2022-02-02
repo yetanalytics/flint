@@ -1,12 +1,11 @@
 (ns com.yetanalytics.flint
   (:require [clojure.spec.alpha :as s]
-            [clojure.walk       :as w]
-            [com.yetanalytics.flint.spec.query  :as qs]
-            [com.yetanalytics.flint.spec.update :as us]
-            [com.yetanalytics.flint.format :as f]
+            [com.yetanalytics.flint.spec.query    :as qs]
+            [com.yetanalytics.flint.spec.update   :as us]
+            [com.yetanalytics.flint.format        :as f]
             [com.yetanalytics.flint.format.query]
             [com.yetanalytics.flint.format.update :as uf]
-            [com.yetanalytics.flint.prefix :as pre]))
+            [com.yetanalytics.flint.prefix        :as pre]))
 
 (def xsd-iri-prefix
   "<http://www.w3.org/2001/XMLSchema#>")
@@ -55,7 +54,7 @@
         ?xsd-pre (get-xsd-prefix prefixes)
         opts     (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
-    (w/postwalk (partial f/format-ast opts) ast)))
+    (f/format-ast ast opts)))
 
 (defn format-updates
   "Format the coll `updates` into a SPARQL Update Request string. Throws
@@ -80,7 +79,5 @@
                (cond-> {:pretty? pretty?}
                  ?xsd-pre (assoc :xsd-prefix ?xsd-pre)))
              xsd-prefixes)]
-    (-> (map (fn [ast opts] (w/postwalk (partial f/format-ast opts) ast))
-             asts
-             opt-maps)
+    (-> (map f/format-ast asts opt-maps)
         (uf/join-updates pretty?))))

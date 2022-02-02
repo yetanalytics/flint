@@ -63,14 +63,14 @@
     (str "(" arg ")")
     arg))
 
-(defmethod f/format-ast :expr/kwarg [_ [_ [[_ k] [_ v]]]]
+(defmethod f/format-ast-node :expr/kwarg [_ [_ [[_ k] [_ v]]]]
   (str (cstr/upper-case (name k)) " = '" v "'"))
 
-(defmethod f/format-ast :expr/op [_ [_ op]] op)
+(defmethod f/format-ast-node :expr/op [_ [_ op]] op)
 
-(defmethod f/format-ast :expr/args [_ [_ args]] args)
+(defmethod f/format-ast-node :expr/args [_ [_ args]] args)
 
-(defmethod f/format-ast :expr/branch [_ [_ [op args]]]
+(defmethod f/format-ast-node :expr/branch [_ [_ [op args]]]
   (let [op-str (op->str op)
         ?dist  (when (distinct-op? op) "DISTINCT ")]
     (cond
@@ -81,8 +81,8 @@
       (graph-pat-exp? op) (str op-str " " (first args))
       :else (str op-str "(" ?dist (cstr/join ", " args) ")"))))
 
-(defmethod f/format-ast :expr/terminal [_ [_ terminal]]
+(defmethod f/format-ast-node :expr/terminal [_ [_ terminal]]
   terminal)
 
-(defmethod f/format-ast :expr/as-var [_ [_ [expr var]]]
+(defmethod f/format-ast-node :expr/as-var [_ [_ [expr var]]]
   (str expr " AS " var))

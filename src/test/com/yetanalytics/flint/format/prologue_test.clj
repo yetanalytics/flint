@@ -1,12 +1,11 @@
 (ns com.yetanalytics.flint.format.prologue-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.string :as cstr]
-            [clojure.walk   :as w]
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.prologue]))
 
 (defn- format-ast [ast]
-  (w/postwalk (partial f/format-ast {:pretty? true}) ast))
+  (f/format-ast ast {:pretty? true}))
 
 (deftest format-test
   (testing "Formatting prologues"

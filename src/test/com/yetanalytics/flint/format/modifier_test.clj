@@ -1,11 +1,10 @@
 (ns com.yetanalytics.flint.format.modifier-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.walk :as w]
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.modifier]))
 
 (defn- format-ast [ast]
-  (w/postwalk (partial f/format-ast {}) ast))
+  (f/format-ast ast {}))
 
 (deftest format-test
   (testing "ORDER BY formatting"
