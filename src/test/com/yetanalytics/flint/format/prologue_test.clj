@@ -6,7 +6,7 @@
             [com.yetanalytics.flint.format.prologue]))
 
 (defn- format-ast [ast]
-  (w/postwalk (partial f/format-ast {}) ast))
+  (w/postwalk (partial f/format-ast {:pretty? true}) ast))
 
 (deftest format-test
   (testing "Formatting prologues"

@@ -56,29 +56,30 @@
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
    does not conform to spec."
-  [query]
+  [query & {:keys [pretty?] :or {pretty? false}}]
   (let [ast      (conform-sparql qs/query-spec query ::invalid-query)
         prefixes (conform-prefixes query ast)
         ?xsd-pre (get-xsd-prefix prefixes)
-        opts     (cond-> {}
+        opts     (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
     (w/postwalk (partial f/format-ast opts) ast)))
 
+;; TODO: Refactor format-updates to reduce code duplication
 (defn format-updates
-  "Format `update` (and potentially `updates`) into a SPARQL Update Request
-   string. Throws an exception if the updates do not conform to spec."
-  [update & updates]
-  (if (not-empty updates)
-    (let [ups      (concat [update] updates)
-          ast      (conform-sparql us/update-request-spec ups ::invalid-update-request)
-          prefixes (conform-multi-prefixes ups ast)
+  "Format a coll of `updates` into a SPARQL Update Request string.
+   Throws an exception if the updates do not conform to spec."
+  [updates & {:keys [pretty?] :or {pretty? false}}]
+  (if (< 1 (count updates))
+    (let [ast      (conform-sparql us/update-request-spec updates ::invalid-update-request)
+          prefixes (conform-multi-prefixes updates ast)
           ?xsd-pre (get-xsd-prefix prefixes)
-          opts     (cond-> {}
+          opts     (cond-> {:pretty? pretty?}
                      ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
       (w/postwalk (partial f/format-ast opts) ast))
-    (let [ast      (conform-sparql us/update-spec update ::invalid-update)
+    (let [update   (first updates)
+          ast      (conform-sparql us/update-spec update ::invalid-update)
           prefixes (conform-prefixes update ast)
           ?xsd-pre (get-xsd-prefix prefixes)
-          opts     (cond-> {}
+          opts     (cond-> {:pretty? pretty?}
                      ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
       (w/postwalk (partial f/format-ast opts) ast))))

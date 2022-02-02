@@ -12,7 +12,7 @@
                             "    2"
                             "    3"
                             "}"])
-           (w/postwalk (partial f/format-ast {})
+           (w/postwalk (partial f/format-ast {:pretty? true})
                        [:values/map [[[:var '?foo]]
                                      [[[:num-lit 1]]
                                       [[:num-lit 2]]
@@ -22,7 +22,7 @@
                             "    (2 \"b\")"
                             "    (3 \"c\")"
                             "}"])
-           (w/postwalk (partial f/format-ast {})
+           (w/postwalk (partial f/format-ast {:pretty? true})
                        [:values/map [[[:var '?foo] [:var '?bar]]
                                      [[[:num-lit 1] [:str-lit "a"]]
                                       [[:num-lit 2] [:str-lit "b"]]
@@ -31,7 +31,7 @@
                             "    (UNDEF \"a\")"
                             "    (2 UNDEF)"
                             "}"])
-           (w/postwalk (partial f/format-ast {})
+           (w/postwalk (partial f/format-ast {:pretty? true})
                        [:values/map [[[:var '?foo] [:var '?bar]]
                                      [[[:values/undef nil] [:str-lit "a"]]
                                       [[:num-lit 2] [:values/undef nil]]]]])))))

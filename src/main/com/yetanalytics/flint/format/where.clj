@@ -8,15 +8,15 @@
             [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.values]))
 
-(defn format-select-query
-  [select-query]
-  (cstr/join "\n" select-query))
+(defmethod f/format-ast :where-sub/select [{:keys [pretty?]} [_ sub-select]]
+  (-> sub-select
+      (f/join-clauses pretty?)
+      (f/wrap-in-braces pretty?)))
 
-(defmethod f/format-ast :where-sub/select [_ [_ sub-select]]
-  (str "{\n" (f/indent-str (format-select-query sub-select)) "\n}"))
-
-(defmethod f/format-ast :where-sub/where [_ [_ sub-where]]
-  (str "{\n" (f/indent-str (cstr/join "\n" sub-where)) "\n}"))
+(defmethod f/format-ast :where-sub/where [{:keys [pretty?]} [_ sub-where]]
+  (-> sub-where
+      (f/join-clauses pretty?)
+      (f/wrap-in-braces pretty?)))
 
 (defmethod f/format-ast :where-sub/empty [_ _]
   "{}")
@@ -24,8 +24,10 @@
 (defmethod f/format-ast :where/recurse [_ [_ pattern]]
   pattern)
 
-(defmethod f/format-ast :where/union [_ [_ patterns]]
-  (cstr/join "\nUNION\n" patterns))
+(defmethod f/format-ast :where/union [{:keys [pretty?]} [_ patterns]]
+  (if pretty?
+    (cstr/join "\nUNION\n" patterns)
+    (cstr/join " UNION " patterns)))
 
 (defmethod f/format-ast :where/optional [_ [_ pattern]]
   (str "OPTIONAL " pattern))

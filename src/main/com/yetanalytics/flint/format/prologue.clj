@@ -6,8 +6,8 @@
 (defmethod f/format-ast :base [_ [_ value]]
   (str "BASE " value))
 
-(defmethod f/format-ast :bases [_ [_ bases]]
-  (cstr/join "\n" bases))
+(defmethod f/format-ast :bases [{:keys [pretty?]} [_ bases]]
+  (f/join-clauses bases pretty?))
 
 (defmethod f/format-ast :prefix [_ [_ [prefix iri]]]
   (let [prefix-name (if (= :$ prefix) "" (name prefix))]
@@ -29,5 +29,7 @@
          pre-strs
          paddings)))
 
-(defmethod f/format-ast :prefixes [_ [_ prefixes]]
-  (cstr/join "\n" (align-prefixes prefixes)))
+(defmethod f/format-ast :prefixes [{:keys [pretty?]} [_ prefixes]]
+  (if pretty?
+    (cstr/join "\n" (align-prefixes prefixes))
+    (cstr/join " " prefixes)))
