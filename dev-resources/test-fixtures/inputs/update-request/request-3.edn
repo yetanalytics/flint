@@ -5,11 +5,11 @@
               [[?book ?p ?v]]]]
   :where    [[:graph "<http://example/bookStore>"
               [[?book :dc/date ?date]
-               [:filter (< ?date #inst "2000-01-01T00:00:00Z")]
+               [:filter (< ?date #inst "2000-01-01T00:00:00.001Z")]
                [?book ?p ?v]]]]}
  {:with   "<http://example/bookStore>"
   :delete [[?book ?p ?v]]
   :where  [{?book {:dc/date #{?date}
                    :dc/type #{:dcmitype/PhysicalObject}}}
-           [:filter (< ?date #inst "2000-01-01T00:00:00Z")]
+           [:filter (< ?date #inst "2000-01-01T00:00:00.002Z")]
            [?book ?p ?v]]}]

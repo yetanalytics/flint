@@ -10,5 +10,5 @@ WHERE {
     }
     ?g dc:publisher <http://www.w3.org> .
     ?g dc:date ?date .
-    FILTER (app:customDate(?date) > "2005-02-28T00:00:00Z"^^xsd:dateTime)
+    FILTER (app:customDate(?date) > "2005-02-28T00:00:00.005Z"^^xsd:dateTime)
 }
