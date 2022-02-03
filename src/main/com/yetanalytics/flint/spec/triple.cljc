@@ -1,40 +1,11 @@
 (ns com.yetanalytics.flint.spec.triple
   (:require [clojure.spec.alpha :as s]
-            [clojure.walk :as w]
-            [clojure.string :as cstr]
             [com.yetanalytics.flint.spec.axiom :as ax]
-            [com.yetanalytics.flint.spec.path  :as ps]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Helpers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;; Defining nopath specs ;;;;;
-
-(defn- sym->new-sym
-  [old-sym-re new-sym sym]
-  (if (symbol? sym)
-    (let [sym-ns (namespace sym)
-          sym-name (name sym)]
-      (symbol sym-ns
-              (cstr/replace sym-name old-sym-re new-sym)))
-    sym))
-
-(defn- form->nopath-spec-form
-  [form]
-  (w/postwalk (partial sym->new-sym #"-spec" "-nopath-spec") form))
-
-(defn- spec->nopath-spec
-  [spec]
-  (-> spec s/form form->nopath-spec-form eval))
-
-(defn- form->novar-spec-form
-  [form]
-  (w/postwalk (partial sym->new-sym #"-spec" "-novar-spec") form))
-
-(defn- spec->novar-spec
-  [spec]
-  (-> spec s/form form->novar-spec-form eval))
+            [com.yetanalytics.flint.spec.path  :as ps])
+  #?(:cljs (:require-macros [com.yetanalytics.flint.spec.triple
+                             :refer [make-obj-spec
+                                     make-pred-objs-spec
+                                     make-nform-spec]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subj/Pred/Obj Specs
@@ -67,15 +38,11 @@
 
 ;; No property paths
 
-(def subj-nopath-spec subj-spec)
-
 (def pred-nopath-spec
   (s/or :ax/var        ax/variable?
         :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
         :ax/rdf-type   ax/rdf-type?))
-
-(def obj-nopath-spec obj-spec)
 
 ;; No variables (or bnodes or property paths)
 
@@ -106,45 +73,65 @@
 
 ;; single-branch `s/or`s are used to conform values
 
-(def obj-set-spec
-  (s/or :triple/o (s/coll-of obj-spec
-                             :min-count 1
-                             :kind set?
-                             :into [])))
+;; Object
 
-(def obj-set-nopath-spec
-  obj-set-spec)
+#?(:clj
+   (defmacro make-obj-spec
+     [obj-spec]
+     `(s/or :triple/o (s/coll-of ~obj-spec
+                                 :min-count 1
+                                 :kind set?
+                                 :into []))))
+
+(def obj-set-spec
+  (make-obj-spec obj-spec))
 
 (def obj-set-novar-spec
-  (spec->novar-spec obj-set-spec))
+  (make-obj-spec obj-novar-spec))
+
+;; Predicate Object
+
+#?(:clj
+   (defmacro make-pred-objs-spec
+     [pred-spec objs-spec]
+     `(s/or :triple/po (s/map-of ~pred-spec ~objs-spec
+                                 :min-count 1
+                                 :into []))))
 
 (def pred-objs-spec
-  (s/or :triple/po (s/map-of pred-spec obj-set-spec
-                             :min-count 1
-                             :into [])))
+  (make-pred-objs-spec pred-spec obj-set-spec))
 
 (def pred-objs-nopath-spec
-  (spec->nopath-spec pred-objs-spec))
+  (make-pred-objs-spec pred-nopath-spec obj-set-spec))
 
 (def pred-objs-novar-spec
-  (spec->novar-spec pred-objs-spec))
+  (make-pred-objs-spec pred-novar-spec obj-set-novar-spec))
+
+;; Subject Predicate Object
+
+#?(:clj
+   (defmacro make-nform-spec
+     [subj-spec pred-objs-spec]
+     `(s/or :triple/spo (s/map-of ~subj-spec ~pred-objs-spec
+                                  :conform-keys true
+                                  :into []))))
 
 (def normal-form-spec
-  (s/or :triple/spo (s/map-of subj-spec pred-objs-spec
-                              :conform-keys true
-                              :into [])))
+  (make-nform-spec subj-spec pred-objs-spec))
 
 (def normal-form-nopath-spec
-  (spec->nopath-spec normal-form-spec))
+  (make-nform-spec subj-spec pred-objs-nopath-spec))
 
 (def normal-form-novar-spec
-  (spec->novar-spec normal-form-spec))
+  (make-nform-spec subj-novar-spec pred-objs-novar-spec))
+
+;; Triple Vectors
 
 (def triple-vec-spec
   (s/tuple subj-spec pred-spec obj-spec))
 
 (def triple-vec-nopath-spec
-  (spec->nopath-spec triple-vec-spec))
+  (s/tuple subj-spec pred-nopath-spec obj-spec))
 
 (def triple-vec-novar-spec
-  (spec->novar-spec triple-vec-spec))
+  (s/tuple subj-novar-spec pred-novar-spec obj-novar-spec))
