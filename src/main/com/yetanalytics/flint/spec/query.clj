@@ -44,8 +44,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::from
-  (s/and (s/or :single ax/iri-spec
-               :coll   (s/and (s/coll-of ax/iri-spec :count 1 :kind vector?)
+  (s/and (s/or :from/single ax/iri-spec
+               :from/coll   (s/and (s/coll-of ax/iri-spec
+                                              :count 1
+                                              :kind vector?)
                               (s/conformer first)))
          (s/conformer second)))
 
