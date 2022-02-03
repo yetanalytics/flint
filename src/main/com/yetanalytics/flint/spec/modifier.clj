@@ -7,7 +7,8 @@
   (s/coll-of (s/or :mod/expr ::es/expr
                    :var ax/variable?
                    :mod/expr-as-var ::es/expr-as-var)
-             :min-count 1))
+             :min-count 1
+             :kind vector?))
 
 (s/def ::order-by
   (s/coll-of (s/or :mod/asc-desc (s/& (s/cat :mod/op #{'asc 'desc}
@@ -15,11 +16,13 @@
                                       (s/conformer #(into [] %)))
                    :var  ax/variable?
                    :mod/expr ::es/expr)
-             :min-count 1))
+             :min-count 1
+             :kind vector?))
 
 (s/def ::having
   (s/coll-of ::es/expr
-             :min-count 1))
+             :min-count 1
+             :kind vector?))
 
 ;; single-branch `s/or`s are used to conform values
 

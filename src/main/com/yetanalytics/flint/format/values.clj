@@ -24,11 +24,11 @@
                  (f/wrap-in-braces pretty?))]
     (str kstr " " vstr)))
 
-(defmethod f/format-ast :values/undef [_ _]
+(defmethod f/format-ast-node :values/undef [_ _]
   "UNDEF")
 
-(defmethod f/format-ast :values/map [{:keys [pretty?]} [_ [vars values]]]
+(defmethod f/format-ast-node :values/map [{:keys [pretty?]} [_ [vars values]]]
   (format-values-clause vars values pretty?))
 
-(defmethod f/format-ast :values [_ [_ values-map]]
+(defmethod f/format-ast-node :values [_ [_ values-map]]
   (str "VALUES " values-map))

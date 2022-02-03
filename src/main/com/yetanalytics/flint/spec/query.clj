@@ -9,7 +9,7 @@
             [com.yetanalytics.flint.spec.values   :as vs]))
 
 (def key-order-map
-  {:bases           0
+  {:base            0
    :prefixes        1
    :select          2
    :select-distinct 2
@@ -24,7 +24,8 @@
    :order-by        7
    :having          8
    :limit           9
-   :offset          10})
+   :offset          10
+   :values          11})
 
 (defn- qkey-comp
   [k1 k2]
@@ -42,8 +43,14 @@
 ;; Dataset Clause specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(s/def ::from ax/iri-spec)
-(s/def ::from-named (s/coll-of ax/iri-spec :min-count 1))
+(s/def ::from
+  (s/and (s/or :single ax/iri-spec
+               :coll   (s/and (s/coll-of ax/iri-spec :count 1 :kind vector?)
+                              (s/conformer first)))
+         (s/conformer second)))
+
+(s/def ::from-named
+  (s/coll-of ax/iri-spec :min-count 1 :kind vector?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query
@@ -56,7 +63,7 @@
                                   ::ss/select-distinct
                                   ::ss/select-reduced)
                               ::ws/where]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ms/group-by
                               ::ms/order-by
@@ -68,13 +75,14 @@
 (def triples-spec
   (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
                    :triple/nform ts/normal-form-nopath-spec)
-             :min-count 0))
+             :min-count 0
+             :kind vector?))
 
 (s/def ::construct triples-spec)
 
 (def construct-query-spec
   (smap->vec (s/keys :req-un [::construct ::ws/where]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ms/group-by
                               ::ms/order-by
@@ -83,12 +91,14 @@
                               ::ms/offset])))
 
 (s/def ::describe
-  (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec :min-count 1)
+  (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec
+                                          :min-count 1
+                                          :kind vector?)
         :wildcard ax/wildcard?))
 
 (def describe-query-spec
   (smap->vec (s/keys :req-un [::describe]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ws/where
                               ::ms/group-by
@@ -101,7 +111,7 @@
 
 (def ask-query-spec
   (smap->vec (s/keys :req-un [::ask ::ws/where]
-                     :opt-un [::ps/bases ::ps/prefixes
+                     :opt-un [::ps/base ::ps/prefixes
                               ::from ::from-named
                               ::ms/group-by
                               ::ms/order-by

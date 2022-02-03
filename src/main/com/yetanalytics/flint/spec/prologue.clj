@@ -9,10 +9,10 @@
        (or (re-matches ax/prefix-iri-ns-regex (name k))
            (= :$ k))))
 
-(s/def ::bases
-  (s/and (s/coll-of ax/iri?)
-         (s/conformer (partial map
-                               (fn [b] [:base [:iri b]])))))
+;; single `s/or` used to conform
+
+(s/def ::base
+  (s/or :iri ax/iri?))
 
 (s/def ::prefixes
   (s/and (s/map-of prefix-keyword? ax/iri?)

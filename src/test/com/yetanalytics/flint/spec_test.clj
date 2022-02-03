@@ -17,10 +17,13 @@
     `(testing "file:" ~@tests#)))
 
 (deftest query-tests
-  (make-tests qs/query-spec "dev-resources/test-fixtures/inputs/query/"))
+  (make-tests qs/query-spec
+              "dev-resources/test-fixtures/inputs/query/"))
 
 (deftest update-tests
-  (make-tests us/update-spec "dev-resources/test-fixtures/inputs/update/"))
+  (make-tests us/update-spec
+              "dev-resources/test-fixtures/inputs/update/"))
 
 (deftest update-request-tests
-  (make-tests us/update-request-spec "dev-resources/test-fixtures/inputs/update-request/"))
+  (make-tests (s/coll-of us/update-spec)
+              "dev-resources/test-fixtures/inputs/update-request/"))

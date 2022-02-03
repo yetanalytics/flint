@@ -1,12 +1,11 @@
 (ns com.yetanalytics.flint.format.expr-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.walk :as w]
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.expr]
             [com.yetanalytics.flint.format.where]))
 
 (defn- format-ast [expr-ast]
-  (w/postwalk (partial f/format-ast {:pretty? true}) expr-ast))
+  (f/format-ast expr-ast {:pretty? true}))
 
 (deftest format-test
   (testing "expression formatting"

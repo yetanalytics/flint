@@ -89,7 +89,7 @@
 
 (def obj-novar-spec
   (s/or :iri ax/iri?
-        :prefix-iri? ax/prefix-iri?
+        :prefix-iri ax/prefix-iri?
         :nil nil?
         :str-lit ax/valid-string?
         :num-lit number?

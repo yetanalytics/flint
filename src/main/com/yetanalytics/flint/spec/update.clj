@@ -6,31 +6,34 @@
             [com.yetanalytics.flint.spec.where    :as ws]))
 
 (def key-order-map
-  {:bases        0
-   :prefixes     1
+  {:base          0
+   :prefixes      1
    ;; Graph management
-   :load         2
-   :load-silent  2
-   :clear        2
-   :clear-silent 2
-   :drop         2
-   :drop-silent  2
-   :add          2
-   :add-silent   2
-   :move         2
-   :move-silent  2
-   :copy         2
-   :copy-silent  2
-   :to           3
+   :load          2
+   :load-silent   2
+   :clear         2
+   :clear-silent  2
+   :drop          2
+   :drop-silent   2
+   :add           2
+   :add-silent    2
+   :create        2
+   :create-silent 2
+   :move          2
+   :move-silent   2
+   :copy          2
+   :copy-silent   2
+   :to            3
+   :into          3
    ;; Graph modification
-   :insert-data  2
-   :delete-data  2
-   :delete-where 2
-   :with         2
-   :delete       3
-   :insert       4
-   :using        5
-   :where        6})
+   :insert-data   2
+   :delete-data   2
+   :delete-where  2
+   :with          2
+   :delete        3
+   :insert        4
+   :using         5
+   :where         6})
 
 (defn- qkey-comp
   [k1 k2]
@@ -66,33 +69,35 @@
 
 (def triples-spec
   (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
-                   :triple/nform ts/normal-form-nopath-spec)))
+                   :triple/nform ts/normal-form-nopath-spec)
+             :kind vector?))
 
 (def triples-novar-spec
   (s/coll-of (s/or :triple/vec ts/triple-vec-novar-spec
-                   :triple/nform ts/normal-form-novar-spec)))
+                   :triple/nform ts/normal-form-novar-spec)
+             :kind vector?))
 
 (def quad-spec
-  (s/and vector?
-         (s/tuple #{:graph}
-                  ax/var-or-iri-spec
-                  triples-spec)))
+  (s/tuple #{:graph}
+           ax/var-or-iri-spec
+           triples-spec))
 
 (def quad-novar-spec
-  (s/and vector?
-         (s/tuple #{:graph}
-                  ax/var-or-iri-spec
-                  triples-novar-spec)))
+  (s/tuple #{:graph}
+           ax/var-or-iri-spec
+           triples-novar-spec))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :triple/vec  ts/triple-vec-nopath-spec
                    :triple/nform ts/normal-form-nopath-spec
-                   :triple/quads quad-spec)))
+                   :triple/quads quad-spec)
+             :kind vector?))
 
 (def triple-or-quads-novar-spec
   (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-spec
                    :triple/nform ts/normal-form-novar-spec
-                   :triple/quads quad-novar-spec)))
+                   :triple/quads quad-novar-spec)
+             :kind vector?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
@@ -105,7 +110,7 @@
 
 (def load-update-spec
   (smap->vec (s/keys :req-un [(or ::load ::load-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes ::into])))
+                     :opt-un [::ps/base ::ps/prefixes ::into])))
 
 (s/def ::clear
   (s/or :iri ax/iri-spec
@@ -115,7 +120,7 @@
 
 (def clear-update-spec
   (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::drop
   (s/or :iri ax/iri-spec
@@ -125,35 +130,35 @@
 
 (def drop-update-spec
   (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::create ax/iri-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
   (smap->vec (s/keys :req-un [(or ::create ::create-silent)]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::add graph-or-default-spec)
 (s/def ::add-silent ::add)
 
 (def add-update-spec
   (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::move graph-or-default-spec)
 (s/def ::move-silent ::move)
 
 (def move-update-spec
   (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::copy graph-or-default-spec)
 (s/def ::copy-silent ::copy)
 
 (def copy-update-spec
   (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
@@ -163,19 +168,19 @@
 
 (def insert-data-update-spec
   (smap->vec (s/keys :req-un [::insert-data]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::delete-data triple-or-quads-novar-spec)
 
 (def delete-data-update-spec
   (smap->vec (s/keys :req-un [::delete-data]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::delete-where triple-or-quads-spec)
 
 (def delete-where-update-spec
   (smap->vec (s/keys :req-un [::delete-where]
-                     :opt-un [::ps/bases ::ps/prefixes])))
+                     :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-spec)
@@ -183,7 +188,7 @@
 (def modify-update-spec
   (smap->vec (s/keys :req-un [(or ::delete ::insert)
                               ::ws/where]
-                     :opt-un [::ps/bases
+                     :opt-un [::ps/base
                               ::ps/prefixes
                               ::delete
                               ::insert
@@ -206,7 +211,3 @@
         :delete-data-update  delete-data-update-spec
         :delete-where-update delete-where-update-spec
         :modify-update       modify-update-spec))
-
-;; single-branch `s/or` is used to conform values
-(def update-request-spec
-  (s/or :update-request (s/coll-of update-spec :min-count 1)))

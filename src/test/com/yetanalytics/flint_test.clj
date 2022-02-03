@@ -4,6 +4,7 @@
             [clojure.edn     :as edn]
             [clojure.java.io :as io]
             [com.yetanalytics.flint :as flint :refer [format-query
+                                                      format-update
                                                       format-updates]]))
 
 (defn- get-in-files
@@ -55,9 +56,9 @@
                             "dev-resources/test-fixtures/inputs/query/"))
 
 (deftest update-tests
-  (make-format-tests (comp format-updates vector)
+  (make-format-tests format-update
                      "dev-resources/test-fixtures/inputs/update/")
-  (make-format-pretty-tests (fn [up] (format-updates [up] :pretty? true))
+  (make-format-pretty-tests (fn [up] (format-update up :pretty? true))
                             "dev-resources/test-fixtures/inputs/update/"))
 
 (deftest update-request-tests
@@ -73,10 +74,10 @@
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-update
-           (try (format-updates [{}])
+           (try (format-update {})
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))
-    (is (= ::flint/invalid-update-request
+    (is (= ::flint/invalid-update
            (try (format-updates [{} {}])
                 (catch clojure.lang.ExceptionInfo e
                   (-> e ex-data :kind)))))))

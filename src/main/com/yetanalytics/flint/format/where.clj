@@ -8,50 +8,50 @@
             [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.values]))
 
-(defmethod f/format-ast :where-sub/select [{:keys [pretty?]} [_ sub-select]]
+(defmethod f/format-ast-node :where-sub/select [{:keys [pretty?]} [_ sub-select]]
   (-> sub-select
       (f/join-clauses pretty?)
       (f/wrap-in-braces pretty?)))
 
-(defmethod f/format-ast :where-sub/where [{:keys [pretty?]} [_ sub-where]]
+(defmethod f/format-ast-node :where-sub/where [{:keys [pretty?]} [_ sub-where]]
   (-> sub-where
       (f/join-clauses pretty?)
       (f/wrap-in-braces pretty?)))
 
-(defmethod f/format-ast :where-sub/empty [_ _]
+(defmethod f/format-ast-node :where-sub/empty [_ _]
   "{}")
 
-(defmethod f/format-ast :where/recurse [_ [_ pattern]]
+(defmethod f/format-ast-node :where/recurse [_ [_ pattern]]
   pattern)
 
-(defmethod f/format-ast :where/union [{:keys [pretty?]} [_ patterns]]
+(defmethod f/format-ast-node :where/union [{:keys [pretty?]} [_ patterns]]
   (if pretty?
     (cstr/join "\nUNION\n" patterns)
     (cstr/join " UNION " patterns)))
 
-(defmethod f/format-ast :where/optional [_ [_ pattern]]
+(defmethod f/format-ast-node :where/optional [_ [_ pattern]]
   (str "OPTIONAL " pattern))
 
-(defmethod f/format-ast :where/minus [_ [_ pattern]]
+(defmethod f/format-ast-node :where/minus [_ [_ pattern]]
   (str "MINUS " pattern))
 
-(defmethod f/format-ast :where/graph [_ [_ [iri pattern]]]
+(defmethod f/format-ast-node :where/graph [_ [_ [iri pattern]]]
   (str "GRAPH " iri " " pattern))
 
-(defmethod f/format-ast :where/service [_ [_ [iri pattern]]]
+(defmethod f/format-ast-node :where/service [_ [_ [iri pattern]]]
   (str "SERVICE " iri " " pattern))
 
-(defmethod f/format-ast :where/service-silent [_ [_ [iri pattern]]]
+(defmethod f/format-ast-node :where/service-silent [_ [_ [iri pattern]]]
   (str "SERVICE SILENT " iri " " pattern))
 
-(defmethod f/format-ast :where/filter [_ [_ expr]]
+(defmethod f/format-ast-node :where/filter [_ [_ expr]]
   (str "FILTER " expr))
 
-(defmethod f/format-ast :where/bind [_ [_ expr-as-var]]
+(defmethod f/format-ast-node :where/bind [_ [_ expr-as-var]]
   (str "BIND (" expr-as-var ")"))
 
-(defmethod f/format-ast :where/values [_ [_ values]]
+(defmethod f/format-ast-node :where/values [_ [_ values]]
   (str "VALUES " values))
 
-(defmethod f/format-ast :where [_ [_ where]]
+(defmethod f/format-ast-node :where [_ [_ where]]
   (str "WHERE " where))

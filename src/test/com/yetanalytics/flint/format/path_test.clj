@@ -1,11 +1,10 @@
 (ns com.yetanalytics.flint.format.path-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.walk :as w]
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.path]))
 
 (defn- format-ast [ast]
-  (w/postwalk (partial f/format-ast {}) ast))
+  (f/format-ast ast {}))
 
 (deftest format-test
   (testing "formatting paths"
@@ -69,8 +68,9 @@
 
 (deftest invalid-test
   (testing "attempting to format an invalid path"
-    (is (try (w/postwalk f/format-ast
-                         '[:path/branch
-                           [[:path/op oh-no]
-                            [:path/args [[:path/terminal [:rdf-type 'a]]]]]])
+    (is (try (f/format-ast
+              '[:path/branch
+                [[:path/op oh-no]
+                 [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
+              {})
              (catch IllegalArgumentException _ true)))))

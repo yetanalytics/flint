@@ -3,13 +3,10 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.axiom]))
 
-(defmethod f/format-ast :base [_ [_ value]]
+(defmethod f/format-ast-node :base [_ [_ value]]
   (str "BASE " value))
 
-(defmethod f/format-ast :bases [{:keys [pretty?]} [_ bases]]
-  (f/join-clauses bases pretty?))
-
-(defmethod f/format-ast :prefix [_ [_ [prefix iri]]]
+(defmethod f/format-ast-node :prefix [_ [_ [prefix iri]]]
   (let [prefix-name (if (= :$ prefix) "" (name prefix))]
     (str "PREFIX " prefix-name ": " iri)))
 
@@ -29,7 +26,7 @@
          pre-strs
          paddings)))
 
-(defmethod f/format-ast :prefixes [{:keys [pretty?]} [_ prefixes]]
+(defmethod f/format-ast-node :prefixes [{:keys [pretty?]} [_ prefixes]]
   (if pretty?
     (cstr/join "\n" (align-prefixes prefixes))
     (cstr/join " " prefixes)))

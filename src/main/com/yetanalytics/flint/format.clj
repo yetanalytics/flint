@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.format
-  (:require [clojure.string :as cstr]))
+  (:require [clojure.string :as cstr]
+            [clojure.walk   :as w]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
@@ -38,14 +39,21 @@
   [clauses pretty?]
   (if pretty?
     (cstr/join "\n" clauses)
-    (cstr/join " " clauses )))
+    (cstr/join " " clauses)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Multimethods
+;; Formatting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmulti format-ast
+(defmulti format-ast-node
   "Convert the AST node into a string."
   (fn [_ x] (dispatch-ast-node x)))
 
-(defmethod format-ast :default [_ ast-node] ast-node)
+(defmethod format-ast-node :default [_ ast-node] ast-node)
+
+(defn format-ast
+  "Convert `ast` into a string, with `opts` including:
+     - `:xsd-prefix` the prefix of the XSD IRI, used in RDF literals.
+     - `:pretty?`    whether to add linebreaks or indents."
+  [ast opts]
+  (w/postwalk (partial format-ast-node opts) ast))

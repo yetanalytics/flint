@@ -9,37 +9,37 @@
             [com.yetanalytics.flint.format.where]
             [com.yetanalytics.flint.format.values]))
 
-(defmethod f/format-ast :construct [{:keys [pretty?]} [_ construct]]
+(defmethod f/format-ast-node :construct [{:keys [pretty?]} [_ construct]]
   (if (not-empty construct)
     (str "CONSTRUCT " (-> construct
                           (f/join-clauses pretty?)
                           (f/wrap-in-braces pretty?)))
     "CONSTRUCT"))
 
-(defmethod f/format-ast :describe/vars-or-iris [_ [_ var-or-iris]]
+(defmethod f/format-ast-node :describe/vars-or-iris [_ [_ var-or-iris]]
   (cstr/join " " var-or-iris))
 
-(defmethod f/format-ast :describe [_ [_ describe]]
+(defmethod f/format-ast-node :describe [_ [_ describe]]
   (str "DESCRIBE " describe))
 
-(defmethod f/format-ast :ask [_ _]
+(defmethod f/format-ast-node :ask [_ _]
   "ASK")
 
-(defmethod f/format-ast :from [_ [_ iri]]
+(defmethod f/format-ast-node :from [_ [_ iri]]
   (str "FROM " iri))
 
-(defmethod f/format-ast :from-named [{:keys [pretty?]} [_ iri-coll]]
+(defmethod f/format-ast-node :from-named [{:keys [pretty?]} [_ iri-coll]]
   (-> (map (fn [iri] (str "FROM NAMED " iri)) iri-coll)
       (f/join-clauses pretty?)))
 
-(defmethod f/format-ast :select-query [{:keys [pretty?]} [_ select-query]]
+(defmethod f/format-ast-node :select-query [{:keys [pretty?]} [_ select-query]]
   (f/join-clauses select-query pretty?))
 
-(defmethod f/format-ast :construct-query [{:keys [pretty?]} [_ construct-query]]
+(defmethod f/format-ast-node :construct-query [{:keys [pretty?]} [_ construct-query]]
   (f/join-clauses construct-query pretty?))
 
-(defmethod f/format-ast :describe-query [{:keys [pretty?]} [_ describe-query]]
+(defmethod f/format-ast-node :describe-query [{:keys [pretty?]} [_ describe-query]]
   (f/join-clauses describe-query pretty?))
 
-(defmethod f/format-ast :ask-query [{:keys [pretty?]} [_ ask-query]]
+(defmethod f/format-ast-node :ask-query [{:keys [pretty?]} [_ ask-query]]
   (f/join-clauses ask-query pretty?))

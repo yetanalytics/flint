@@ -1,7 +1,6 @@
 (ns com.yetanalytics.flint.format.where-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.string :as cstr]
-            [clojure.walk   :as w]
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.where]))
 
@@ -11,10 +10,10 @@
                             "    ?s ?p ?o ."
                             "    ?s ?p ?o ."
                             "}"])
-           (->> '[:where-sub/where
-                  [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]
-                   [:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]
-                (w/postwalk (partial f/format-ast {:pretty? true})))))
+           (-> '[:where-sub/where
+                 [[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]
+                  [:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]]]
+               (f/format-ast {:pretty? true}))))
     (is (= (cstr/join "\n" ["{"
                             "    ?s1 ?p1 ?o1 ."
                             "    ?s2 ?p2 ?o2a , ?o2b ."
@@ -50,51 +49,51 @@
                             "        (1 2)"
                             "    }"
                             "}"])
-           (->> '[:where-sub/where
-                  [[:triple/vec [[:var ?s1] [:var ?p1] [:var ?o1]]]
-                   [:triple/nform [:spo [[[:var ?s2]
-                                   [:po [[[:var ?p2]
-                                          [:o [[:var ?o2a] [:var ?o2b]]]]]]]]]]
-                   [:where/recurse
-                    [:where-sub/where [[:triple/vec [[:var ?s3] [:var ?p3] [:var ?o3]]]]]]
-                   [:where/union
-                    [[:where-sub/where
-                      [[:triple/vec [[:var ?s4] [:var ?p4] [:var ?o4]]]]]
-                     [:where-sub/where [[:triple/vec [[:var ?s5] [:var ?p5] [:var ?o5]]]]]]]
-                   [:where/optional
-                    [:where-sub/where [[:triple/vec [[:var ?s6] [:var ?p6] [:var ?o6]]]]]]
-                   [:where/minus
-                    [:where-sub/where [[:triple/vec [[:var ?s7] [:var ?p7] [:var ?o7]]]]]]
-                   [:where/graph
-                    [[:prefix-iri :ns/my-graph]
-                     [:where-sub/where [[:triple/vec [[:var ?s8] [:var ?p8] [:var ?o8]]]]]]]
-                   [:where/service
-                    [[:prefix-iri :ns/my-uri]
-                     [:where-sub/where [[:triple/vec [[:var ?s9] [:var ?p9] [:var ?o9]]]]]]]
-                   [:where/service-silent
-                    [[:prefix-iri :ns/my-uri]
-                     [:where-sub/where [[:triple/vec [[:var ?s10] [:var ?p10] [:var ?o10]]]]]]]
-                   [:where/bind
-                    [:expr/as-var
-                     [[:expr/branch
-                       [[:expr/op +]
-                        [:expr/args
-                         ([:expr/terminal [:num-lit 2]]
-                          [:expr/terminal [:num-lit 2]])]]]
-                      [:var ?foo]]]]
-                   [:where/filter
-                    [:expr/branch
-                     [[:expr/op =]
-                      [:expr/args
-                       ([:expr/terminal [:num-lit 2]]
-                        [:expr/terminal [:var ?bar]])]]]]
-                   [:where/filter
-                    [:expr/branch
-                     [[:expr/op ns:myfn]
-                      [:expr/args
-                       ([:expr/terminal [:num-lit 2]]
-                        [:expr/terminal [:var ?baz]])]]]]
-                   [:where/values
-                    [:values/map [[[:var ?x] [:var ?y]]
-                                  [[[:num-lit 1] [:num-lit 2]]]]]]]]
-                (w/postwalk (partial f/format-ast {:pretty? true})))))))
+           (-> '[:where-sub/where
+                 [[:triple/vec [[:var ?s1] [:var ?p1] [:var ?o1]]]
+                  [:triple/nform [:spo [[[:var ?s2]
+                                         [:po [[[:var ?p2]
+                                                [:o [[:var ?o2a] [:var ?o2b]]]]]]]]]]
+                  [:where/recurse
+                   [:where-sub/where [[:triple/vec [[:var ?s3] [:var ?p3] [:var ?o3]]]]]]
+                  [:where/union
+                   [[:where-sub/where
+                     [[:triple/vec [[:var ?s4] [:var ?p4] [:var ?o4]]]]]
+                    [:where-sub/where [[:triple/vec [[:var ?s5] [:var ?p5] [:var ?o5]]]]]]]
+                  [:where/optional
+                   [:where-sub/where [[:triple/vec [[:var ?s6] [:var ?p6] [:var ?o6]]]]]]
+                  [:where/minus
+                   [:where-sub/where [[:triple/vec [[:var ?s7] [:var ?p7] [:var ?o7]]]]]]
+                  [:where/graph
+                   [[:prefix-iri :ns/my-graph]
+                    [:where-sub/where [[:triple/vec [[:var ?s8] [:var ?p8] [:var ?o8]]]]]]]
+                  [:where/service
+                   [[:prefix-iri :ns/my-uri]
+                    [:where-sub/where [[:triple/vec [[:var ?s9] [:var ?p9] [:var ?o9]]]]]]]
+                  [:where/service-silent
+                   [[:prefix-iri :ns/my-uri]
+                    [:where-sub/where [[:triple/vec [[:var ?s10] [:var ?p10] [:var ?o10]]]]]]]
+                  [:where/bind
+                   [:expr/as-var
+                    [[:expr/branch
+                      [[:expr/op +]
+                       [:expr/args
+                        ([:expr/terminal [:num-lit 2]]
+                         [:expr/terminal [:num-lit 2]])]]]
+                     [:var ?foo]]]]
+                  [:where/filter
+                   [:expr/branch
+                    [[:expr/op =]
+                     [:expr/args
+                      ([:expr/terminal [:num-lit 2]]
+                       [:expr/terminal [:var ?bar]])]]]]
+                  [:where/filter
+                   [:expr/branch
+                    [[:expr/op ns:myfn]
+                     [:expr/args
+                      ([:expr/terminal [:num-lit 2]]
+                       [:expr/terminal [:var ?baz]])]]]]
+                  [:where/values
+                   [:values/map [[[:var ?x] [:var ?y]]
+                                 [[[:num-lit 1] [:num-lit 2]]]]]]]]
+               (f/format-ast {:pretty? true}))))))
