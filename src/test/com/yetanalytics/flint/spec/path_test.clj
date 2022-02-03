@@ -16,13 +16,13 @@
     (testing "branch structure"
       (are [path]
            (= [:path/branch
-               [[:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]
-                             [:path/terminal [:ax/prefix-iri :baz/qux]]]]]]
+               [[:path/paths [[:path/terminal [:ax/prefix-iri :foo/bar]]
+                              [:path/terminal [:ax/prefix-iri :baz/qux]]]]]]
               (update (s/conform ::ps/path path) 1 subvec 1 2))
         '(alt :foo/bar :baz/qux)
         '(cat :foo/bar :baz/qux))
       (are [path]
-           (= [:path/branch [[:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
+           (= [:path/branch [[:path/paths [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
               (update (s/conform ::ps/path path) 1 subvec 1 2))
         '(inv :foo/bar)
         '(not :foo/bar)
@@ -43,18 +43,18 @@
     (testing "branch nesting"
       (is (= [:path/branch
               [[:path/op 'alt]
-               [:path/args
+               [:path/paths
                 [[:path/branch
                   [[:path/op 'not]
-                   [:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
+                   [:path/paths [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
                  [:path/branch
                   [[:path/op 'cat]
-                   [:path/args [[:path/branch
-                                 [[:path/op 'inv]
-                                  [:path/args [[:path/terminal
-                                                [:ax/prefix-iri :baz/qux]]]]]]
-                                [:path/terminal
-                                 [:ax/prefix-iri :quu/bee]]]]]]]]]]
+                   [:path/paths [[:path/branch
+                                  [[:path/op 'inv]
+                                   [:path/paths [[:path/terminal
+                                                  [:ax/prefix-iri :baz/qux]]]]]]
+                                 [:path/terminal
+                                  [:ax/prefix-iri :quu/bee]]]]]]]]]]
              (s/conform
               ::ps/path
               '(alt (not :foo/bar) (cat (inv :baz/qux) :quu/bee))))))))

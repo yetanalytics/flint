@@ -5,7 +5,7 @@
 
 (defmethod f/format-ast-node :path/op [_ [_ op]] (keyword op))
 
-(defmethod f/format-ast-node :path/args [_ [_ args]] args)
+(defmethod f/format-ast-node :path/paths [_ [_ paths]] paths)
 
 (defn- parens-if-nests
   "Super-basic precedence comparison to wrap parens if there's an inner
@@ -15,15 +15,15 @@
     (str "(" arg ")")
     arg))
 
-(defmethod f/format-ast-node :path/branch [_ [_ [op args]]]
+(defmethod f/format-ast-node :path/branch [_ [_ [op paths]]]
   (case op
-    :alt (str "(" (cstr/join " | " args) ")")
-    :cat (str "(" (cstr/join " / " args) ")")
-    :inv (str "^" (first args))
-    :?   (-> args first parens-if-nests (str "?"))
-    :*   (-> args first parens-if-nests (str "*"))
-    :+   (-> args first parens-if-nests (str "+"))
-    :not (str "!" (cstr/join " | " args))))
+    :alt (str "(" (cstr/join " | " paths) ")")
+    :cat (str "(" (cstr/join " / " paths) ")")
+    :inv (str "^" (first paths))
+    :?   (-> paths first parens-if-nests (str "?"))
+    :*   (-> paths first parens-if-nests (str "*"))
+    :+   (-> paths first parens-if-nests (str "+"))
+    :not (str "!" (cstr/join " | " paths))))
 
 (defmethod f/format-ast-node :path/terminal [_ [_ value]]
   value)

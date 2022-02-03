@@ -20,11 +20,7 @@
                (s/cat :path/op    #{'alt}
                       :path/paths (s/* ::path-neg)))
          (s/conformer second)
-         (s/conformer (fn [{op    :path/op
-                            path  :path/path
-                            paths :path/paths}]
-                        [[:path/op op]
-                         [:path/args (if path [path] paths)]])))))
+         (s/conformer #(into [] %)))))
 
 (s/def ::path
   (s/or :path/terminal
@@ -47,4 +43,4 @@
                             path  :path/path
                             paths :path/paths}]
                         [[:path/op op]
-                         [:path/args (if path [path] paths)]])))))
+                         [:path/paths (if path [path] paths)]])))))

@@ -31,7 +31,7 @@
                  [:triple/po
                   [[[:triple/path
                      [:path/branch [[:path/op cat]
-                                    [:path/args
+                                    [:path/paths
                                      [[:path/terminal [:ax/prefix-iri :x/one]]
                                       [:path/terminal [:ax/prefix-iri :x/two]]]]]]]
                     [:triple/o [[:ax/var ?o]]]]]]]]]
@@ -40,7 +40,7 @@
       (is (= '[[:ax/var ?s]
                [:triple/path
                 [:path/branch [[:path/op cat]
-                               [:path/args
+                               [:path/paths
                                 [[:path/terminal [:ax/prefix-iri :x/one]]
                                  [:path/terminal [:ax/prefix-iri :x/two]]]]]]]
                [:ax/var ?o]]
