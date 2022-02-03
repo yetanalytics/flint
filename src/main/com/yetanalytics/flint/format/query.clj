@@ -32,14 +32,14 @@
   (-> (map (fn [iri] (str "FROM NAMED " iri)) iri-coll)
       (f/join-clauses pretty?)))
 
-(defmethod f/format-ast-node :select-query [{:keys [pretty?]} [_ select-query]]
+(defmethod f/format-ast-node :query/select [{:keys [pretty?]} [_ select-query]]
   (f/join-clauses select-query pretty?))
 
-(defmethod f/format-ast-node :construct-query [{:keys [pretty?]} [_ construct-query]]
+(defmethod f/format-ast-node :query/construct [{:keys [pretty?]} [_ construct-query]]
   (f/join-clauses construct-query pretty?))
 
-(defmethod f/format-ast-node :describe-query [{:keys [pretty?]} [_ describe-query]]
+(defmethod f/format-ast-node :query/describe [{:keys [pretty?]} [_ describe-query]]
   (f/join-clauses describe-query pretty?))
 
-(defmethod f/format-ast-node :ask-query [{:keys [pretty?]} [_ ask-query]]
+(defmethod f/format-ast-node :query/ask [{:keys [pretty?]} [_ ask-query]]
   (f/join-clauses ask-query pretty?))

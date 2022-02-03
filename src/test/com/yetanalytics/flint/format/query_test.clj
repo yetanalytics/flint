@@ -19,7 +19,7 @@
                             "VALUES ?z {"
                             "    1"
                             "}"])
-           (->> '[:select-query
+           (->> '[:query/select
                   [[:prefixes [[:prologue/prefix [:foo [:ax/iri "<http://example.org/foo/>"]]]]]
                    [:select [:select/var-or-exprs [[:ax/var ?x]]]]
                    [:from [:ax/iri "<http://example.org/my-graph/>"]]
@@ -41,7 +41,7 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
-           (->> '[:construct-query
+           (->> '[:query/construct
                   [[:construct [[:triple/vec [[:ax/var ?x]
                                               [:ax/var ?y]
                                               [:ax/var ?z]]]]]
@@ -55,7 +55,7 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
-           (->> '[:construct-query
+           (->> '[:query/construct
                   [[:construct []]
                    [:from [:ax/iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
@@ -66,7 +66,7 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
-           (->> '[:construct-query
+           (->> '[:query/construct
                   [[:construct []]
                    [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
                                                             [:ax/var ?y]
@@ -79,7 +79,7 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
-           (->> '[:describe-query
+           (->> '[:query/describe
                   [[:describe [:describe/vars-or-iris [[:ax/var ?x] [:ax/var ?y]]]]
                    [:from-named [[:ax/iri "<http://example.org/my-graph/>"]
                                  [:ax/iri "<http://example.org/my-graph-2/>"]]]
@@ -94,7 +94,7 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
-           (->> '[:ask-query
+           (->> '[:query/ask
                   [[:ask []]
                    [:from-named [[:ax/iri "<http://example.org/my-graph/>"]
                                  [:ax/iri "<http://example.org/my-graph-2/>"]]]
@@ -106,7 +106,7 @@
                             "WHERE {"
                             "    ?x ?y ?z ."
                             "}"])
-           (->> '[:ask-query
+           (->> '[:query/ask
                   [[:ask []]
                    [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
                                                             [:ax/var ?y]

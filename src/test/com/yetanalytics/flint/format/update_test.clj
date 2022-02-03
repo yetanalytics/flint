@@ -12,7 +12,7 @@
     (is (= (cstr/join "\n" ["INSERT DATA {"
                             "    foo:x dc:title \"Title\" ."
                             "}"])
-           (->> '[:insert-data-update
+           (->> '[:update/insert-data
                   [[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
                                                 [:ax/prefix-iri :dc/title]
                                                 [:ax/str-lit "Title"]]]]]]]
@@ -23,7 +23,7 @@
                             "        foo:x dc:title \"Title\" ."
                             "    }"
                             "}"])
-           (->> '[:delete-data-update
+           (->> '[:update/delete-data
                   [[:delete-data
                     [[:triple/quads [:graph
                                      [:ax/iri "<http://example.org>"]
@@ -36,7 +36,7 @@
                             "    ?x ?y ?z ."
                             "    ?i ?j ?k ."
                             "}"])
-           (->> '[:delete-where-update
+           (->> '[:update/delete-where
                   [[:delete-where
                     [[:triple/vec [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
                      [:triple/vec [[:ax/var ?i] [:ax/var ?j] [:ax/var ?k]]]]]]]
@@ -49,7 +49,7 @@
                             "        ?q ?r ?s ."
                             "    }"
                             "}"])
-           (->> '[:delete-where-update
+           (->> '[:update/delete-where
                   [[:delete-where
                     [[:triple/vec
                       [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
@@ -73,7 +73,7 @@
                             "WHERE {"
                             "    ?a ?b ?c ."
                             "}"])
-           (->> '[:modify-update
+           (->> '[:update/modify
                   [[:insert
                     [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
                    [:using
@@ -94,7 +94,7 @@
                             "    ?x ?y ?z ."
                             "    ?a ?b ?c ."
                             "}"])
-           (->> '[:modify-update
+           (->> '[:update/modify
                   [[:with [:ax/iri "<http://example.org>"]]
                    [:delete [[:triple/vec [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]]]
                    [:insert [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
@@ -112,100 +112,100 @@
   (testing "format graph management updates"
     (testing "- LOAD"
       (is (= "LOAD <http://example.org/1>\nINTO <http://example.org/2>"
-             (->> '[:load-update
+             (->> '[:update/load
                     [[:load [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:into [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast)))
       (is (= "LOAD SILENT <http://example.org/1>\nINTO <http://example.org/2>"
-             (->> '[:load-update
+             (->> '[:update/load
                     [[:load-silent [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:into [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast))))
     (testing "- CLEAR"
       (is (= "CLEAR DEFAULT"
-             (->> '[:clear-update
+             (->> '[:update/clear
                     [[:clear [:update/kw :default]]]]
                   format-ast)))
       (is (= "CLEAR NAMED"
-             (->> '[:clear-update
+             (->> '[:update/clear
                     [[:clear [:update/kw :named]]]]
                   format-ast)))
       (is (= "CLEAR ALL"
-             (->> '[:clear-update
+             (->> '[:update/clear
                     [[:clear [:update/kw :all]]]]
                   format-ast)))
       (is (= "CLEAR <http://example.org>"
-             (->> '[:clear-update
+             (->> '[:update/clear
                     [[:clear [:ax/iri "<http://example.org>"]]]]
                   format-ast)))
       (is (= "CLEAR SILENT <http://example.org>"
-             (->> '[:clear-update
+             (->> '[:update/clear
                     [[:clear-silent [:ax/iri "<http://example.org>"]]]]
                   format-ast)))
-      (is (try (->> '[:clear-update
+      (is (try (->> '[:update/clear
                       [[:clear [:update/kw :bad]]]]
                     format-ast)
                (catch IllegalArgumentException _ true))))
     (testing "- DROP"
       (is (= "DROP DEFAULT"
-             (->> '[:drop-update
+             (->> '[:update/drop
                     [[:drop [:update/kw :default]]]]
                   format-ast)))
       (is (= "DROP NAMED"
-             (->> '[:drop-update
+             (->> '[:update/drop
                     [[:drop [:update/kw :named]]]]
                   format-ast)))
       (is (= "DROP ALL"
-             (->> '[:drop-update
+             (->> '[:update/drop
                     [[:drop [:update/kw :all]]]]
                   format-ast)))
       (is (= "DROP <http://example.org>"
-             (->> '[:drop-update
+             (->> '[:update/drop
                     [[:drop [:ax/iri "<http://example.org>"]]]]
                   format-ast)))
       (is (= "DROP SILENT <http://example.org>"
-             (->> '[:drop-update
+             (->> '[:update/drop
                     [[:drop-silent [:ax/iri "<http://example.org>"]]]]
                   format-ast))))
     (testing "- CREATE"
       (is (= "CREATE <http://example.org>"
-             (->> '[:create-update
+             (->> '[:update/create
                     [[:create [:ax/iri "<http://example.org>"]]]]
                   format-ast)))
       (is (= "CREATE SILENT <http://example.org>"
-             (->> '[:create-update
+             (->> '[:update/create
                     [[:create-silent [:ax/iri "<http://example.org>"]]]]
                   format-ast))))
     (testing "- ADD"
       (is (= "ADD <http://example.org/1>\nTO <http://example.org/2>"
-             (->> '[:add-update
+             (->> '[:update/add
                     [[:add [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:to [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast)))
       (is (= "ADD SILENT <http://example.org/1>\nTO <http://example.org/2>"
-             (->> '[:add-update
+             (->> '[:update/add
                     [[:add-silent [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:to [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast))))
     (testing "- COPY"
       (is (= "COPY <http://example.org/1>\nTO <http://example.org/2>"
-             (->> '[:copy-update
+             (->> '[:update/copy
                     [[:copy [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:to [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast)))
       (is (= "COPY SILENT <http://example.org/1>\nTO <http://example.org/2>"
-             (->> '[:copy-update
+             (->> '[:update/copy
                     [[:copy-silent [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:to [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast))))
     (testing "- MOVE"
       (is (= "MOVE <http://example.org/1>\nTO <http://example.org/2>"
-             (->> '[:move-update
+             (->> '[:update/move
                     [[:move [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:to [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast)))
       (is (= "MOVE SILENT <http://example.org/1>\nTO <http://example.org/2>"
-             (->> '[:move-update
+             (->> '[:update/move
                     [[:move-silent [:update/named-graph [:ax/iri "<http://example.org/1>"]]]
                      [:to [:update/named-graph [:ax/iri "<http://example.org/2>"]]]]]
                   format-ast))))))

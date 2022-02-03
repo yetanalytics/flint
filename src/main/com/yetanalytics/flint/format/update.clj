@@ -84,25 +84,25 @@
 (defmethod f/format-ast-node :copy-silent [_ [_ copy-silent]]
   (str "COPY SILENT " copy-silent))
 
-(defmethod f/format-ast-node :load-update [{:keys [pretty?]} [_ load-update]]
+(defmethod f/format-ast-node :update/load [{:keys [pretty?]} [_ load-update]]
   (f/join-clauses load-update pretty?))
 
-(defmethod f/format-ast-node :clear-update [{:keys [pretty?]} [_ clear-update]]
+(defmethod f/format-ast-node :update/clear [{:keys [pretty?]} [_ clear-update]]
   (f/join-clauses clear-update pretty?))
 
-(defmethod f/format-ast-node :drop-update [{:keys [pretty?]} [_ drop-update]]
+(defmethod f/format-ast-node :update/drop [{:keys [pretty?]} [_ drop-update]]
   (f/join-clauses drop-update pretty?))
 
-(defmethod f/format-ast-node :create-update [{:keys [pretty?]} [_ create-update]]
+(defmethod f/format-ast-node :update/create [{:keys [pretty?]} [_ create-update]]
   (f/join-clauses create-update pretty?))
 
-(defmethod f/format-ast-node :add-update [{:keys [pretty?]} [_ add-update]]
+(defmethod f/format-ast-node :update/add [{:keys [pretty?]} [_ add-update]]
   (f/join-clauses add-update pretty?))
 
-(defmethod f/format-ast-node :move-update [{:keys [pretty?]} [_ move-update]]
+(defmethod f/format-ast-node :update/move [{:keys [pretty?]} [_ move-update]]
   (f/join-clauses move-update pretty?))
 
-(defmethod f/format-ast-node :copy-update [{:keys [pretty?]} [_ copy-update]]
+(defmethod f/format-ast-node :update/copy [{:keys [pretty?]} [_ copy-update]]
   (f/join-clauses copy-update pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -130,16 +130,16 @@
 (defmethod f/format-ast-node :insert [{:keys [pretty?]} [_ insert]]
   (str "INSERT " (format-quads insert pretty?)))
 
-(defmethod f/format-ast-node :insert-data-update [{:keys [pretty?]} [_ id-update]]
+(defmethod f/format-ast-node :update/insert-data [{:keys [pretty?]} [_ id-update]]
   (f/join-clauses id-update pretty?))
 
-(defmethod f/format-ast-node :delete-data-update [{:keys [pretty?]} [_ dd-update]]
+(defmethod f/format-ast-node :update/delete-data [{:keys [pretty?]} [_ dd-update]]
   (f/join-clauses dd-update pretty?))
 
-(defmethod f/format-ast-node :delete-where-update [{:keys [pretty?]} [_ dw-update]]
+(defmethod f/format-ast-node :update/delete-where [{:keys [pretty?]} [_ dw-update]]
   (f/join-clauses dw-update pretty?))
 
-(defmethod f/format-ast-node :modify-update [{:keys [pretty?]} [_ mod-update]]
+(defmethod f/format-ast-node :update/modify [{:keys [pretty?]} [_ mod-update]]
   (f/join-clauses mod-update pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

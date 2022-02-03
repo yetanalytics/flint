@@ -200,14 +200,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def update-spec
-  (s/or :load-update   load-update-spec
-        :clear-update  clear-update-spec
-        :drop-update   drop-update-spec
-        :create-update create-update-spec
-        :add-update    add-update-spec
-        :move-update   move-update-spec
-        :copy-update   copy-update-spec
-        :insert-data-update  insert-data-update-spec
-        :delete-data-update  delete-data-update-spec
-        :delete-where-update delete-where-update-spec
-        :modify-update       modify-update-spec))
+  (s/or :update/load   load-update-spec
+        :update/clear  clear-update-spec
+        :update/drop   drop-update-spec
+        :update/create create-update-spec
+        :update/add    add-update-spec
+        :update/move   move-update-spec
+        :update/copy   copy-update-spec
+        :update/insert-data  insert-data-update-spec
+        :update/delete-data  delete-data-update-spec
+        :update/delete-where delete-where-update-spec
+        :update/modify       modify-update-spec))

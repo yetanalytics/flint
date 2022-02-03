@@ -120,7 +120,7 @@
                               ::ms/offset])))
 
 (def query-spec
-  (s/or :select-query    select-query-spec
-        :construct-query construct-query-spec
-        :describe-query  describe-query-spec
-        :ask-query       ask-query-spec))
+  (s/or :query/select    select-query-spec
+        :query/construct construct-query-spec
+        :query/describe  describe-query-spec
+        :query/ask       ask-query-spec))
