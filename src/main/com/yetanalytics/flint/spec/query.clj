@@ -44,8 +44,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::from
-  (s/and (s/or :single ax/iri-spec
-               :coll   (s/and (s/coll-of ax/iri-spec :count 1 :kind vector?)
+  (s/and (s/or :from/single ax/iri-spec
+               :from/coll   (s/and (s/coll-of ax/iri-spec
+                                              :count 1
+                                              :kind vector?)
                               (s/conformer first)))
          (s/conformer second)))
 
@@ -94,7 +96,7 @@
   (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec
                                           :min-count 1
                                           :kind vector?)
-        :wildcard ax/wildcard?))
+        :ax/wildcard ax/wildcard?))
 
 (def describe-query-spec
   (smap->vec (s/keys :req-un [::describe]
@@ -120,7 +122,7 @@
                               ::ms/offset])))
 
 (def query-spec
-  (s/or :select-query    select-query-spec
-        :construct-query construct-query-spec
-        :describe-query  describe-query-spec
-        :ask-query       ask-query-spec))
+  (s/or :query/select    select-query-spec
+        :query/construct construct-query-spec
+        :query/describe  describe-query-spec
+        :query/ask       ask-query-spec))

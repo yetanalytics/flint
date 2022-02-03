@@ -13,7 +13,7 @@
 (defmethod f/format-ast-node :triple/nform [_ [_ nform]]
   nform)
 
-(defmethod f/format-ast-node :spo [{:keys [pretty?]} [_ spo]]
+(defmethod f/format-ast-node :triple/spo [{:keys [pretty?]} [_ spo]]
   (if pretty?
     (str (->> spo
               (map (fn [[s po]]
@@ -28,11 +28,11 @@
               (cstr/join " . "))
          " .")))
 
-(defmethod f/format-ast-node :po [{:keys [pretty?]} [_ po]]
+(defmethod f/format-ast-node :triple/po [{:keys [pretty?]} [_ po]]
   (let [join-sep (if pretty? " ;\n" " ; ")]
     (->> po
          (map (fn [[p o]] (str p " " o)))
          (cstr/join join-sep))))
 
-(defmethod f/format-ast-node :o [_ [_ o]]
+(defmethod f/format-ast-node :triple/o [_ [_ o]]
   (->> o (cstr/join " , ")))

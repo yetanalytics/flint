@@ -75,10 +75,10 @@
 ;; Composite specs
 
 (def iri-spec
-  (s/or :iri iri?
-        :prefix-iri prefix-iri?))
+  (s/or :ax/iri iri?
+        :ax/prefix-iri prefix-iri?))
 
 (def var-or-iri-spec
-  (s/or :var variable?
-        :iri iri?
-        :prefix-iri prefix-iri?))
+  (s/or :ax/var variable?
+        :ax/iri iri?
+        :ax/prefix-iri prefix-iri?))

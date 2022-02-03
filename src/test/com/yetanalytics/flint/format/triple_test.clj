@@ -13,18 +13,21 @@
              "?s2 ?p1 ?o1 , ?o2 ;"
              "    ?p2 ?o1 , ?o2 ."])
            (f/format-ast
-            '[:triple/nform [:spo [[[:iri "<http://example.org/supercalifragilisticexpialidocious>"]
-                                    [:po [[[:var ?p1]
-                                           [:o [[:var ?o1] [:var ?o2]]]]
-                                          [[:var ?p2]
-                                           [:o [[:var ?o1] [:var ?o2]]]]]]]
-                                   [[:var ?s2]
-                                    [:po [[[:var ?p1]
-                                           [:o [[:var ?o1] [:var ?o2]]]]
-                                          [[:var ?p2]
-                                           [:o [[:var ?o1] [:var ?o2]]]]]]]]]]
+            '[:triple/nform
+              [:triple/spo [[[:ax/iri "<http://example.org/supercalifragilisticexpialidocious>"]
+                             [:triple/po
+                              [[[:ax/var ?p1]
+                                [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
+                               [[:ax/var ?p2]
+                                [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]
+                            [[:ax/var ?s2]
+                             [:triple/po
+                              [[[:ax/var ?p1]
+                                [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
+                               [[:ax/var ?p2]
+                                [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]]]]
             {:pretty? true})))
     (is (= "?s ?p ?o ."
            (f/format-ast
-            '[:triple/vec [[:var ?s] [:var ?p] [:var ?o]]]
+            '[:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]
             {:pretty? true})))))

@@ -12,9 +12,10 @@
 ;; single `s/or` used to conform
 
 (s/def ::base
-  (s/or :iri ax/iri?))
+  (s/or :ax/iri ax/iri?))
 
 (s/def ::prefixes
   (s/and (s/map-of prefix-keyword? ax/iri?)
          (s/conformer (partial map
-                               (fn [[pre iri]] [:prefix [pre [:iri iri]]])))))
+                               (fn [[pre iri]]
+                                 [:prologue/prefix [pre [:ax/iri iri]]])))))

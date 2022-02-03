@@ -5,29 +5,29 @@
 
 (deftest modifier-conform-test
   (testing "Conforming solution modifiers"
-    (is (= [[:mod/expr [:expr/terminal [:var '?foo]]]]
+    (is (= [[:mod/expr [:expr/terminal [:ax/var '?foo]]]]
            (s/conform ::ms/group-by ['?foo])))
     (is (= '[[:mod/expr-as-var
               [:expr/as-var
                [[:expr/branch [[:expr/op +]
-                               [:expr/args ([:expr/terminal [:num-lit 2]]
-                                            [:expr/terminal [:num-lit 2]])]]]
-                [:var ?foo]]]]]
+                               [:expr/args ([:expr/terminal [:ax/num-lit 2]]
+                                            [:expr/terminal [:ax/num-lit 2]])]]]
+                [:ax/var ?foo]]]]]
            (s/conform ::ms/group-by ['[(+ 2 2) ?foo]])))
     (is (= '[[:mod/asc-desc
               [[:mod/op asc]
-               [:mod/expr [:expr/terminal [:var ?bar]]]]]]
+               [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]
            (s/conform ::ms/order-by '[(asc ?bar)])))
-    (is (= '[[:var ?foo]
+    (is (= '[[:ax/var ?foo]
              [:mod/asc-desc
               [[:mod/op asc]
-               [:mod/expr [:expr/terminal [:var ?bar]]]]]]
+               [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]
            (s/conform ::ms/order-by '[?foo (asc ?bar)])))
-    (is (= '[[:expr/terminal [:num-lit 1]]
-             [:expr/terminal [:num-lit 2]]
-             [:expr/terminal [:num-lit 3]]]
+    (is (= '[[:expr/terminal [:ax/num-lit 1]]
+             [:expr/terminal [:ax/num-lit 2]]
+             [:expr/terminal [:ax/num-lit 3]]]
            (s/conform ::ms/having '[1 2 3])))
-    (is (= [:num-lit 10]
+    (is (= [:ax/num-lit 10]
            (s/conform ::ms/limit 10)))
-    (is (= [:num-lit 2]
+    (is (= [:ax/num-lit 2]
            (s/conform ::ms/offset 2)))))

@@ -22,22 +22,22 @@
     (is (= [{:iri :bar
              :prefix :$
              :prefixes {:foo "<http://foo.org/>"}
-             :path [:select-query :where :where-sub/where :triple/vec]}]
+             :path [:query/select :where :where-sub/where :triple/vec]}]
            (->> (assoc query :where '[[:bar :a ?y]])
                 (s/conform qs/query-spec)
                 (pre/validate-prefixes (:prefixes query)))))
     (is (= [{:iri      :fee/bar
              :prefix   :fee
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:select-query :where :where-sub/where :triple/vec]}
+             :path     [:query/select :where :where-sub/where :triple/vec]}
             {:iri      :fii/bar
              :prefix   :fii
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:select-query :where :where-sub/where :where/union :where-sub/where :triple/vec]}
+             :path     [:query/select :where :where-sub/where :where/union :where-sub/where :triple/vec]}
             {:iri      :fum/bar
              :prefix   :fum
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:select-query :where :where-sub/where :where/union :where-sub/where :triple/vec]}]
+             :path     [:query/select :where :where-sub/where :where/union :where-sub/where :triple/vec]}]
            (->> query
                 (s/conform qs/query-spec)
                 (pre/validate-prefixes (:prefixes query)))))))

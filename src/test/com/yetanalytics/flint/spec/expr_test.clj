@@ -11,15 +11,15 @@
       (is (s/valid? ::es/expr "bar"))
       (is (s/valid? ::es/expr 2))
       (is (s/valid? ::es/expr false))
-      (is (= [:expr/terminal [:var '?foo]]
+      (is (= [:expr/terminal [:ax/var '?foo]]
              (s/conform ::es/expr '?foo)))
-      (is (= [:expr/terminal [:dt-lit #inst "2022-01-19T22:20:49Z"]]
+      (is (= [:expr/terminal [:ax/dt-lit #inst "2022-01-19T22:20:49Z"]]
              (s/conform ::es/expr #inst "2022-01-19T22:20:49Z")))
-      (is (= [:expr/terminal [:num-lit 100]]
+      (is (= [:expr/terminal [:ax/num-lit 100]]
              (s/conform ::es/expr 100)))
-      (is (= [:expr/terminal [:bool-lit true]]
+      (is (= [:expr/terminal [:ax/bool-lit true]]
              (s/conform ::es/expr true)))
-      (is (= [:expr/terminal [:str-lit "ok"]]
+      (is (= [:expr/terminal [:ax/str-lit "ok"]]
              (s/conform ::es/expr "ok"))))
     (is (= [:expr/branch [[:expr/op 'rand]
                           [:expr/args []]]]
@@ -32,50 +32,50 @@
                                                       [:expr/args []]]]]]]]
            (s/conform ::es/expr '(bnode (rand)))))
     (is (= [:expr/branch [[:expr/op 'count]
-                          [:expr/args [[:expr/terminal [:var '?foo]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
            (s/conform ::es/expr '(count ?foo))))
     (is (= [:expr/branch [[:expr/op 'count]
-                          [:expr/args [[:expr/terminal [:wildcard '*]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/wildcard '*]]]]]]
            (s/conform ::es/expr '(count *))))
     (is (= [:expr/branch [[:expr/op 'bound]
-                          [:expr/args [[:expr/terminal [:var '?foo]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
            (s/conform ::es/expr '(bound ?foo))))
     (is (= [:expr/branch [[:expr/op 'exists]
                           [:expr/args [[:where-sub/where
-                                        [[:triple/vec '[[:var ?s]
-                                                        [:var ?p]
-                                                        [:var ?o]]]]]]]]]
+                                        [[:triple/vec '[[:ax/var ?s]
+                                                        [:ax/var ?p]
+                                                        [:ax/var ?o]]]]]]]]]
            (s/conform ::es/expr '(exists [[?s ?p ?o]]))))
     (is (= [:expr/branch [[:expr/op 'contains]
-                          [:expr/args [[:expr/terminal [:str-lit "foo"]]
-                                       [:expr/terminal [:str-lit "foobar"]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/str-lit "foo"]]
+                                       [:expr/terminal [:ax/str-lit "foobar"]]]]]]
            (s/conform ::es/expr '(contains "foo" "foobar"))))
     (is (= [:expr/branch [[:expr/op 'regex]
-                          [:expr/args [[:expr/terminal [:var '?foo]]
-                                       [:expr/terminal [:str-lit "bar"]]
-                                       [:expr/terminal [:str-lit "i"]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/var '?foo]]
+                                       [:expr/terminal [:ax/str-lit "bar"]]
+                                       [:expr/terminal [:ax/str-lit "i"]]]]]]
            (s/conform ::es/expr '(regex ?foo "bar" "i"))))
     (is (= [:expr/branch [[:expr/op 'group-concat]
-                          [:expr/args [[:expr/terminal [:var '?foo]]
+                          [:expr/args [[:expr/terminal [:ax/var '?foo]]
                                        [:expr/terminal [:expr/kwarg
                                                         [[:expr/k :separator]
                                                          [:expr/v ";"]]]]]]]]
            (s/conform ::es/expr '(group-concat ?foo :separator ";"))))
     (is (= [:expr/branch [[:expr/op 'if]
-                          [:expr/args [[:expr/terminal [:bool-lit true]]
-                                       [:expr/terminal [:num-lit 1]]
-                                       [:expr/terminal [:num-lit 0]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/bool-lit true]]
+                                       [:expr/terminal [:ax/num-lit 1]]
+                                       [:expr/terminal [:ax/num-lit 0]]]]]]
            (s/conform ::es/expr '(if true 1 0))))
     (is (= [:expr/branch [[:expr/op '+]
-                          [:expr/args [[:expr/terminal [:num-lit 1]]
-                                       [:expr/terminal [:num-lit 2]]
+                          [:expr/args [[:expr/terminal [:ax/num-lit 1]]
+                                       [:expr/terminal [:ax/num-lit 2]]
                                        [:expr/branch [[:expr/op '*]
-                                                      [:expr/args [[:expr/terminal [:num-lit 3]]
-                                                                   [:expr/terminal [:num-lit 4]]]]]]]]]]
+                                                      [:expr/args [[:expr/terminal [:ax/num-lit 3]]
+                                                                   [:expr/terminal [:ax/num-lit 4]]]]]]]]]]
            (s/conform ::es/expr '(+ 1 2 (* 3 4)))))
-    (is (= [:expr/branch [[:expr/op [:prefix-iri :foo/my-custom-fn]]
-                          [:expr/args [[:expr/terminal [:num-lit 2]]
-                                       [:expr/terminal [:num-lit 2]]]]]]
+    (is (= [:expr/branch [[:expr/op [:ax/prefix-iri :foo/my-custom-fn]]
+                          [:expr/args [[:expr/terminal [:ax/num-lit 2]]
+                                       [:expr/terminal [:ax/num-lit 2]]]]]]
            (s/conform ::es/expr '(:foo/my-custom-fn 2 2))))))
 
 (deftest invalid-expr-test
@@ -85,18 +85,18 @@
                            :val  '(rand 1)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :0-ary]
+                          {:path   [:expr/branch :expr/nilary]
                            :reason "Extra input"
-                           :pred   `(s/cat :op ~'#{'uuid 'now 'rand 'struuid})
+                           :pred   `(s/cat :expr/op ~'#{'uuid 'now 'rand 'struuid})
                            :val    '(1)
                            :via    [::es/expr]
                            :in     [1]}
-                          {:path [:expr/branch :custom :op :iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                            :pred `ax/iri?
                            :val  'rand
                            :via  [::es/expr]
                            :in   [0]}
-                          {:path [:expr/branch :custom :op :prefix-iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  'rand
                            :via  [::es/expr]
@@ -110,10 +110,10 @@
                            :val  '(not false true)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :1-ary]
+                          {:path   [:expr/branch :expr/unary]
                            :reason "Extra input"
                            :pred   `(s/cat
-                                     :op
+                                     :expr/op
                                      ~'#{'not
                                          'str 'strlen 'ucase 'lcase
                                          'lang 'datatype 'blank? 'literal?
@@ -130,16 +130,16 @@
                                          'avg 'avg-distinct
                                          'sample 'sample-distinct
                                          'count 'count-distinct}
-                                     :arg-1 ::es/expr)
+                                     :expr/arg-1 ::es/expr)
                            :val    '(true)
                            :via    [::es/expr]
                            :in     [2]}
-                           {:path [:expr/branch :custom :op :iri]
+                           {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                             :pred `ax/iri?
                             :val  'not
                             :via  [::es/expr]
                             :in   [0]}
-                           {:path [:expr/branch :custom :op :prefix-iri]
+                           {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                             :pred `ax/prefix-iri?
                             :val  'not
                             :via  [::es/expr]
@@ -153,18 +153,18 @@
                            :val  '(contains "foo")
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :2-ary :arg-2]
+                          {:path   [:expr/branch :expr/binary :expr/arg-2]
                            :reason "Insufficient input"
                            :pred   ::es/expr
                            :val    ()
                            :via    [::es/expr ::es/expr]
                            :in     []}
-                          {:path [:expr/branch :custom :op :iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                            :pred `ax/iri?
                            :val  'contains
                            :via  [::es/expr]
                            :in   [0]}
-                          {:path [:expr/branch :custom :op :prefix-iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  'contains
                            :via  [::es/expr]
@@ -178,18 +178,18 @@
                            :val  '(+)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :2-plus-ary :arg-1]
+                          {:path   [:expr/branch :expr/binary-plus :expr/arg-1]
                            :reason "Insufficient input"
                            :pred   ::es/expr
                            :val    ()
                            :via    [::es/expr ::es/expr]
                            :in     []}
-                          {:path [:expr/branch :custom :op :iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                            :pred `ax/iri?
                            :val  '+
                            :via  [::es/expr]
                            :in   [0]}
-                          {:path [:expr/branch :custom :op :prefix-iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  '+
                            :via  [::es/expr]
@@ -203,14 +203,14 @@
   (testing "expr-as-var spec"
     (is (= '[:expr/as-var
              [[:expr/branch [[:expr/op +]
-                             [:expr/args [[:expr/terminal [:num-lit 2]]
-                                          [:expr/terminal [:num-lit 2]]]]]]
-              [:var ?foo]]]
+                             [:expr/args [[:expr/terminal [:ax/num-lit 2]]
+                                          [:expr/terminal [:ax/num-lit 2]]]]]]
+              [:ax/var ?foo]]]
            (s/conform ::es/expr-as-var '[(+ 2 2) ?foo])))
     (is (= '[:expr/as-var
              [[:expr/branch [[:expr/op concat]
-                             [:expr/args [[:expr/terminal [:var ?G]]
-                                          [:expr/terminal [:str-lit " "]]
-                                          [:expr/terminal [:var ?S]]]]]]
-              [:var ?name]]]
+                             [:expr/args [[:expr/terminal [:ax/var ?G]]
+                                          [:expr/terminal [:ax/str-lit " "]]
+                                          [:expr/terminal [:ax/var ?S]]]]]]
+              [:ax/var ?name]]]
            (s/conform ::es/expr-as-var '[(concat ?G " " ?S) ?name])))))
