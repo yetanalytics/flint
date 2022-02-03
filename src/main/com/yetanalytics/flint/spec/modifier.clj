@@ -4,8 +4,8 @@
             [com.yetanalytics.flint.spec.expr  :as es]))
 
 (s/def ::group-by
-  (s/coll-of (s/or :mod/expr ::es/expr
-                   :var ax/variable?
+  (s/coll-of (s/or :mod/expr        ::es/expr
+                   :ax/var          ax/variable?
                    :mod/expr-as-var ::es/expr-as-var)
              :min-count 1
              :kind vector?))
@@ -14,8 +14,8 @@
   (s/coll-of (s/or :mod/asc-desc (s/& (s/cat :mod/op #{'asc 'desc}
                                              :mod/expr ::es/expr)
                                       (s/conformer #(into [] %)))
-                   :var  ax/variable?
-                   :mod/expr ::es/expr)
+                   :ax/var       ax/variable?
+                   :mod/expr     ::es/expr)
              :min-count 1
              :kind vector?))
 
@@ -26,6 +26,6 @@
 
 ;; single-branch `s/or`s are used to conform values
 
-(s/def ::limit (s/or :num-lit int?))
+(s/def ::limit (s/or :ax/num-lit int?))
 
-(s/def ::offset (s/or :num-lit int?))
+(s/def ::offset (s/or :ax/num-lit int?))

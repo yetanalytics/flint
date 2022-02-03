@@ -41,7 +41,7 @@
       (let [anode (zip/node loc)]
         (if (and (->> anode vector?)
                  (->> anode count (= 2))
-                 (->> anode first (= :prefix-iri))
+                 (->> anode first (= :ax/prefix-iri))
                  (->> anode second (invalid-prefix? prefixes)))
           (recur (zip/next loc)
                  (conj errs (prefix-error-map (second anode) prefixes loc)))

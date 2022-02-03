@@ -14,23 +14,23 @@
                             "    2"
                             "    3"
                             "}"])
-           (format-ast [:values/map [[[:var '?foo]]
-                                     [[[:num-lit 1]]
-                                      [[:num-lit 2]]
-                                      [[:num-lit 3]]]]])))
+           (format-ast [:values/map [[[:ax/var '?foo]]
+                                     [[[:ax/num-lit 1]]
+                                      [[:ax/num-lit 2]]
+                                      [[:ax/num-lit 3]]]]])))
     (is (= (cstr/join "\n" ["(?foo ?bar) {"
                             "    (1 \"a\")"
                             "    (2 \"b\")"
                             "    (3 \"c\")"
                             "}"])
-           (format-ast [:values/map [[[:var '?foo] [:var '?bar]]
-                                     [[[:num-lit 1] [:str-lit "a"]]
-                                      [[:num-lit 2] [:str-lit "b"]]
-                                      [[:num-lit 3] [:str-lit "c"]]]]])))
+           (format-ast [:values/map [[[:ax/var '?foo] [:ax/var '?bar]]
+                                     [[[:ax/num-lit 1] [:ax/str-lit "a"]]
+                                      [[:ax/num-lit 2] [:ax/str-lit "b"]]
+                                      [[:ax/num-lit 3] [:ax/str-lit "c"]]]]])))
     (is (= (cstr/join "\n" ["(?foo ?bar) {"
                             "    (UNDEF \"a\")"
                             "    (2 UNDEF)"
                             "}"])
-           (format-ast [:values/map [[[:var '?foo] [:var '?bar]]
-                                     [[[:values/undef nil] [:str-lit "a"]]
-                                      [[:num-lit 2] [:values/undef nil]]]]])))))
+           (format-ast [:values/map [[[:ax/var '?foo] [:ax/var '?bar]]
+                                     [[[:values/undef nil] [:ax/str-lit "a"]]
+                                      [[:ax/num-lit 2] [:values/undef nil]]]]])))))

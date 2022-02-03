@@ -5,41 +5,45 @@
 
 (deftest foo
   (testing "Triples"
-    (is (= '[:spo [[[:var ?s]
-                    [:po [[[:var ?p]
-                           [:o [[:var ?o]]]]]]]]]
+    (is (= '[:triple/spo [[[:ax/var ?s]
+                    [:triple/po [[[:ax/var ?p]
+                           [:triple/o [[:ax/var ?o]]]]]]]]]
            (s/conform ts/normal-form-spec '{?s {?p #{?o}}})))
-    (is (= '[:spo [[[:var ?s1]
-                    [:po [[[:var ?p1]
-                           [:o [[:var ?o1] [:var ?o2]]]]
-                          [[:var ?p2]
-                           [:o [[:var ?o1] [:var ?o2]]]]]]]
-                   [[:var ?s2]
-                    [:po [[[:var ?p1]
-                           [:o [[:var ?o1] [:var ?o2]]]]
-                          [[:var ?p2]
-                           [:o [[:var ?o1] [:var ?o2]]]]]]]]]
+    (is (= '[:triple/spo [[[:ax/var ?s1]
+                    [:triple/po [[[:ax/var ?p1]
+                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
+                          [[:ax/var ?p2]
+                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]
+                   [[:ax/var ?s2]
+                    [:triple/po [[[:ax/var ?p1]
+                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
+                          [[:ax/var ?p2]
+                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]]]
            (s/conform ts/normal-form-spec '{?s1 {?p1 #{?o1 ?o2}
                                                  ?p2 #{?o1 ?o2}}
                                             ?s2 {?p1 #{?o1 ?o2}
                                                  ?p2 #{?o1 ?o2}}})))
-    (is (= '[[:var ?s] [:var ?p] [:var ?o]]
+    (is (= '[[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]
            (s/conform ts/triple-vec-spec '[?s ?p ?o])))
     (testing "with and without paths"
-      (is (= '[:spo [[[:var ?s]
-                      [:po [[[:triple/path [:path/branch [[:path/op cat]
-                                                          [:path/args
-                                                           [[:path/terminal [:prefix-iri :x/one]]
-                                                            [:path/terminal [:prefix-iri :x/two]]]]]]]
-                             [:o [[:var ?o]]]]]]]]]
+      (is (= '[:triple/spo
+               [[[:ax/var ?s]
+                 [:triple/po
+                  [[[:triple/path
+                     [:path/branch [[:path/op cat]
+                                    [:path/args
+                                     [[:path/terminal [:ax/prefix-iri :x/one]]
+                                      [:path/terminal [:ax/prefix-iri :x/two]]]]]]]
+                    [:triple/o [[:ax/var ?o]]]]]]]]]
              (s/conform ts/normal-form-spec
                         '{?s {(cat :x/one :x/two) #{?o}}})))
-      (is (= '[[:var ?s]
-               [:triple/path [:path/branch [[:path/op cat]
-                                            [:path/args
-                                             [[:path/terminal [:prefix-iri :x/one]]
-                                              [:path/terminal [:prefix-iri :x/two]]]]]]]
-               [:var ?o]]
+      (is (= '[[:ax/var ?s]
+               [:triple/path
+                [:path/branch [[:path/op cat]
+                               [:path/args
+                                [[:path/terminal [:ax/prefix-iri :x/one]]
+                                 [:path/terminal [:ax/prefix-iri :x/two]]]]]]]
+               [:ax/var ?o]]
              (s/conform ts/triple-vec-spec
                         '[?s (cat :x/one :x/two) ?o])))
       (is (not (s/valid? ts/normal-form-nopath-spec

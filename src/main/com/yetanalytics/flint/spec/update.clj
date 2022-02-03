@@ -113,7 +113,7 @@
                      :opt-un [::ps/base ::ps/prefixes ::into])))
 
 (s/def ::clear
-  (s/or :iri ax/iri-spec
+  (s/or :ax/iri    ax/iri-spec
         :update/kw #{:default :named :all}))
 
 (s/def ::clear-silent ::clear)
@@ -123,7 +123,7 @@
                      :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::drop
-  (s/or :iri ax/iri-spec
+  (s/or :ax/iri    ax/iri-spec
         :update/kw #{:default :named :all}))
 
 (s/def ::drop-silent ::drop)

@@ -3,13 +3,13 @@
             [com.yetanalytics.flint.spec.axiom :as ax]))
 
 (def value-spec
-  (s/or :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :num-lit number?
-        :bool-lit boolean?
-        :str-lit ax/valid-string?
-        :lmap-lit ax/lang-map?
-        :values/undef nil?))
+  (s/or :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/num-lit    number?
+        :ax/bool-lit   boolean?
+        :ax/str-lit    ax/valid-string?
+        :ax/lmap-lit   ax/lang-map?
+        :values/undef  nil?))
 
 (defn- matching-val-lengths*
   [m]
@@ -37,7 +37,7 @@
   [m]
   (let [k (first (keys m))
         v (first (vals m))]
-    [(mapv (fn [vr] [:var vr]) k) v]))
+    [(mapv (fn [vr] [:ax/var vr]) k) v]))
 
 (def values-clause-spec
   (s/and

@@ -41,61 +41,61 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def subj-spec
-  (s/or :var ax/variable?
-        :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :bnode ax/bnode?))
+  (s/or :ax/var        ax/variable?
+        :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/bnode      ax/bnode?))
 
 (def pred-spec
-  (s/or :var ax/variable?
-        :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :rdf-type ax/rdf-type?
-        :triple/path ::ps/path))
+  (s/or :ax/var        ax/variable?
+        :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/rdf-type   ax/rdf-type?
+        :triple/path   ::ps/path))
 
 (def obj-spec
-  (s/or :var ax/variable?
-        :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :bnode ax/bnode?
-        :nil nil?
-        :str-lit ax/valid-string?
-        :num-lit number?
-        :bool-lit boolean?
-        :dt-lit inst?
-        :lmap-lit ax/lang-map?))
+  (s/or :ax/var        ax/variable?
+        :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/bnode      ax/bnode?
+        :ax/nil        nil?
+        :ax/str-lit    ax/valid-string?
+        :ax/lmap-lit   ax/lang-map?
+        :ax/num-lit    number?
+        :ax/bool-lit   boolean?
+        :ax/dt-lit     inst?))
 
 ;; No property paths
 
 (def subj-nopath-spec subj-spec)
 
 (def pred-nopath-spec
-  (s/or :var ax/variable?
-        :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :rdf-type ax/rdf-type?))
+  (s/or :ax/var        ax/variable?
+        :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/rdf-type   ax/rdf-type?))
 
 (def obj-nopath-spec obj-spec)
 
 ;; No variables (or bnodes or property paths)
 
 (def subj-novar-spec
-  (s/or :iri ax/iri?
-        :prefix-iri ax/prefix-iri?))
+  (s/or :ax/iri ax/iri?
+        :ax/prefix-iri ax/prefix-iri?))
 
 (def pred-novar-spec
-  (s/or :iri ax/iri?
-        :prefix-iri ax/prefix-iri?))
+  (s/or :ax/iri ax/iri?
+        :ax/prefix-iri ax/prefix-iri?))
 
 (def obj-novar-spec
-  (s/or :iri ax/iri?
-        :prefix-iri ax/prefix-iri?
-        :nil nil?
-        :str-lit ax/valid-string?
-        :num-lit number?
-        :bool-lit boolean?
-        :dt-lit inst?
-        :lmap-lit ax/lang-map?))
+  (s/or :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/nil        nil?
+        :ax/str-lit    ax/valid-string?
+        :ax/lmap-lit   ax/lang-map?
+        :ax/num-lit    number?
+        :ax/bool-lit   boolean?
+        :ax/dt-lit     inst?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Combo Specs
@@ -107,10 +107,10 @@
 ;; single-branch `s/or`s are used to conform values
 
 (def obj-set-spec
-  (s/or :o (s/coll-of obj-spec
-                      :min-count 1
-                      :kind set?
-                      :into [])))
+  (s/or :triple/o (s/coll-of obj-spec
+                             :min-count 1
+                             :kind set?
+                             :into [])))
 
 (def obj-set-nopath-spec
   obj-set-spec)
@@ -119,9 +119,9 @@
   (spec->novar-spec obj-set-spec))
 
 (def pred-objs-spec
-  (s/or :po (s/map-of pred-spec obj-set-spec
-                      :min-count 1
-                      :into [])))
+  (s/or :triple/po (s/map-of pred-spec obj-set-spec
+                             :min-count 1
+                             :into [])))
 
 (def pred-objs-nopath-spec
   (spec->nopath-spec pred-objs-spec))
@@ -130,9 +130,9 @@
   (spec->novar-spec pred-objs-spec))
 
 (def normal-form-spec
-  (s/or :spo (s/map-of subj-spec pred-objs-spec
-                       :conform-keys true
-                       :into [])))
+  (s/or :triple/spo (s/map-of subj-spec pred-objs-spec
+                              :conform-keys true
+                              :into [])))
 
 (def normal-form-nopath-spec
   (spec->nopath-spec normal-form-spec))

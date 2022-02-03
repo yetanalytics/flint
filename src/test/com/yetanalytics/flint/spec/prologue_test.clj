@@ -16,11 +16,11 @@
 
 (deftest conform-prologue-test
   (testing "Conforming the prologue"
-    (is (= [:iri "<http://foo.org>"]
+    (is (= [:ax/iri "<http://foo.org>"]
            (s/conform ::ps/base "<http://foo.org>")))
-    (is (= [[:prefix [:$   [:iri "<http://default.org>"]]]
-            [:prefix [:foo [:iri "<http://foo.org>"]]]
-            [:prefix [:bar [:iri "<http://bar.org>"]]]]
+    (is (= [[:prologue/prefix [:$   [:ax/iri "<http://default.org>"]]]
+            [:prologue/prefix [:foo [:ax/iri "<http://foo.org>"]]]
+            [:prologue/prefix [:bar [:ax/iri "<http://bar.org>"]]]]
            (s/conform ::ps/prefixes
                       {:$   "<http://default.org>"
                        :foo "<http://foo.org>"

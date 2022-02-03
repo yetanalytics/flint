@@ -94,7 +94,7 @@
   (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec
                                           :min-count 1
                                           :kind vector?)
-        :wildcard ax/wildcard?))
+        :ax/wildcard ax/wildcard?))
 
 (def describe-query-spec
   (smap->vec (s/keys :req-un [::describe]

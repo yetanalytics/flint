@@ -6,7 +6,7 @@
 (defmethod f/format-ast-node :base [_ [_ value]]
   (str "BASE " value))
 
-(defmethod f/format-ast-node :prefix [_ [_ [prefix iri]]]
+(defmethod f/format-ast-node :prologue/prefix [_ [_ [prefix iri]]]
   (let [prefix-name (if (= :$ prefix) "" (name prefix))]
     (str "PREFIX " prefix-name ": " iri)))
 

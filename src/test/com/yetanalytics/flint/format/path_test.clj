@@ -13,48 +13,48 @@
                   [[:path/op alt]
                    [:path/args [[:path/branch
                                  [[:path/op not]
-                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]
+                                  [:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
                                 [:path/branch
                                  [[:path/op cat]
                                   [:path/args [[:path/branch
                                                 [[:path/op inv]
                                                  [:path/args [[:path/terminal
-                                                               [:prefix-iri :baz/qux]]]]]]
+                                                               [:ax/prefix-iri :baz/qux]]]]]]
                                                [:path/terminal
-                                                [:prefix-iri :quu/bee]]]]]]]]]]
+                                                [:ax/prefix-iri :quu/bee]]]]]]]]]]
                 format-ast)))
     (is (= "(!foo:bar / (^baz:qux | quu:bee))"
            (->> '[:path/branch
                   [[:path/op cat]
                    [:path/args [[:path/branch
                                  [[:path/op not]
-                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]
+                                  [:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
                                 [:path/branch
                                  [[:path/op alt]
                                   [:path/args [[:path/branch
                                                 [[:path/op inv]
                                                  [:path/args [[:path/terminal
-                                                               [:prefix-iri :baz/qux]]]]]]
+                                                               [:ax/prefix-iri :baz/qux]]]]]]
                                                [:path/terminal
-                                                [:prefix-iri :quu/bee]]]]]]]]]]
+                                                [:ax/prefix-iri :quu/bee]]]]]]]]]]
                 format-ast)))
     (is (= "!(foo:bar | baz:qux)"
            (->> '[:path/branch
                   [[:path/op not]
                    [:path/args [[:path/branch
                                  [[:path/op alt]
-                                  [:path/args [[:path/terminal [:prefix-iri :foo/bar]]
-                                               [:path/terminal [:prefix-iri :baz/qux]]]]]]]]]]
+                                  [:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]
+                                               [:path/terminal [:ax/prefix-iri :baz/qux]]]]]]]]]]
                 format-ast)))
     (is (= "^a"
            (->> '[:path/branch
                   [[:path/op inv]
-                   [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
+                   [:path/args [[:path/terminal [:ax/rdf-type 'a]]]]]]
                 format-ast)))
     (is (= "a?"
            (->> '[:path/branch
                   [[:path/op ?]
-                   [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
+                   [:path/args [[:path/terminal [:ax/rdf-type 'a]]]]]]
                 format-ast)))
     (is (= "((a?)*)+"
            (->> '[:path/branch
@@ -63,7 +63,7 @@
                                  [[:path/op *]
                                   [:path/args [[:path/branch
                                                 [[:path/op ?]
-                                                 [:path/args [[:path/terminal [:rdf-type 'a]]]]]]]]]]]]]]
+                                                 [:path/args [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
                 format-ast)))))
 
 (deftest invalid-test
@@ -71,6 +71,6 @@
     (is (try (f/format-ast
               '[:path/branch
                 [[:path/op oh-no]
-                 [:path/args [[:path/terminal [:rdf-type 'a]]]]]]
+                 [:path/args [[:path/terminal [:ax/rdf-type 'a]]]]]]
               {})
              (catch IllegalArgumentException _ true)))))

@@ -9,12 +9,12 @@
 (def expr-terminal-spec
   (s/and
    (comp not list?)
-   (s/or :var      ax/variable?
-         :dt-lit   inst?
-         :num-lit  number?
-         :bool-lit boolean?
-         :str-lit  ax/valid-string?
-         :lmap-lit ax/lang-map?)))
+   (s/or :ax/var      ax/variable?
+         :ax/num-lit  number?
+         :ax/bool-lit boolean?
+         :ax/str-lit  ax/valid-string?
+         :ax/lmap-lit ax/lang-map?
+         :ax/dt-lit   inst?)))
 
 (def expr-branch-spec
   (s/and
@@ -40,10 +40,10 @@
                              :arg-1 ::expr)
          :1-wild-ary  (s/cat :op #{'count 'count-distinct}
                              :arg-1 (s/or :expr/terminal
-                                          (s/or :wildcard ax/wildcard?)))
+                                          (s/or :ax/wildcard ax/wildcard?)))
          :1-var-ary   (s/cat :op #{'bound}
                              :arg-1 (s/or :expr/terminal
-                                          (s/or :var ax/variable?)))
+                                          (s/or :ax/var ax/variable?)))
          :1-where-ary (s/cat :op #{'exists 'not-exists}
                              ;; Avoid mutually recursive `:require`
                              :arg-1 :com.yetanalytics.flint.spec.where/where)
@@ -94,4 +94,4 @@
 
 (s/def ::expr-as-var
   (s/or :expr/as-var (s/and vector?
-                            (s/tuple ::expr (s/or :var ax/variable?)))))
+                            (s/tuple ::expr (s/or :ax/var ax/variable?)))))

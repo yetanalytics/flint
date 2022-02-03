@@ -7,21 +7,22 @@
 (deftest conform-path-test
   (testing "Path"
     (testing "terminals"
-      (is (= [:path/terminal [:iri "<http://example.org>"]]
+      (is (= [:path/terminal [:ax/iri "<http://example.org>"]]
              (s/conform ::ps/path "<http://example.org>")))
-      (is (= [:path/terminal [:prefix-iri :foo/bar]]
+      (is (= [:path/terminal [:ax/prefix-iri :foo/bar]]
              (s/conform ::ps/path :foo/bar)))
-      (is (= [:path/terminal [:rdf-type 'a]]
+      (is (= [:path/terminal [:ax/rdf-type 'a]]
              (s/conform ::ps/path 'a))))
     (testing "branch structure"
       (are [path]
-           (= [:path/branch [[:path/args [[:path/terminal [:prefix-iri :foo/bar]]
-                                          [:path/terminal [:prefix-iri :baz/qux]]]]]]
+           (= [:path/branch
+               [[:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]
+                             [:path/terminal [:ax/prefix-iri :baz/qux]]]]]]
               (update (s/conform ::ps/path path) 1 subvec 1 2))
         '(alt :foo/bar :baz/qux)
         '(cat :foo/bar :baz/qux))
       (are [path]
-           (= [:path/branch [[:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]
+           (= [:path/branch [[:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
               (update (s/conform ::ps/path path) 1 subvec 1 2))
         '(inv :foo/bar)
         '(not :foo/bar)
@@ -45,32 +46,32 @@
                [:path/args
                 [[:path/branch
                   [[:path/op 'not]
-                   [:path/args [[:path/terminal [:prefix-iri :foo/bar]]]]]]
+                   [:path/args [[:path/terminal [:ax/prefix-iri :foo/bar]]]]]]
                  [:path/branch
                   [[:path/op 'cat]
                    [:path/args [[:path/branch
                                  [[:path/op 'inv]
                                   [:path/args [[:path/terminal
-                                                [:prefix-iri :baz/qux]]]]]]
+                                                [:ax/prefix-iri :baz/qux]]]]]]
                                 [:path/terminal
-                                 [:prefix-iri :quu/bee]]]]]]]]]]
+                                 [:ax/prefix-iri :quu/bee]]]]]]]]]]
              (s/conform
               ::ps/path
               '(alt (not :foo/bar) (cat (inv :baz/qux) :quu/bee))))))))
 
 (deftest invalid-path-test
   (testing "Path error data"
-    (is (= {::s/problems [{:path [:path/terminal :iri]
+    (is (= {::s/problems [{:path [:path/terminal :ax/iri]
                            :pred `ax/iri?
                            :val  2
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/terminal :prefix-iri]
+                          {:path [:path/terminal :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  2
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/terminal :rdf-type]
+                          {:path [:path/terminal :ax/rdf-type]
                            :pred `ax/rdf-type?
                            :val  2
                            :via  [::ps/path]

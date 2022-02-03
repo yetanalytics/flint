@@ -6,35 +6,37 @@
 (deftest axiom-format
   (testing "Formatting terminal AST nodes"
     (is (= "<http://example.org>"
-           (f/format-ast-node {} [:iri "<http://example.org>"])))
+           (f/format-ast-node {} [:ax/iri "<http://example.org>"])))
     (is (= "foo:bar"
-           (f/format-ast-node {} [:prefix-iri :foo/bar])))
+           (f/format-ast-node {} [:ax/prefix-iri :foo/bar])))
     (is (= "?xyz"
-           (f/format-ast-node {} [:var '?xyz])))
+           (f/format-ast-node {} [:ax/var '?xyz])))
     (is (= "_:b0"
-           (f/format-ast-node {} [:bnode '_b0])))
+           (f/format-ast-node {} [:ax/bnode '_b0])))
     (is (= "[]"
-           (f/format-ast-node {} [:bnode '_])))
+           (f/format-ast-node {} [:ax/bnode '_])))
     (is (= "*"
-           (f/format-ast-node {} [:wildcard '*])))
+           (f/format-ast-node {} [:ax/wildcard '*])))
     (is (= "*"
-           (f/format-ast-node {} [:wildcard :*])))
+           (f/format-ast-node {} [:ax/wildcard :*])))
     (is (= "a"
-           (f/format-ast-node {} [:rdf-type 'a])))
+           (f/format-ast-node {} [:ax/rdf-type 'a])))
     (is (= "a"
-           (f/format-ast-node {} [:rdf-type :a])))
+           (f/format-ast-node {} [:ax/rdf-type :a])))
+    (is (= "NULL"
+           (f/format-ast-node {} [:ax/nil :a])))
     (is (= "\"My String\""
-           (f/format-ast-node {} [:str-lit "My String"])))
+           (f/format-ast-node {} [:ax/str-lit "My String"])))
     (is (= "\"My String\"@en"
-           (f/format-ast-node {} [:lmap-lit {:en "My String"}])))
+           (f/format-ast-node {} [:ax/lmap-lit {:en "My String"}])))
     (is (= "123"
-           (f/format-ast-node {} [:num-lit 123])))
+           (f/format-ast-node {} [:ax/num-lit 123])))
     (is (= "123.4"
-           (f/format-ast-node {} [:num-lit 123.4])))
+           (f/format-ast-node {} [:ax/num-lit 123.4])))
     (is (= "true"
-           (f/format-ast-node {} [:bool-lit true])))
+           (f/format-ast-node {} [:ax/bool-lit true])))
     (is (= "\"2022-01-20T16:22:19Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
-           (f/format-ast-node {} [:dt-lit #inst "2022-01-20T16:22:19Z"])))
+           (f/format-ast-node {} [:ax/dt-lit #inst "2022-01-20T16:22:19Z"])))
     (is (= "\"2022-01-20T16:22:19Z\"^^xsd:dateTime"
            (f/format-ast-node {:xsd-prefix "xsd"}
-                              [:dt-lit #inst "2022-01-20T16:22:19Z"])))))
+                              [:ax/dt-lit #inst "2022-01-20T16:22:19Z"])))))

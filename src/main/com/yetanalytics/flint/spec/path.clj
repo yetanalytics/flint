@@ -5,9 +5,9 @@
 (def path-terminal-spec
   (s/and
    (comp not list?)
-   (s/or :iri        ax/iri?
-         :prefix-iri ax/prefix-iri?
-         :rdf-type   ax/rdf-type?)))
+   (s/or :ax/iri        ax/iri?
+         :ax/prefix-iri ax/prefix-iri?
+         :ax/rdf-type   ax/rdf-type?)))
 
 (s/def ::path-neg
   (s/or :path/terminal
