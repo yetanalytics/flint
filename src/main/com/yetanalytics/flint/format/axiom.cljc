@@ -39,7 +39,9 @@
   (str bool-value))
 
 (defmethod f/format-ast-node :ax/dt-lit [{:keys [xsd-prefix]} [_ dt-value]]
-  (let [xsd-suffix (if xsd-prefix
-                     (str xsd-prefix ":dateTime")
-                     "<http://www.w3.org/2001/XMLSchema#dateTime>")]
-    (str "\"" (.toInstant dt-value) "\"^^" xsd-suffix)))
+  (let [xsd-suffix  (if xsd-prefix
+                      (str xsd-prefix ":dateTime")
+                      "<http://www.w3.org/2001/XMLSchema#dateTime>")
+        inst-string #?(:clj (str (.toInstant dt-value))
+                       :cljs (.toISOString dt-value))]
+    (str "\"" inst-string "\"^^" xsd-suffix)))

@@ -35,8 +35,12 @@
            (f/format-ast-node {} [:ax/num-lit 123.4])))
     (is (= "true"
            (f/format-ast-node {} [:ax/bool-lit true])))
-    (is (= "\"2022-01-20T16:22:19Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
+    (is (= (str #?(:clj "\"2022-01-20T16:22:19Z\""
+                   :cljs "\"2022-01-20T16:22:19.000Z\"")
+                "^^<http://www.w3.org/2001/XMLSchema#dateTime>")
            (f/format-ast-node {} [:ax/dt-lit #inst "2022-01-20T16:22:19Z"])))
-    (is (= "\"2022-01-20T16:22:19Z\"^^xsd:dateTime"
+    (is (= (str #?(:clj "\"2022-01-20T16:22:19Z\""
+                   :cljs "\"2022-01-20T16:22:19.000Z\"")
+                "^^xsd:dateTime")
            (f/format-ast-node {:xsd-prefix "xsd"}
                               [:ax/dt-lit #inst "2022-01-20T16:22:19Z"])))))
