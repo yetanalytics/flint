@@ -1,20 +1,23 @@
 (ns com.yetanalytics.flint.spec-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.edn        :as edn]
-            [clojure.java.io    :as io]
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.query  :as qs]
-            [com.yetanalytics.flint.spec.update :as us]))
+            [com.yetanalytics.flint.spec.update :as us]
+            #?@(:clj [[clojure.edn        :as edn]
+                      [clojure.java.io    :as io]]))
+  #?(:cljs (:require-macros
+            [com.yetanalytics.flint.spec-test :refer [make-tests]])))
 
-(defmacro make-tests [spec dir-name]
-  (let [files# (->> dir-name io/file file-seq (filter #(.isFile %)))
-        tests# (map (fn [file#]
-                      (let [fname# (.getName file#)
-                            edn#   (edn/read-string (slurp file#))]
-                        `(testing ~fname#
-                           (is (s/valid? ~spec (quote ~edn#))))))
-                    files#)]
-    `(testing "file:" ~@tests#)))
+#?(:clj
+   (defmacro make-tests [spec dir-name]
+     (let [files# (->> dir-name io/file file-seq (filter #(.isFile %)))
+           tests# (map (fn [file#]
+                         (let [fname# (.getName file#)
+                               edn#   (edn/read-string (slurp file#))]
+                           `(testing ~fname#
+                              (is (s/valid? ~spec (quote ~edn#))))))
+                       files#)]
+       `(testing "file:" ~@tests#))))
 
 (deftest query-tests
   (make-tests qs/query-spec
