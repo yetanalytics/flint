@@ -16,11 +16,13 @@
         (s/and
          list?
          (comp symbol? first)
-         (s/or :varardic
-               (s/cat :op #{'alt}
-                      :paths (s/* ::path-neg)))
+         (s/or :path/varardic
+               (s/cat :path/op    #{'alt}
+                      :path/paths (s/* ::path-neg)))
          (s/conformer second)
-         (s/conformer (fn [{:keys [op path paths]}]
+         (s/conformer (fn [{op    :path/op
+                            path  :path/path
+                            paths :path/paths}]
                         [[:path/op op]
                          [:path/args (if path [path] paths)]])))))
 
@@ -31,16 +33,18 @@
         (s/and
          list?
          (comp symbol? first)
-         (s/or :varardic
-               (s/cat :op #{'alt 'cat}
-                      :paths (s/* ::path))
-               :unary
-               (s/cat :op #{'inv '? '* '+}
-                      :path ::path)
-               :unary-neg
-               (s/cat :op #{'not}
-                      :path ::path-neg))
+         (s/or :path/varardic
+               (s/cat :path/op    #{'alt 'cat}
+                      :path/paths (s/* ::path))
+               :path/unary
+               (s/cat :path/op   #{'inv '? '* '+}
+                      :path/path ::path)
+               :path/unary-neg
+               (s/cat :path/op   #{'not}
+                      :path/path ::path-neg))
          (s/conformer second)
-         (s/conformer (fn [{:keys [op path paths]}]
+         (s/conformer (fn [{op    :path/op
+                            path  :path/path
+                            paths :path/paths}]
                         [[:path/op op]
                          [:path/args (if path [path] paths)]])))))

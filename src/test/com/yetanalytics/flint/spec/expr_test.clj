@@ -85,18 +85,18 @@
                            :val  '(rand 1)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :0-ary]
+                          {:path   [:expr/branch :expr/nilary]
                            :reason "Extra input"
-                           :pred   `(s/cat :op ~'#{'uuid 'now 'rand 'struuid})
+                           :pred   `(s/cat :expr/op ~'#{'uuid 'now 'rand 'struuid})
                            :val    '(1)
                            :via    [::es/expr]
                            :in     [1]}
-                          {:path [:expr/branch :custom :op :ax/iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                            :pred `ax/iri?
                            :val  'rand
                            :via  [::es/expr]
                            :in   [0]}
-                          {:path [:expr/branch :custom :op :ax/prefix-iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  'rand
                            :via  [::es/expr]
@@ -110,10 +110,10 @@
                            :val  '(not false true)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :1-ary]
+                          {:path   [:expr/branch :expr/unary]
                            :reason "Extra input"
                            :pred   `(s/cat
-                                     :op
+                                     :expr/op
                                      ~'#{'not
                                          'str 'strlen 'ucase 'lcase
                                          'lang 'datatype 'blank? 'literal?
@@ -130,16 +130,16 @@
                                          'avg 'avg-distinct
                                          'sample 'sample-distinct
                                          'count 'count-distinct}
-                                     :arg-1 ::es/expr)
+                                     :expr/arg-1 ::es/expr)
                            :val    '(true)
                            :via    [::es/expr]
                            :in     [2]}
-                           {:path [:expr/branch :custom :op :ax/iri]
+                           {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                             :pred `ax/iri?
                             :val  'not
                             :via  [::es/expr]
                             :in   [0]}
-                           {:path [:expr/branch :custom :op :ax/prefix-iri]
+                           {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                             :pred `ax/prefix-iri?
                             :val  'not
                             :via  [::es/expr]
@@ -153,18 +153,18 @@
                            :val  '(contains "foo")
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :2-ary :arg-2]
+                          {:path   [:expr/branch :expr/binary :expr/arg-2]
                            :reason "Insufficient input"
                            :pred   ::es/expr
                            :val    ()
                            :via    [::es/expr ::es/expr]
                            :in     []}
-                          {:path [:expr/branch :custom :op :ax/iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                            :pred `ax/iri?
                            :val  'contains
                            :via  [::es/expr]
                            :in   [0]}
-                          {:path [:expr/branch :custom :op :ax/prefix-iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  'contains
                            :via  [::es/expr]
@@ -178,18 +178,18 @@
                            :val  '(+)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :2-plus-ary :arg-1]
+                          {:path   [:expr/branch :expr/binary-plus :expr/arg-1]
                            :reason "Insufficient input"
                            :pred   ::es/expr
                            :val    ()
                            :via    [::es/expr ::es/expr]
                            :in     []}
-                          {:path [:expr/branch :custom :op :ax/iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
                            :pred `ax/iri?
                            :val  '+
                            :via  [::es/expr]
                            :in   [0]}
-                          {:path [:expr/branch :custom :op :ax/prefix-iri]
+                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
                            :pred `ax/prefix-iri?
                            :val  '+
                            :via  [::es/expr]

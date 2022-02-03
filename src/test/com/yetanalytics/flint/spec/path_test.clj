@@ -102,17 +102,17 @@
                            :val  '(foo :bar/baz)
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/branch :varardic :op]
+                          {:path [:path/branch :path/varardic :path/op]
                            :pred '#{'cat 'alt}
                            :val  'foo
                            :via  [::ps/path]
                            :in   [0]}
-                          {:path [:path/branch :unary :op]
+                          {:path [:path/branch :path/unary :path/op]
                            :pred '#{'inv '+ '* '?}
                            :val  'foo
                            :via  [::ps/path]
                            :in   [0]}
-                          {:path [:path/branch :unary-neg :op]
+                          {:path [:path/branch :path/unary-neg :path/op]
                            :pred '#{'not}
                            :val  'foo
                            :via  [::ps/path]
@@ -125,22 +125,22 @@
                            :val  '(not (cat :foo/bar :bar/baz))
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/branch :varardic :op]
+                          {:path [:path/branch :path/varardic :path/op]
                            :pred '#{'cat 'alt}
                            :val  'not
                            :via  [::ps/path]
                            :in   [0]}
-                          {:path [:path/branch :unary :op]
+                          {:path [:path/branch :path/unary :path/op]
                            :pred '#{'inv '+ '* '?}
                            :val  'not
                            :via  [::ps/path]
                            :in   [0]}
-                          {:path [:path/branch :unary-neg :path :path/terminal]
+                          {:path [:path/branch :path/unary-neg :path/path :path/terminal]
                            :pred `(comp not list?)
                            :val  '(cat :foo/bar :bar/baz)
                            :via  [::ps/path ::ps/path-neg ::ps/path-neg]
                            :in   [1]}
-                          {:path [:path/branch :unary-neg :path :path/branch :varardic :op]
+                          {:path [:path/branch :path/unary-neg :path/path :path/branch :path/varardic :path/op]
                            :pred '#{'alt}
                            :val  'cat
                            :via  [::ps/path ::ps/path-neg ::ps/path-neg]
