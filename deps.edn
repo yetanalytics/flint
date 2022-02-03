@@ -14,6 +14,9 @@
                         :git/sha "b3fd0d2"}}}
   :run-clj {:exec-fn   cognitect.test-runner.api/test
             :exec-args {:dirs ["src/test"]}}
+  :run-cljs {;; -X is not supported here yet
+             :main-opts ["-m" "cljs-test-runner.main"
+                         "-d" "src/test"]}
   :run-cov {:exec-fn   cloverage.coverage/run-project
             :exec-args {:src-ns-path  ["src/main"]
                         :test-ns-path ["src/test"]}}}}
