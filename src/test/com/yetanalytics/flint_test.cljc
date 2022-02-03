@@ -90,4 +90,23 @@
            (try (format-updates [{} {}])
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
-                  (-> e ex-data :kind)))))))
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-prefixes
+           (try (format-query '{:select [?x]
+                                :where [[:foo/bar :a ?y]]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-prefixes
+           (try (format-updates ['{:copy :foo :to :bar}
+                                 '{:copy :baz :to :qux}])
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (testing "- short circuiting on error"
+      (is (= 0
+             (try (format-updates ['{:copy :foo :to :bar}
+                                   '{:copy :baz :to :qux}])
+                  (catch #?(:clj clojure.lang.ExceptionInfo
+                            :cljs js/Error) e
+                    (-> e ex-data :index))))))))
