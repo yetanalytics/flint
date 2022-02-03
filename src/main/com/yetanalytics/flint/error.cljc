@@ -1,11 +1,9 @@
 (ns com.yetanalytics.flint.error
   (:require [clojure.spec.alpha :as s]
             [clojure.string     :as cstr]
-            #?(:clj
-               [clojure.core :refer [format]]
-               :cljs
-               [goog.string :as gstring]
-               [goog.string.format :as format])))
+            #?@(:clj [[clojure.core :refer [format]]]
+                :cljs [[goog.string :as gstring]
+                       [goog.string.format]])))
 
 (def ^:private fmt #?(:clj format :cljs gstring/format))
 
