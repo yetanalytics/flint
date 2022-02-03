@@ -3,7 +3,9 @@
             [com.yetanalytics.flint.spec.axiom    :as ax]
             [com.yetanalytics.flint.spec.prologue :as ps]
             [com.yetanalytics.flint.spec.triple   :as ts]
-            [com.yetanalytics.flint.spec.where    :as ws]))
+            [com.yetanalytics.flint.spec.where    :as ws])
+  #?(:cljs (:require-macros
+            [com.yetanalytics.flint.spec.update :refer [smap->vec]])))
 
 (def key-order-map
   {:base          0
@@ -41,11 +43,12 @@
         n2 (get key-order-map k2 100)]
     (- n1 n2)))
 
-(defmacro smap->vec
-  [form]
-  `(s/and ~form
-          (s/conformer #(into [] %))
-          (s/conformer #(sort-by first qkey-comp %))))
+#?(:clj
+   (defmacro smap->vec
+     [form]
+     `(s/and ~form
+             (s/conformer #(into [] %))
+             (s/conformer #(sort-by first qkey-comp %)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper specs
