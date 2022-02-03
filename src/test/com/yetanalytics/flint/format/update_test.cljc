@@ -145,7 +145,9 @@
       (is (try (->> '[:update/clear
                       [[:clear [:update/kw :bad]]]]
                     format-ast)
-               (catch IllegalArgumentException _ true))))
+               (catch #?(:clj IllegalArgumentException
+                         :cljs js/Error) _
+                 true))))
     (testing "- DROP"
       (is (= "DROP DEFAULT"
              (->> '[:update/drop

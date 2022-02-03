@@ -73,4 +73,6 @@
                 [[:path/op oh-no]
                  [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]
               {})
-             (catch IllegalArgumentException _ true)))))
+             (catch #?(:clj IllegalArgumentException
+                       :cljs js/Error) _
+               true)))))
