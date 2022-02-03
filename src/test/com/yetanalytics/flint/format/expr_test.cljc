@@ -7,8 +7,8 @@
 (defn- format-ast [expr-ast]
   (f/format-ast expr-ast {:pretty? true}))
 
-(deftest format-test
-  (testing "expression formatting"
+(deftest format-expr-test
+  (testing "Formatting expressions"
     (is (= ["2" "3"]
            (->> [[:expr/terminal [:ax/num-lit 2]]
                  [:expr/terminal [:ax/num-lit 3]]]
@@ -173,8 +173,10 @@
                                               [[:triple/vec [[:ax/var ?x]
                                                              [:ax/var ?y]
                                                              [:ax/var ?z]]]]]]]]]
-                format-ast))))
-  (testing "expr AS var formatting"
+                format-ast)))))
+
+(deftest format-expr-as-var-test
+  (testing "Formatting expr AS var clauses"
     (is (= "(2 + 2) AS ?foo"
            (->> '[:expr/as-var
                   [[:expr/branch

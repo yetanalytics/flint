@@ -4,7 +4,7 @@
             [com.yetanalytics.flint.spec.query :as qs]))
 
 (deftest conform-query-test
-  (testing "conform query"
+  (testing "Conforming query"
     ;; Ensure that re-ordering works
     (is (= '[:query/select
                [[:prefixes [[:prologue/prefix [:foo [:ax/iri "<http://example.org/foo/>"]]]]]

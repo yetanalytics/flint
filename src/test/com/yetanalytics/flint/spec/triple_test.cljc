@@ -4,7 +4,7 @@
             [com.yetanalytics.flint.spec.triple :as ts]))
 
 (deftest conform-triple-test
-  (testing "Conform triples"
+  (testing "Conforming triples"
     (is (= '[:triple/spo [[[:ax/var ?s]
                     [:triple/po [[[:ax/var ?p]
                            [:triple/o [[:ax/var ?o]]]]]]]]]

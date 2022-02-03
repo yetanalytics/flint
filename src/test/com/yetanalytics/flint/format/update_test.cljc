@@ -7,8 +7,8 @@
 (defn- format-ast [ast]
   (f/format-ast ast {:pretty? true}))
 
-(deftest format-test
-  (testing "format INSERT DATA"
+(deftest format-update-test
+  (testing "Formatting INSERT DATA clauses"
     (is (= (cstr/join "\n" ["INSERT DATA {"
                             "    foo:x dc:title \"Title\" ."
                             "}"])
@@ -17,7 +17,7 @@
                                                 [:ax/prefix-iri :dc/title]
                                                 [:ax/str-lit "Title"]]]]]]]
                 format-ast))))
-  (testing "format DELETE DATA"
+  (testing "Formatting DELETE DATA clauses"
     (is (= (cstr/join "\n" ["DELETE DATA {"
                             "    GRAPH <http://example.org> {"
                             "        foo:x dc:title \"Title\" ."
@@ -31,7 +31,7 @@
                                                     [:ax/prefix-iri :dc/title]
                                                     [:ax/str-lit "Title"]]]]]]]]]]
                 format-ast))))
-  (testing "format DELETE WHERE"
+  (testing "Formatting DELETE WHERE clauses"
     (is (= (cstr/join "\n" ["DELETE WHERE {"
                             "    ?x ?y ?z ."
                             "    ?i ?j ?k ."
@@ -65,7 +65,7 @@
                        [:ax/iri "<http://example.org>"]
                        [[:triple/vec [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]
                 format-ast))))
-  (testing "format DELETE...INSERT"
+  (testing "Formatting DELETE...INSERT clauses"
     (is (= (cstr/join "\n" ["INSERT {"
                             "    ?a ?b ?c ."
                             "}"
@@ -109,7 +109,7 @@
                                  [:triple/po [[[:ax/var ?b]
                                                [:triple/o [[:ax/var ?c]]]]]]]]]]]]]]]
                 format-ast))))
-  (testing "format graph management updates"
+  (testing "Formatting graph management updates"
     (testing "- LOAD"
       (is (= "LOAD <http://example.org/1>\nINTO <http://example.org/2>"
              (->> '[:update/load

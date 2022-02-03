@@ -4,7 +4,7 @@
             [com.yetanalytics.flint.spec.where :as ws]))
 
 (deftest conform-where-test
-  (testing "Conform WHERE clause"
+  (testing "Conforming WHERE clauses"
     (is (= '[:where-sub/select
              [[:select [:select/var-or-exprs [[:ax/var ?s]]]]
               [:where [:where-sub/where [[:triple/vec [[:ax/var ?s]

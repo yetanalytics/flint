@@ -7,7 +7,7 @@
 (defn- format-ast [ast]
   (f/format-ast ast {:pretty? true}))
 
-(deftest format-test
+(deftest format-prologue-test
   (testing "Formatting prologues"
     (is (= "BASE <http://foo.org>"
            (->> [:base [:ax/iri "<http://foo.org>"]]

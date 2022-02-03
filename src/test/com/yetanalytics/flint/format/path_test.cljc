@@ -6,8 +6,8 @@
 (defn- format-ast [ast]
   (f/format-ast ast {}))
 
-(deftest format-test
-  (testing "formatting paths"
+(deftest format-path-test
+  (testing "Formatting paths"
     (is (= "(!foo:bar | (^baz:qux / quu:bee))"
            (->> '[:path/branch
                   [[:path/op alt]
@@ -66,8 +66,8 @@
                                                    [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
                 format-ast)))))
 
-(deftest invalid-test
-  (testing "attempting to format an invalid path"
+(deftest format-invalid-test
+  (testing "Formatting an invalid path"
     (is (try (f/format-ast
               '[:path/branch
                 [[:path/op oh-no]

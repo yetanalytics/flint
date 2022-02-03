@@ -6,8 +6,8 @@
 (defn- format-ast [ast]
   (f/format-ast ast {}))
 
-(deftest format-test
-  (testing "ORDER BY formatting"
+(deftest format-modifier-test
+  (testing "Formatting ORDER BY clauses"
     (is (= "ORDER BY (?foo + ?bar)"
            (->> '[:order-by [[:mod/expr [:expr/branch
                                          [[:expr/op +]
@@ -35,7 +35,7 @@
                              [:mod/asc-desc [[:mod/op asc]
                                              [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]]
                 format-ast))))
-  (testing "GROUP BY formatting"
+  (testing "Formatting GROUP BY clauses"
     (is (= "GROUP BY ?foo"
            (->> '[:group-by [[:ax/var ?foo]]]
                 format-ast)))
@@ -52,17 +52,17 @@
                                                               [:ax/var ?foo]]]]
                              [:ax/var ?bar]]]
                 format-ast))))
-  (testing "HAVING formatting"
+  (testing "Formatting HAVING clauses"
     (is (= "HAVING 1 2 3"
            (->> '[:having [[:expr/terminal [:ax/num-lit 1]]
                            [:expr/terminal [:ax/num-lit 2]]
                            [:expr/terminal [:ax/num-lit 3]]]]
                 format-ast))))
-  (testing "LIMIT formatting"
+  (testing "Formatting LIMIT clauses"
     (is (= "LIMIT 10"
            (->> '[:limit [:ax/num-lit 10]]
                 format-ast))))
-  (testing "OFFSET formatting"
+  (testing "Formatting OFFSET clauses"
     (is (= "OFFSET 2"
            (->> '[:offset [:ax/num-lit 2]]
                 format-ast)))))
