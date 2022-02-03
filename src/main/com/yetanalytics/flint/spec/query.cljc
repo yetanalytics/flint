@@ -29,6 +29,7 @@
    :offset          10
    :values          11})
 
+#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-private-var])}
 (defn- qkey-comp
   [k1 k2]
   (let [n1 (get key-order-map k1 100)
