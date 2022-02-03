@@ -1,4 +1,5 @@
 (ns com.yetanalytics.flint.spec-test
+  #_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-referred-var])}
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.query  :as qs]

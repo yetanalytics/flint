@@ -22,8 +22,8 @@
     (is (= '[[:move [:update/default-graph :default]]
              [:to [:update/named-graph [:ax/iri "<http://example.org>"]]]]
            (s/conform us/move-update-spec
-                      '{:move :default
-                        :to "<http://example.org>"})))))
+                      '{:to "<http://example.org>"
+                        :move :default})))))
 
 (deftest invalid-update-test
   (testing "invalid updates"
