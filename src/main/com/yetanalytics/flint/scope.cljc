@@ -1,6 +1,5 @@
 (ns com.yetanalytics.flint.scope
-  (:require [clojure.set :as cset]
-            [clojure.zip :as zip]))
+  (:require [clojure.zip :as zip]))
 
 (defn- get-kv
   "Given `coll` of `[:keyword value]` pairs, return the pair
@@ -21,7 +20,7 @@
 
 (defmethod get-scope-vars :ax/var [[_ v]] [v])
 
-(defmethod get-scope-vars :expr/expr-as-var [[_ [_expr v]]]
+(defmethod get-scope-vars :expr/as-var [[_ [_expr v]]]
   (get-scope-vars v))
 
 ;; SELECT in-scope vars
@@ -36,8 +35,8 @@
 
 ;; Basic Graph Pattern
 
-(defmethod get-scope-vars :triple/vec [[_ [s p o]]]
-  [(second s) (second p) (second o)])
+(defmethod get-scope-vars :triple/vec [[_ spo]]
+  (mapcat get-scope-vars spo))
 
 (defmethod get-scope-vars :triple/o [[_ o]]
   (mapcat get-scope-vars o))
@@ -63,6 +62,9 @@
 
 ;; Path
 
+(defmethod get-scope-vars :triple/path [[_ p]]
+  (get-scope-vars p))
+
 (defmethod get-scope-vars :path/branch [[_ [_op [_k paths]]]]
   (mapcat get-scope-vars paths))
 
@@ -77,19 +79,19 @@
 (defmethod get-scope-vars :select/expr-as-var [[_ ev]]
   (get-scope-vars ev))
 
-(defmethod get-scope-vars :sub-where/select [[_ s]]
-  (let [select (get-kv s :select)
-        where  (get-kv s :where)]
+(defmethod get-scope-vars :where-sub/select [[_ s]]
+  (let [[_ select] (get-kv s :select)
+        where      (get-kv s :where)]
     (case (first select)
       :ax/wildcard
       (get-scope-vars where)
       :select/var-or-exprs
-      (mapcat get-scope-vars select))))
+      (mapcat get-scope-vars (second select)))))
 
-(defmethod get-scope-vars :sub-where/where [[_ vs]]
+(defmethod get-scope-vars :where-sub/where [[_ vs]]
   (mapcat get-scope-vars vs))
 
-(defmethod get-scope-vars :sub-where/empty [_] [])
+(defmethod get-scope-vars :where-sub/empty [_] [])
 
 ;; WHERE modifiers
 
@@ -99,7 +101,7 @@
 (defmethod get-scope-vars :where/optional [[_ vs]]
   (get-scope-vars vs))
 
-(defmethod get-scope-vars :sub-where/graph [[_ [term vs]]]
+(defmethod get-scope-vars :where/graph [[_ [term vs]]]
   (concat (get-scope-vars term) (get-scope-vars vs)))
 
 (defmethod get-scope-vars :where/service [[_ [term vs]]]
@@ -111,8 +113,8 @@
 (defmethod get-scope-vars :where/bind [[_ vs]]
   (get-scope-vars vs))
 
-(defmethod get-scope-vars :values [[_ vmap]]
-  (->> vmap first (map get-scope-vars)))
+(defmethod get-scope-vars :where/values [[_ [_ values]]]
+  (mapcat get-scope-vars (first values)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; AST Traversal
@@ -134,6 +136,26 @@
               identity
               ast))
 
+(defn- scope-error-map
+  [var scope-vars zip-loc k]
+  {:variable   var
+   :scope-vars scope-vars
+   :path       (conj (->> zip-loc
+                          zip/path
+                          (filter #(-> % first keyword?))
+                          (mapv #(-> % first)))
+                     k)})
+
+(defn- get-bind-var
+  [ast-node]
+  ;; [:where/bind [:expr/as-var ...]] OR
+  ;; [:select/expr-as-var [:expr/as-var ...]]
+  (-> ast-node
+      second ; [:expr/as-var [expr var]]
+      second ; [expr var]
+      second ; [:ax/var ?var]
+      second))
+
 (defn validate-scoped-vars
   [ast]
   (loop [loc  (ast-zipper ast)
@@ -143,34 +165,38 @@
         (case (first ast-node)
           ;; BIND (expr AS var)
           :where/bind
-          (let [bind-var   (-> ast-node second second second)
+          (let [bind-var   (get-bind-var ast-node)
                 prev-elems (zip/lefts loc)
-                scope      (->> prev-elems
-                                (map get-scope-vars prev-elems)
-                                (apply cset/union))]
+                scope      (set (mapcat get-scope-vars prev-elems))]
             (if (contains? scope bind-var)
               (recur (zip/next loc)
-                     (conj errs {:var bind-var}))
+                     (conj errs (scope-error-map bind-var
+                                                 scope
+                                                 loc
+                                                 (first ast-node))))
               (recur (zip/next loc)
                      errs)))
           ;; SELECT ... (expr AS var) ...
           :select/expr-as-var
-          (let [bind-var   (-> ast-node second second second)
+          (let [bind-var   (get-bind-var ast-node)
                 prev-elems (zip/lefts loc)
                 sel-query  (->> loc
                                 zip/up ; :select/var-or-exprs
                                 zip/up ; :select
-                                zip/up ; :query/select or :sub-where/select
+                                zip/up ; :query/select or :where-sub/select
                                 zip/node)
-                where      (get-kv sel-query :where)
+                where      (get-kv (second sel-query) :where)
                 where-vars (get-scope-vars (second where))
-                prev-vars  (map get-scope-vars prev-elems)
-                scope      (apply cset/union (concat where-vars prev-vars))]
+                prev-vars  (mapcat get-scope-vars prev-elems)
+                scope      (set (concat where-vars prev-vars))]
             (if (contains? scope bind-var)
               (recur (zip/next loc)
-                     (conj errs {:var bind-var}))
+                     (conj errs (scope-error-map bind-var
+                                                 scope
+                                                 loc
+                                                 (first ast-node))))
               (recur (zip/next loc)
                      errs)))
           ;; else
-          (zip/next loc)))
-      errs)))
+          (recur (zip/next loc) errs)))
+      (not-empty errs))))
