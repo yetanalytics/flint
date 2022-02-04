@@ -2,7 +2,7 @@
 {:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
             :ns "<http://example.org/ns#>"}
  :select  [?title ?price]
- :where   [[:where [[?x :ns/price ?price]
+ :where   [[:where [[?x :ns/price ?p]
                     [?x :ns/discount ?discount]
                     [:bind [(* ?p (- 1 ?discount)) ?price]]]]
            [:filter (< ?price 20)]
