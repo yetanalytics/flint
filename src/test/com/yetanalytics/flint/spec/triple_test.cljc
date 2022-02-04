@@ -9,16 +9,17 @@
                     [:triple/po [[[:ax/var ?p]
                            [:triple/o [[:ax/var ?o]]]]]]]]]
            (s/conform ts/normal-form-spec '{?s {?p #{?o}}})))
-    (is (= '[:triple/spo [[[:ax/var ?s1]
-                    [:triple/po [[[:ax/var ?p1]
-                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
-                          [[:ax/var ?p2]
-                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]
-                   [[:ax/var ?s2]
-                    [:triple/po [[[:ax/var ?p1]
-                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
-                          [[:ax/var ?p2]
-                           [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]]]
+    (is (= '[:triple/spo
+             [[[:ax/var ?s1]
+               [:triple/po [[[:ax/var ?p1]
+                             [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
+                            [[:ax/var ?p2]
+                             [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]
+              [[:ax/var ?s2]
+               [:triple/po [[[:ax/var ?p1]
+                             [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]
+                            [[:ax/var ?p2]
+                             [:triple/o [[:ax/var ?o1] [:ax/var ?o2]]]]]]]]]
            (s/conform ts/normal-form-spec '{?s1 {?p1 #{?o1 ?o2}
                                                  ?p2 #{?o1 ?o2}}
                                             ?s2 {?p1 #{?o1 ?o2}
