@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.prologue :as ps]))
 
-(deftest prologue-axiom-test
+(deftest valid-prologue-test
   (testing "Valid base IRIs"
     (is (s/valid? ::ps/base "<http://foo.org>"))
     (is (not (s/valid? ::ps/base "http://foo.org"))))
@@ -15,7 +15,7 @@
     (is (not (s/valid? ::ps/prefixes {:& "<http://foo.org>"})))))
 
 (deftest conform-prologue-test
-  (testing "Conforming the prologue"
+  (testing "Conforming prologues"
     (is (= [:ax/iri "<http://foo.org>"]
            (s/conform ::ps/base "<http://foo.org>")))
     (is (= [[:prologue/prefix [:$   [:ax/iri "<http://default.org>"]]]

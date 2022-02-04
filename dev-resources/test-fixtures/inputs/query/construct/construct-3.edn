@@ -7,4 +7,4 @@
              [?g :dc/publisher "<http://www.w3.org>"]
              [?g :dc/date ?date]
              [:filter (> (:app/customDate ?date)
-                         #inst "2005-02-28T00:00:00Z")]]}
+                         #inst "2005-02-28T00:00:00.005Z")]]}

@@ -5,8 +5,8 @@
             [com.yetanalytics.flint.spec.expr  :as es]))
 
 (deftest conform-expr-test
-  (testing "Conforming expression"
-    (testing "terminals"
+  (testing "Conforming expressions"
+    (testing "(terminals)"
       (is (s/valid? ::es/expr '?foo))
       (is (s/valid? ::es/expr "bar"))
       (is (s/valid? ::es/expr 2))
@@ -199,8 +199,8 @@
            (-> (s/explain-data ::es/expr '(+))
                (update ::s/problems (partial filter (comp not set? :pred))))))))
 
-(deftest expr-as-var-test
-  (testing "expr-as-var spec"
+(deftest conform-expr-as-var-test
+  (testing "Conforming expr AS var clauses"
     (is (= '[:expr/as-var
              [[:expr/branch [[:expr/op +]
                              [:expr/args [[:expr/terminal [:ax/num-lit 2]]

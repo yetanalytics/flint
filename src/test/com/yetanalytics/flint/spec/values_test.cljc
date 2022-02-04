@@ -4,7 +4,7 @@
             [com.yetanalytics.flint.spec.values :as vs]))
 
 (deftest conform-values-test
-  (testing "Conform VALUES clause"
+  (testing "Conforming VALUES clauses"
     (is (= '[:values/map [[[:ax/var ?foo] [:ax/var ?bar]]
                           [[[:ax/num-lit 1] [:ax/prefix-iri :x]]
                            [[:ax/num-lit 2] [:ax/prefix-iri :y]]
@@ -20,7 +20,7 @@
                                     ?bar [:x nil]})))))
 
 (deftest invalid-values-test
-  (testing "Invalid VALUES clause"
+  (testing "Invalid VALUES clauses"
     (is (= {::s/problems [{:path [:values/map :values/sparql-format]
                            :pred `map?
                            :val  2

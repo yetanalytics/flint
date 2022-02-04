@@ -7,6 +7,28 @@
             [com.yetanalytics.flint.spec.triple   :as ts]
             [com.yetanalytics.flint.spec.values   :as vs]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sub-SELECT query
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def key-order-map
+  {:select          2
+   :select-distinct 2
+   :select-reduced  2
+   :where           5
+   :group-by        6
+   :order-by        7
+   :having          8
+   :limit           9
+   :offset          10
+   :values          11})
+
+(defn- key-comp
+  [k1 k2]
+  (let [n1 (get key-order-map k1 100)
+        n2 (get key-order-map k2 100)]
+    (- n1 n2)))
+
 (s/def ::select
   (s/and (s/keys :req-un [(or ::ss/select
                               ::ss/select-distinct
@@ -19,7 +41,12 @@
                           ::ms/having
                           ::ms/limit
                           ::ms/offset])
-         (s/conformer #(into [] %))))
+         (s/conformer #(into [] %))
+         (s/conformer #(sort-by first key-comp %))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; WHERE clause
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::where
   (s/or :where-sub/select

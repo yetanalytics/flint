@@ -7,8 +7,8 @@
 (defn- format-ast [ast]
   (f/format-ast ast {:pretty? true}))
 
-(deftest format-test
-  (testing "Formatting VALUES clause"
+(deftest format-values-test
+  (testing "Formatting VALUES clauses"
     (is (= (cstr/join "\n" ["?foo {"
                             "    1"
                             "    2"

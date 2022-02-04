@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.modifier :as ms]))
 
-(deftest modifier-conform-test
+(deftest conform-modifier-test
   (testing "Conforming solution modifiers"
     (is (= [[:mod/expr [:expr/terminal [:ax/var '?foo]]]]
            (s/conform ::ms/group-by ['?foo])))

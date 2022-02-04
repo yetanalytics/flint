@@ -4,8 +4,8 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.where]))
 
-(deftest format-test
-  (testing "WHERE formatting"
+(deftest format-where-test
+  (testing "Formatting WHERE clause"
     (is (= (cstr/join "\n" ["{"
                             "    ?s ?p ?o ."
                             "    ?s ?p ?o ."

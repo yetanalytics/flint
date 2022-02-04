@@ -6,7 +6,9 @@
             [com.yetanalytics.flint.spec.select   :as ss]
             [com.yetanalytics.flint.spec.triple   :as ts]
             [com.yetanalytics.flint.spec.where    :as ws]
-            [com.yetanalytics.flint.spec.values   :as vs]))
+            [com.yetanalytics.flint.spec.values   :as vs])
+  #?(:cljs (:require-macros
+            [com.yetanalytics.flint.spec.query :refer [smap->vec]])))
 
 (def key-order-map
   {:base            0
@@ -27,17 +29,19 @@
    :offset          10
    :values          11})
 
+#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-private-var])}
 (defn- qkey-comp
   [k1 k2]
   (let [n1 (get key-order-map k1 100)
         n2 (get key-order-map k2 100)]
     (- n1 n2)))
 
-(defmacro smap->vec
-  [form]
-  `(s/and ~form
-          (s/conformer #(into [] %))
-          (s/conformer #(sort-by first qkey-comp %))))
+#?(:clj
+   (defmacro smap->vec
+     [form]
+     `(s/and ~form
+             (s/conformer #(into [] %))
+             (s/conformer #(sort-by first qkey-comp %)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dataset Clause specs
@@ -48,7 +52,7 @@
                :from/coll   (s/and (s/coll-of ax/iri-spec
                                               :count 1
                                               :kind vector?)
-                              (s/conformer first)))
+                                   (s/conformer first)))
          (s/conformer second)))
 
 (s/def ::from-named

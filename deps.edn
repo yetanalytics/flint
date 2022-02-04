@@ -1,16 +1,22 @@
 {:paths ["src/main"]
- :deps {org.clojure/clojure {:mvn/version "1.10.3"}}
+ :deps {org.clojure/clojure       {:mvn/version "1.10.3"}
+        org.clojure/clojurescript {:mvn/version "1.10.914"}}
  :aliases
  {:dev {:extra-paths ["src/dev"]
         :extra-deps  {org.apache.jena/jena-arq {:mvn/version "4.3.2"}}}
   :test {:extra-paths ["src/test" "dev-resources"]
-         :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
-                       cloverage/cloverage    {:mvn/version "1.2.2"}
+         :extra-deps  {org.clojure/test.check  {:mvn/version "1.1.1"}
+                       cloverage/cloverage     {:mvn/version "1.2.2"}
+                       olical/cljs-test-runner {:mvn/version "3.8.0"
+                                                :exclusions [org.clojure/clojurescript]}
                        io.github.cognitect-labs/test-runner
                        {:git/tag "v0.5.0"
                         :git/sha "b3fd0d2"}}}
   :run-clj {:exec-fn   cognitect.test-runner.api/test
             :exec-args {:dirs ["src/test"]}}
+  :run-cljs {;; -X is not supported here yet
+             :main-opts ["-m" "cljs-test-runner.main"
+                         "-d" "src/test"]}
   :run-cov {:exec-fn   cloverage.coverage/run-project
             :exec-args {:src-ns-path  ["src/main"]
                         :test-ns-path ["src/test"]}}}}

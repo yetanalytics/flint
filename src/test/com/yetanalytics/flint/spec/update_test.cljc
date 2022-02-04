@@ -4,7 +4,7 @@
             [com.yetanalytics.flint.spec.update :as us]))
 
 (deftest conform-update-test
-  (testing "conforming updates"
+  (testing "Conforming updates"
     (is (= '[[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
                                           [:ax/prefix-iri :dc/title]
                                           [:ax/str-lit "Title"]]]]]]
@@ -22,10 +22,10 @@
     (is (= '[[:move [:update/default-graph :default]]
              [:to [:update/named-graph [:ax/iri "<http://example.org>"]]]]
            (s/conform us/move-update-spec
-                      '{:move :default
-                        :to "<http://example.org>"})))))
+                      '{:to "<http://example.org>"
+                        :move :default})))))
 
 (deftest invalid-update-test
-  (testing "invalid updates"
+  (testing "Invalid updates"
     (is (not (s/valid? us/insert-data-update-spec
                        '{:insert-data [[?x ?y ?z]]})))))

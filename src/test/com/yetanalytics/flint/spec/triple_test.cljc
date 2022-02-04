@@ -3,8 +3,8 @@
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.triple :as ts]))
 
-(deftest foo
-  (testing "Triples"
+(deftest conform-triple-test
+  (testing "Conforming triples"
     (is (= '[:triple/spo [[[:ax/var ?s]
                     [:triple/po [[[:ax/var ?p]
                            [:triple/o [[:ax/var ?o]]]]]]]]]

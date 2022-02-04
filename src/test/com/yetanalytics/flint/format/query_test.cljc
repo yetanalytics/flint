@@ -7,8 +7,8 @@
 (defn- format-ast [ast]
   (f/format-ast ast {:pretty? true}))
 
-(deftest format-test
-  (testing "format SELECT query"
+(deftest format-query-test
+  (testing "Formatting SELECT queries"
     (is (= (cstr/join "\n" ["PREFIX foo: <http://example.org/foo/>"
                             "SELECT ?x"
                             "FROM <http://example.org/my-graph/>"
@@ -33,7 +33,7 @@
                              [[[:ax/var ?z]]
                               [[[:ax/num-lit 1]]]]]]]]
                 format-ast))))
-  (testing "format CONSTRUCT query"
+  (testing "Formatting CONSTRUCT queries"
     (is (= (cstr/join "\n" ["CONSTRUCT {"
                             "    ?x ?y ?z ."
                             "}"
@@ -72,7 +72,7 @@
                                                             [:ax/var ?y]
                                                             [:ax/var ?z]]]]]]]]
                 format-ast))))
-  (testing "format DESCRIBE query"
+  (testing "Formatting DESCRIBE queries"
     (is (= (cstr/join "\n" ["DESCRIBE ?x ?y"
                             "FROM NAMED <http://example.org/my-graph/>"
                             "FROM NAMED <http://example.org/my-graph-2/>"
@@ -87,7 +87,7 @@
                                                             [:ax/var ?y]
                                                             [:ax/var ?z]]]]]]]]
                 format-ast))))
-  (testing "format ASK query"
+  (testing "Formatting ASK queries"
     (is (= (cstr/join "\n" ["ASK"
                             "FROM NAMED <http://example.org/my-graph/>"
                             "FROM NAMED <http://example.org/my-graph-2/>"

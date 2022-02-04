@@ -5,15 +5,15 @@
             [com.yetanalytics.flint.spec.path  :as ps]))
 
 (deftest conform-path-test
-  (testing "Path"
-    (testing "terminals"
+  (testing "Conform paths"
+    (testing "- terminals"
       (is (= [:path/terminal [:ax/iri "<http://example.org>"]]
              (s/conform ::ps/path "<http://example.org>")))
       (is (= [:path/terminal [:ax/prefix-iri :foo/bar]]
              (s/conform ::ps/path :foo/bar)))
       (is (= [:path/terminal [:ax/rdf-type 'a]]
              (s/conform ::ps/path 'a))))
-    (testing "branch structure"
+    (testing "- branch structure"
       (are [path]
            (= [:path/branch
                [[:path/paths [[:path/terminal [:ax/prefix-iri :foo/bar]]
@@ -29,7 +29,7 @@
         '(? :foo/bar)
         '(* :foo/bar)
         '(+ :foo/bar)))
-    (testing "branch operation"
+    (testing "- branch operation"
       (are [op path]
            (= op
               (get-in (s/conform ::ps/path path) [1 0 1]))
@@ -60,7 +60,7 @@
               '(alt (not :foo/bar) (cat (inv :baz/qux) :quu/bee))))))))
 
 (deftest invalid-path-test
-  (testing "Path error data"
+  (testing "Invalid paths"
     (is (= {::s/problems [{:path [:path/terminal :ax/iri]
                            :pred `ax/iri?
                            :val  2

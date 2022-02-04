@@ -4,8 +4,8 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.triple]))
 
-(deftest format-test
-  (testing "formatting triples"
+(deftest format-triples-test
+  (testing "Formatting triples"
     (is (= (cstr/join
             "\n"
             ["<http://example.org/supercalifragilisticexpialidocious> ?p1 ?o1 , ?o2 ;"

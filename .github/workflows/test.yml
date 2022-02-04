@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        target: [test-clj]
+        target: [test-clj, test-cljs]
     
     steps:
     - name: Checkout project
