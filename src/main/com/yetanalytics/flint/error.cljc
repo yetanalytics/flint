@@ -96,3 +96,30 @@
    (prefix-error-msg* prefix-errs ""))
   ([prefix-errs index]
    (prefix-error-msg* prefix-errs (fmt " at index %d" index))))
+
+(defn- scope-error-msg*
+  [scope-errs index-str]
+  (let [var-coll  (->> scope-errs (map :variable) distinct sort)
+        var-count (->> var-coll count)
+        var-strs  (->> var-coll (map name))
+        var-str   (if (= 1 var-count)
+                    (first var-strs)
+                    (fmt "%s and %s"
+                         (cstr/join ", " (butlast var-strs))
+                         (last var-strs)))]
+    (fmt "%d variable%s%s in %d `expr AS var` clause%s %s already defined in scope: %s!'"
+         var-count
+         (if (= 1 var-count) "" "s")
+         index-str
+         (count scope-errs)
+         (if (= 1 (count scope-errs)) "" "s")
+         (if (= 1 var-count) "was" "were")
+         var-str)))
+
+(defn scope-error-msg
+  "Return an error message specifying the number of variables with scope
+   errors, number of locations and, if applicable, the input coll index."
+  ([scope-errs]
+   (scope-error-msg* scope-errs ""))
+  ([scope-errs index]
+   (scope-error-msg* scope-errs (fmt " at index %d" index))))
