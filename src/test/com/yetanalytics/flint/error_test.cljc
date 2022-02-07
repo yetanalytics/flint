@@ -4,7 +4,8 @@
             [com.yetanalytics.flint.spec.query  :as qs]
             [com.yetanalytics.flint.spec.update :as us]
             [com.yetanalytics.flint.error       :as err]
-            [com.yetanalytics.flint.prefix      :as pre]))
+            [com.yetanalytics.flint.prefix      :as pre]
+            [com.yetanalytics.flint.scope       :as scope]))
 
 (deftest top-level-keyword-test
   (testing "all top level keywords are accounted for"
@@ -123,4 +124,29 @@
                 (map (partial s/conform us/update-spec))
                 (map (partial pre/validate-prefixes {}))
                 (map-indexed (fn [idx err] (err/prefix-error-msg err idx)))
+                first)))))
+
+(deftest scope-error-msg-test
+  (testing "scope error messages"
+    (is (= "1 variable in 2 `expr AS var` clauses was already defined in scope: ?x!'"
+           (->> '{:select [[2 ?x]]
+                  :where  [[?x ?y ?z]
+                           [:bind [3 ?x]]]}
+                (s/conform qs/query-spec)
+                scope/validate-scoped-vars
+                err/scope-error-msg)))
+    (is (= "2 variables in 2 `expr AS var` clauses were already defined in scope: ?x and ?y!'"
+           (->> '{:select [[2 ?y]]
+                  :where  [[?x ?y ?z]
+                           [:bind [3 ?x]]]}
+                (s/conform qs/query-spec)
+                scope/validate-scoped-vars
+                err/scope-error-msg)))
+    (is (= "1 variable at index 0 in 1 `expr AS var` clause was already defined in scope: ?x!'"
+           (->> '[{:delete [[?x ?y ?z]]
+                   :where  [[?x ?y ?z]
+                            [:bind [3 ?x]]]}]
+                (map (partial s/conform us/update-spec))
+                (map scope/validate-scoped-vars)
+                (map-indexed (fn [idx err] (err/scope-error-msg err idx)))
                 first)))))
