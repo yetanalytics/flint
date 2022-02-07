@@ -6,6 +6,7 @@
             [com.yetanalytics.flint.format.query]
             [com.yetanalytics.flint.format.update :as uf]
             [com.yetanalytics.flint.prefix        :as pre]
+            [com.yetanalytics.flint.scope         :as scope]
             [com.yetanalytics.flint.error         :as err]))
 
 (def xsd-iri-prefix
@@ -54,27 +55,43 @@
 (def conform-update
   (partial conform-sparql ::invalid-update us/update-spec))
 
-(defn- conform-prefixes-err-map
+(defn- assert-prefixes-err-map
   [prefix-errs sparql ast]
   {:kind  ::invalid-prefixes
    :error prefix-errs
    :input sparql
    :ast   ast})
 
-(defn- conform-prefixes
+(defn- assert-prefixes
   ([sparql ast ?prefixes]
    (let [prefixes (or ?prefixes {})]
-     (if-some [prefix-errs (pre/validate-prefixes prefixes ast)]
+     (when-some [prefix-errs (pre/validate-prefixes prefixes ast)]
        (throw (ex-info (err/prefix-error-msg prefix-errs)
-                       (conform-prefixes-err-map prefix-errs sparql ast)))
-       prefixes)))
+                       (assert-prefixes-err-map prefix-errs sparql ast))))))
   ([sparql ast ?prefixes index]
    (let [prefixes (or ?prefixes {})]
-     (if-some [prefix-errs (pre/validate-prefixes prefixes ast)]
+     (when-some [prefix-errs (pre/validate-prefixes prefixes ast)]
        (throw (ex-info (err/prefix-error-msg prefix-errs index)
-                       (assoc (conform-prefixes-err-map prefix-errs sparql ast)
-                              :index index)))
-       prefixes))))
+                       (assoc (assert-prefixes-err-map prefix-errs sparql ast)
+                              :index index)))))))
+
+(defn- assert-scope-err-map
+  [scope-errs sparql ast]
+  {:kind  ::invalid-scoped-vars
+   :error scope-errs
+   :input sparql
+   :ast   ast})
+
+(defn- assert-scoped-vars
+  ([sparql ast]
+   (when-some [errs (scope/validate-scoped-vars ast)]
+     (throw (ex-info (err/scope-error-msg errs)
+                     (assert-scope-err-map errs sparql ast)))))
+  ([sparql ast index]
+   (when-some [errs (scope/validate-scoped-vars ast)]
+     (throw (ex-info (err/scope-error-msg errs index)
+                     (assoc (assert-scope-err-map errs sparql ast)
+                            :index index))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public API Functions
@@ -83,9 +100,13 @@
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
    does not conform to spec or if its prefixed IRIs cannot be expanded."
-  [query & {:keys [pretty?] :or {pretty? false}}]
+  [query & {:keys [pretty? validate?] :or {pretty?   false
+                                           validate? true}}]
   (let [ast      (conform-query query)
-        prefix-m (conform-prefixes query ast (:prefixes query))
+        prefix-m (:prefixes query)
+        _        (when validate?
+                   (assert-prefixes query ast prefix-m)
+                   (assert-scoped-vars query ast))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
@@ -98,9 +119,13 @@
 (defn format-update
   "Format `update` into a SPARQL Update string. Throws an exception if `update`
    does not conform to spec or if its prefixed IRIs cannot be expanded."
-  [update & {:keys [pretty?] :or {pretty? false}}]
+  [update & {:keys [pretty? validate?] :or {pretty?   false
+                                            validate? true}}]
   (let [ast      (conform-update update)
-        prefix-m (conform-prefixes update ast (:prefixes update))
+        prefix-m (:prefixes update)
+        _        (when validate?
+                   (assert-prefixes update ast prefix-m)
+                   (assert-scoped-vars update ast))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
@@ -110,17 +135,20 @@
   "Format the coll `updates` into a SPARQL Update Request string. Throws
    an exception if any update does not conform to spec or has a prefixed
    IRI that cannot be expanded."
-  [updates & {:keys [pretty?] :or {pretty? false}}]
-  (let [indexes      (-> updates count range)
-        asts         (map conform-update updates indexes)
-        prefix-maps* (reduce (fn [pm-coll {pm :prefixes :as _update}]
+  [updates & {:keys [pretty? validate?] :or {pretty?   false
+                                             validate? true}}]
+  (let [idxs         (-> updates count range)
+        asts         (map conform-update updates idxs)
+        prefix-ms    (reduce (fn [pm-coll {pm :prefixes :as _update}]
                                (let [last-pm (last pm-coll)
                                      new-pm  (merge last-pm pm)]
                                  (conj pm-coll new-pm)))
                              []
                              updates)
-        prefix-maps  (map conform-prefixes updates asts prefix-maps* indexes)
-        xsd-prefixes (map get-xsd-prefix prefix-maps)
+        _            (when validate?
+                       (dorun (map assert-prefixes updates asts prefix-ms idxs))
+                       (dorun (map assert-scoped-vars updates asts idxs)))
+        xsd-prefixes (map get-xsd-prefix prefix-ms)
         opt-maps     (map (fn [?xsd-pre]
                             (cond-> {:pretty? pretty?}
                               ?xsd-pre (assoc :xsd-prefix ?xsd-pre)))

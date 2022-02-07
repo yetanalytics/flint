@@ -120,19 +120,23 @@
 ;; AST Traversal
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- ast-branch?
+  [x]
+  (and (vector? x)
+       (= 2 (count x))
+       (keyword? (first x))
+       (not= "ax" (namespace (first x)))))
+
 (defn- ast-zipper
   "Create a zipper out of the AST, where each AST node `[:keyword children]`
    is treated as a zipper branch."
   [ast]
-  (zip/zipper (fn [x]
-                (and (vector? x)
-                     (= 2 (count x))
-                     (keyword? (first x))
-                     (not= "ax" (namespace (first x)))))
-              (fn [x]
-                (if (-> x second first keyword?)
-                  [(-> x second)]
-                  (-> x second)))
+  (zip/zipper ast-branch?
+              (fn [[_ children]]
+                (if (or (ast-branch? children)
+                        (not (coll? children)))
+                  [children]
+                  children))
               identity
               ast))
 
@@ -162,9 +166,10 @@
          errs []]
     (if-not (zip/end? loc)
       (let [ast-node (zip/node loc)]
-        (case (first ast-node)
+        (cond
           ;; BIND (expr AS var)
-          :where/bind
+          (and (zip/branch? loc)
+               (= :where/bind (first ast-node)))
           (let [bind-var   (get-bind-var ast-node)
                 prev-elems (zip/lefts loc)
                 scope      (set (mapcat get-scope-vars prev-elems))]
@@ -177,7 +182,8 @@
               (recur (zip/next loc)
                      errs)))
           ;; SELECT ... (expr AS var) ...
-          :select/expr-as-var
+          (and (zip/branch? loc)
+               (= :select/expr-as-var (first ast-node)))
           (let [bind-var   (get-bind-var ast-node)
                 prev-elems (zip/lefts loc)
                 sel-query  (->> loc
@@ -197,6 +203,6 @@
                                                  (first ast-node))))
               (recur (zip/next loc)
                      errs)))
-          ;; else
+          :else
           (recur (zip/next loc) errs)))
       (not-empty errs))))
