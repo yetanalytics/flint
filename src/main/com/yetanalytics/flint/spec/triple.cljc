@@ -11,11 +11,40 @@
 ;; Subj/Pred/Obj Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Just paths banned in
+;; - CONSTRUCT
+
+;; Blank nodes (and paths) banned in
+;; - DELETE WHERE
+;; - DELETE DATA
+;; - DELETE
+
+;; Variables (and paths) banned in
+;; - DELETE DATA
+;; - INSERT DATA
+
+;; Subjects
+
 (def subj-spec
   (s/or :ax/var        ax/variable?
         :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
         :ax/bnode      ax/bnode?))
+
+(def subj-novar-spec
+  (s/or :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/bnode      ax/bnode?))
+
+(def subj-noblank-spec
+  (s/or :ax/var        ax/variable?
+        :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?))
+
+(def subj-novar-noblank-spec
+  ax/iri-spec)
+
+;; Predicates
 
 (def pred-spec
   (s/or :ax/var        ax/variable?
@@ -23,6 +52,18 @@
         :ax/prefix-iri ax/prefix-iri?
         :ax/rdf-type   ax/rdf-type?
         :triple/path   ::ps/path))
+
+(def pred-nopath-spec
+  (s/or :ax/var        ax/variable?
+        :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/rdf-type   ax/rdf-type?))
+
+(def pred-novar-spec
+  (s/or :ax/iri ax/iri?
+        :ax/prefix-iri ax/prefix-iri?))
+
+;; Objects
 
 (def obj-spec
   (s/or :ax/var        ax/variable?
@@ -36,25 +77,28 @@
         :ax/bool-lit   boolean?
         :ax/dt-lit     inst?))
 
-;; No property paths
+(def obj-novar-spec
+  (s/or :ax/iri        ax/iri?
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/nil        nil?
+        :ax/str-lit    ax/valid-string?
+        :ax/lmap-lit   ax/lang-map?
+        :ax/num-lit    number?
+        :ax/bool-lit   boolean?
+        :ax/dt-lit     inst?))
 
-(def pred-nopath-spec
+(def obj-noblank-spec
   (s/or :ax/var        ax/variable?
         :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
-        :ax/rdf-type   ax/rdf-type?))
+        :ax/nil        nil?
+        :ax/str-lit    ax/valid-string?
+        :ax/lmap-lit   ax/lang-map?
+        :ax/num-lit    number?
+        :ax/bool-lit   boolean?
+        :ax/dt-lit     inst?))
 
-;; No variables (or bnodes or property paths)
-
-(def subj-novar-spec
-  (s/or :ax/iri ax/iri?
-        :ax/prefix-iri ax/prefix-iri?))
-
-(def pred-novar-spec
-  (s/or :ax/iri ax/iri?
-        :ax/prefix-iri ax/prefix-iri?))
-
-(def obj-novar-spec
+(def obj-novar-noblank-spec
   (s/or :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
         :ax/nil        nil?
@@ -89,6 +133,12 @@
 (def obj-set-novar-spec
   (make-obj-spec obj-novar-spec))
 
+(def obj-set-noblank-spec
+  (make-obj-spec obj-noblank-spec))
+
+(def obj-set-novar-noblank-spec
+  (make-obj-spec obj-novar-noblank-spec))
+
 ;; Predicate Object
 
 #?(:clj
@@ -106,6 +156,12 @@
 
 (def pred-objs-novar-spec
   (make-pred-objs-spec pred-novar-spec obj-set-novar-spec))
+
+(def pred-objs-noblank-spec
+  (make-pred-objs-spec pred-nopath-spec obj-set-noblank-spec))
+
+(def pred-objs-novar-noblank-spec
+  (make-pred-objs-spec pred-nopath-spec obj-set-novar-noblank-spec))
 
 ;; Subject Predicate Object
 
@@ -125,6 +181,12 @@
 (def normal-form-novar-spec
   (make-nform-spec subj-novar-spec pred-objs-novar-spec))
 
+(def normal-form-noblank-spec
+  (make-nform-spec subj-noblank-spec pred-objs-noblank-spec))
+
+(def normal-form-novar-noblank-spec
+  (make-nform-spec subj-novar-noblank-spec pred-objs-novar-noblank-spec))
+
 ;; Triple Vectors
 
 (def triple-vec-spec
@@ -135,3 +197,9 @@
 
 (def triple-vec-novar-spec
   (s/tuple subj-novar-spec pred-novar-spec obj-novar-spec))
+
+(def triple-vec-noblank-spec
+  (s/tuple subj-noblank-spec pred-nopath-spec obj-noblank-spec))
+
+(def triple-vec-novar-noblank-spec
+  (s/tuple subj-novar-noblank-spec pred-nopath-spec obj-novar-noblank-spec))

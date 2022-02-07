@@ -28,4 +28,10 @@
 (deftest invalid-update-test
   (testing "Invalid updates"
     (is (not (s/valid? us/insert-data-update-spec
-                       '{:insert-data [[?x ?y ?z]]})))))
+                       '{:insert-data [[?x ?y ?z]]})))
+    (is (not (s/valid? us/insert-data-update-spec
+                       '{:insert-data [{:foo/x {:bar/y #{?z}}}]})))
+    (is (not (s/valid? us/insert-data-update-spec
+                       '{:delete-data [[:foo/x :bar/y _1]]})))
+    (is (not (s/valid? us/insert-data-update-spec
+                       '{:delete-data [{:foo/x {:bar/y #{_1}}}]})))))
