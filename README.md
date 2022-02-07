@@ -8,8 +8,8 @@ Three functions exist in the Flint API: `format-query`, `format-update`, and `fo
 Each function takes in the following keyword arguments:
 | Argument | Description |
 | --- | --- |
-| `pretty?` | If `true`, adds linebreaks and indentation to the resulting SPARQL string.
-| `validate?` | If `true`, performs advanced validation. Currently validates prefixed IRIs and scoped vars in `expr AS var` clauses.
+| `pretty?` | If `true`, adds linebreaks and indentation to the resulting SPARQL string. Default `false`.
+| `validate?` | If `true`, performs advanced validation. Currently validates prefixed IRIs and scoped vars in `expr AS var` clauses. Default `true`.
 
 ## Prior Art
 - Flint is based off of the grammar of [SPARQL 1.1](https://www.w3.org/TR/sparql11-query/).
