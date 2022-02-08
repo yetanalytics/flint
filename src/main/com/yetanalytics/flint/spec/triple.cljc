@@ -80,6 +80,7 @@
 (def obj-novar-spec
   (s/or :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
+        :ax/bnode      ax/bnode?
         :ax/nil        nil?
         :ax/str-lit    ax/valid-string?
         :ax/lmap-lit   ax/lang-map?
