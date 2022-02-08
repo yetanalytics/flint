@@ -161,6 +161,13 @@
                   :where [[?x ?y ?z]]}
                 (s/conform qs/query-spec)
                 scope/validate-scoped-vars)))
+    (is (= [{:variable   '?z
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
+           (->> '{:select [[2 ?z]]
+                  :where [{?x {?y #{?z}}}]}
+                (s/conform qs/query-spec)
+                scope/validate-scoped-vars)))
     (is (= [{:variable   '?x
              :scope-vars #{'?x '?y '?z '?w}
              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
