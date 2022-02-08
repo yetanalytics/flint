@@ -5,6 +5,7 @@
             [com.yetanalytics.flint.format        :as f]
             [com.yetanalytics.flint.format.query]
             [com.yetanalytics.flint.format.update :as uf]
+            [com.yetanalytics.flint.bnode         :as bnode]
             [com.yetanalytics.flint.prefix        :as pre]
             [com.yetanalytics.flint.scope         :as scope]
             [com.yetanalytics.flint.error         :as err]))
@@ -93,6 +94,33 @@
                      (assoc (assert-scope-err-map errs sparql ast)
                             :index index))))))
 
+(defn- assert-bnodes
+  [sparql ast]
+  (let [res (bnode/validate-bnodes ast)]
+    (when-some [errs (:errors res)]
+      (throw (ex-info "Invalid blank nodes!"
+                      {:kind  (:kind res)
+                       :error errs
+                       :input sparql
+                       :ast   ast})))))
+
+(defn- assert-bnodes-coll
+  [sparql-coll ast-coll]
+  (loop [inputs sparql-coll
+         asts   ast-coll
+         bnodes #{}
+         idx    0]
+    (when-some [ast (first asts)]
+      (let [res (bnode/validate-bnodes bnodes ast)]
+        (if-some [errs (:errors res)]
+          (throw (ex-info "Invalid blank nodes!"
+                          {:kind  (:kind res)
+                           :error errs
+                           :input (first inputs)
+                           :ast   ast
+                           :index idx}))
+          (recur (rest inputs) (rest asts) (:bnodes res) (inc idx)))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public API Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -106,7 +134,8 @@
         prefix-m (:prefixes query)
         _        (when validate?
                    (assert-prefixes query ast prefix-m)
-                   (assert-scoped-vars query ast))
+                   (assert-scoped-vars query ast)
+                   (assert-bnodes query ast))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
@@ -125,7 +154,8 @@
         prefix-m (:prefixes update)
         _        (when validate?
                    (assert-prefixes update ast prefix-m)
-                   (assert-scoped-vars update ast))
+                   (assert-scoped-vars update ast)
+                   (assert-bnodes update ast))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
@@ -147,7 +177,8 @@
                              updates)
         _            (when validate?
                        (dorun (map assert-prefixes updates asts prefix-ms idxs))
-                       (dorun (map assert-scoped-vars updates asts idxs)))
+                       (dorun (map assert-scoped-vars updates asts idxs))
+                       (assert-bnodes-coll updates asts))
         xsd-prefixes (map get-xsd-prefix prefix-ms)
         opt-maps     (map (fn [?xsd-pre]
                             (cond-> {:pretty? pretty?}

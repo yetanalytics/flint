@@ -95,19 +95,19 @@
        {:kind   ::update-request-bnode-error
         :bnodes (cset/union bnodes bnode-union)
         :errors (map (fn [bnode] {:bnode bnode}) reused-bnodes)}
-       (let [bgp-count-m
-             (reduce (fn [m bgp]
-                       (reduce (fn [m bnode]
-                                 (if (contains? m bnode)
-                                   (update m bnode inc)
-                                   (assoc m bnode 1)))
-                               m
-                               bgp))
-                     {}
-                     bgp-bnodes)]
+       (if-some [bnode-bgp-errs
+                   (->> bgp-bnodes
+                        (apply concat)
+                        (reduce (fn [m bnode]
+                                  (if (contains? m bnode)
+                                    (update m bnode inc)
+                                    (assoc m bnode 1)))
+                                {})
+                        (filterv (fn [[_ n]] (< 1 n)))
+                        (map (fn [[bnode n]] {:bnode     bnode
+                                              :bgp-count n}))
+                        not-empty)]
          {:kind   ::bgp-bnode-error
           :bnodes (cset/union bnodes bnode-union)
-          :errors (->> bgp-count-m
-                       (filterv (fn [[_ n]] (< 1 n)))
-                       (map (fn [[bnode n]] {:bnode     bnode
-                                             :bgp-count n})))})))))
+          :errors bnode-bgp-errs}
+         {:bnodes (cset/union bnodes bnode-union)})))))
