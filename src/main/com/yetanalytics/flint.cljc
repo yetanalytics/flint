@@ -1,14 +1,15 @@
 (ns com.yetanalytics.flint
   (:require [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.spec.query    :as qs]
-            [com.yetanalytics.flint.spec.update   :as us]
-            [com.yetanalytics.flint.format        :as f]
+            [com.yetanalytics.flint.spec.query      :as qs]
+            [com.yetanalytics.flint.spec.update     :as us]
+            [com.yetanalytics.flint.format          :as f]
             [com.yetanalytics.flint.format.query]
-            [com.yetanalytics.flint.format.update :as uf]
-            [com.yetanalytics.flint.error         :as err]
-            [com.yetanalytics.flint.validate :as v]
+            [com.yetanalytics.flint.format.update   :as uf]
+            [com.yetanalytics.flint.error           :as err]
+            [com.yetanalytics.flint.validate        :as v]
+            [com.yetanalytics.flint.validate.bnode  :as vb]
             [com.yetanalytics.flint.validate.prefix :as vp]
-            [com.yetanalytics.flint.validate.scope :as vs]))
+            [com.yetanalytics.flint.validate.scope  :as vs]))
 
 (def xsd-iri-prefix
   "<http://www.w3.org/2001/XMLSchema#>")
@@ -94,32 +95,37 @@
                      (assoc (assert-scope-err-map errs sparql ast)
                             :index index))))))
 
-;; (defn- assert-bnodes
-;;   [sparql ast]
-;;   (let [res (bnode/validate-bnodes ast)]
-;;     (when-some [errs (:errors res)]
-;;       (throw (ex-info "Invalid blank nodes!"
-;;                       {:kind  (:kind res)
-;;                        :error errs
-;;                        :input sparql
-;;                        :ast   ast})))))
+(defn- assert-bnodes
+  [sparql ast nodes-m]
+  (let [res (vb/validate-bnodes nodes-m)]
+    (when-some [errs (second res)]
+      (throw (ex-info "Invalid blank nodes!"
+                      {:kind  (:kind res)
+                       :error errs
+                       :input sparql
+                       :ast   ast})))))
 
-;; (defn- assert-bnodes-coll
-;;   [sparql-coll ast-coll]
-;;   (loop [inputs sparql-coll
-;;          asts   ast-coll
-;;          bnodes #{}
-;;          idx    0]
-;;     (when-some [ast (first asts)]
-;;       (let [res (bnode/validate-bnodes bnodes ast)]
-;;         (if-some [errs (:errors res)]
-;;           (throw (ex-info "Invalid blank nodes!"
-;;                           {:kind  (:kind res)
-;;                            :error errs
-;;                            :input (first inputs)
-;;                            :ast   ast
-;;                            :index idx}))
-;;           (recur (rest inputs) (rest asts) (:bnodes res) (inc idx)))))))
+(defn- assert-bnodes-coll
+  [sparql-coll ast-coll nodes-m-coll]
+  (loop [inputs   sparql-coll
+         asts     ast-coll
+         nodes-ms nodes-m-coll
+         bnodes   #{}
+         idx      0]
+    (when-some [nodes-m (first asts)]
+      (let [res (vb/validate-bnodes bnodes nodes-m)]
+        (if-some [errs (second res)]
+          (throw (ex-info "Invalid blank nodes!"
+                          {:kind  (:kind errs)
+                           :error errs
+                           :input (first inputs)
+                           :ast   (first asts)
+                           :index idx}))
+          (recur (rest inputs)
+                 (rest asts)
+                 (rest nodes-ms)
+                 (first res)
+                 (inc idx)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public API Functions
@@ -136,12 +142,7 @@
                    (let [nodes-m (v/collect-nodes ast)]
                      (assert-prefixes query ast nodes-m prefix-m)
                      (assert-scoped-vars query ast nodes-m)
-                     #_(when-some [errs (vs/validate-scoped-vars nodes-m)]
-                       (throw (ex-info (err/scope-error-msg errs)
-                                       (assert-scope-err-map errs update ast)))))
-                   #_(assert-prefixes query ast prefix-m)
-                   #_(assert-scoped-vars query ast)
-                   #_(assert-bnodes query ast))
+                     (assert-bnodes query ast nodes-m)))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
@@ -161,8 +162,8 @@
         _        (when validate?
                    (let [nodes-m (v/collect-nodes ast)]
                      (assert-prefixes update ast nodes-m prefix-m)
-                     (assert-scoped-vars update nodes-m ast))
-                   #_(assert-bnodes update ast))
+                     (assert-scoped-vars update nodes-m ast)
+                     (assert-bnodes update ast nodes-m)))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
                    ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
@@ -185,8 +186,8 @@
         _            (when validate?
                        (let [nodes-m-coll (map v/collect-nodes asts)]
                          (dorun (map assert-prefixes updates asts nodes-m-coll prefix-ms idxs))
-                         (dorun (map assert-scoped-vars updates asts nodes-m-coll idxs)))
-                       #_(assert-bnodes-coll updates asts))
+                         (dorun (map assert-scoped-vars updates asts nodes-m-coll idxs))
+                         (assert-bnodes-coll updates asts nodes-m-coll)))
         xsd-prefixes (map get-xsd-prefix prefix-ms)
         opt-maps     (map (fn [?xsd-pre]
                             (cond-> {:pretty? pretty?}

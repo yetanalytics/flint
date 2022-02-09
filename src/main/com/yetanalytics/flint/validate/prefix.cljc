@@ -14,7 +14,7 @@
   {:prefixes prefixes
    :iri      prefix-iri
    :prefix   (or (some->> prefix-iri namespace keyword) :$)
-   :path     (conj (->> loc zip/path (mapv #(-> % first))) :ax/prefix-iri)})
+   :path     (conj (->> loc zip/path (mapv first)) :ax/prefix-iri)})
 
 (defn validate-prefixes
   [prefixes node-m]

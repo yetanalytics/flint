@@ -124,11 +124,7 @@
   [var scope-vars zip-loc k]
   {:variable   var
    :scope-vars scope-vars
-   :path       (conj (->> zip-loc
-                          zip/path
-                          (filter #(-> % first keyword?))
-                          (mapv #(-> % first)))
-                     k)})
+   :path       (conj (->> zip-loc zip/path (mapv first)) k)})
 
 (defn- get-bind-var
   [ast-node]
