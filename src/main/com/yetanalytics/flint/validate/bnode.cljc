@@ -114,13 +114,6 @@
                          :bnode    bnode
                          :zip-locs locs}))))))
 
-(comment
-  (apply =
-         '([:query/select :where :where-sub/where 1 :where/recurse :where-sub/where 0]
-           [:query/select :where :where-sub/where 1 :where/recurse :where-sub/where 0]
-           [:query/select :where :where-sub/where 0 :where/recurse :where-sub/where 0]
-           [:query/select :where :where-sub/where 0 :where/recurse :where-sub/where 0])))
-
 (defn- bnode-err-map
   [bnode loc]
   {:bnode bnode
@@ -134,6 +127,13 @@
           bnode-locs))
 
 (defn validate-bnodes
+  "Given the map `node-m` between nodes and zipper locs, validate that
+   all bnodes satisfy the following conditions:
+     - They cannot be duplicated in different Basic Graph Patterns (BGPs).
+     - They cannot be duplicated across different Updates in a request.
+  
+   Returns a pair between the union of `prev-bnodes` and the bnodes in
+   `node-m`, and a nilable error map."
   ([node-m]
    (validate-bnodes #{} node-m))
   ([prev-bnodes node-m]
@@ -151,6 +151,6 @@
                                      (filter (comp not valid-bnode-locs?))
                                      not-empty)]
          [bnode-union
-          {:kind ::dupe-bnodes-bgp
+          {:kind   ::dupe-bnodes-bgp
            :errors (bnode-locs->err-map bad-bnode-locs)}]
          [bnode-union nil])))))

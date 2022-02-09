@@ -12,6 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti get-scope-vars
+  "Return a coll of all variables in the scope of the AST branch."
   (fn [x] (if (and (vector? x) (= 2 (count x)) (keyword? (first x)))
             (first x)
             :default)))
@@ -127,6 +128,7 @@
    :path       (conj (->> zip-loc zip/path (mapv first)) k)})
 
 (defn- get-bind-var
+  "Starting at an `:expr/as-var` node, get the `var` in `expr AS var`."
   [ast-node]
   (-> ast-node ; [:expr/as-var [expr var]]
       second   ; [expr var]
@@ -134,6 +136,7 @@
       second))
 
 (defn- validate-bind
+  "Validate `BIND (expr AS var)`"
   [bind loc]
   (let [bind-var   (get-bind-var bind)
         prev-elems (zip/lefts loc)
@@ -142,6 +145,7 @@
       (scope-err-map bind-var scope loc :where/bind))))
 
 (defn- validate-select
+  "Validate `SELECT ... (expr AS var) ..."
   [select-clause loc]
   (let [bind-var (get-bind-var select-clause)
         prev-elems (zip/lefts loc)
@@ -166,6 +170,9 @@
           node-locs))
 
 (defn validate-scoped-vars
+  "Given `node-m` a map from nodes to zipper locs, check that each var in
+   a `expr AS var` node does not already exist in scope. If invalid, return
+   a vector of error maps; otherwise return `nil`."
   [node-m]
   (let [binds          (:where/bind node-m)
         select-clauses (:select/expr-as-var node-m)]

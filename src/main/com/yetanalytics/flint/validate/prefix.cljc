@@ -17,6 +17,9 @@
    :path     (conj (->> loc zip/path (mapv first)) :ax/prefix-iri)})
 
 (defn validate-prefixes
+  "Given `node-m` a map from nodes to zipper locs, check that each prefix
+   node is included in `prefixes`. If validation fails, return a coll of
+   error maps; otherwise return `nil`."
   [prefixes node-m]
   (let [prefix-m (:ax/prefix-iri node-m)
         errors   (reduce (fn [acc [prefix locs]]
