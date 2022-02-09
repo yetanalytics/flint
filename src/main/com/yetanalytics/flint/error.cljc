@@ -1,6 +1,7 @@
 (ns com.yetanalytics.flint.error
   (:require [clojure.spec.alpha :as s]
             [clojure.string     :as cstr]
+            [com.yetanalytics.flint.validate.bnode :as vb]
             #?@(:clj [[clojure.core :refer [format]]]
                 :cljs [[goog.string :as gstring]
                        [goog.string.format]])))
@@ -123,3 +124,35 @@
    (scope-error-msg* scope-errs ""))
   ([scope-errs index]
    (scope-error-msg* scope-errs (fmt " at index %d" index))))
+
+(defn- bnode-error-msg*
+  [bnode-err-m index-str]
+  (let [bnode-coll  (->> bnode-err-m :errors (map :bnode) distinct)
+        bnode-count (count bnode-coll)
+        bnode-strs  (->> bnode-coll (map name))
+        bnode-str   (if (= 1 bnode-count)
+                      (first bnode-strs)
+                      (fmt "%s and %s"
+                           (cstr/join ", " (butlast bnode-strs))
+                           (last bnode-strs)))]
+    (case (:kind bnode-err-m)
+      ::vb/dupe-bnodes-update
+      (fmt "%d blank node%s%s %s duplicated from previous updates: %s!"
+           bnode-count
+           (if (= 1 bnode-count) "" "s")
+           index-str
+           (if (= 1 bnode-count) "was" "were")
+           bnode-str)
+      ::vb/dupe-bnodes-bgp
+      (fmt "%d blank node%s%s %s duplicated in multiple BGPs: %s!"
+           bnode-count
+           (if (= 1 bnode-count) "" "s")
+           index-str
+           (if (= 1 bnode-count) "was" "were")
+           bnode-str))))
+
+(defn bnode-error-msg
+  ([bnode-err-m]
+   (bnode-error-msg* bnode-err-m ""))
+  ([bnode-err-m index ]
+   (bnode-error-msg* bnode-err-m (fmt " at index %d" index))))

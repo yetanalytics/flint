@@ -4,8 +4,10 @@
             [com.yetanalytics.flint.spec.query  :as qs]
             [com.yetanalytics.flint.spec.update :as us]
             [com.yetanalytics.flint.error       :as err]
-            [com.yetanalytics.flint.prefix      :as pre]
-            [com.yetanalytics.flint.scope       :as scope]))
+            [com.yetanalytics.flint.validate    :as v]
+            [com.yetanalytics.flint.validate.bnode  :as vb]
+            [com.yetanalytics.flint.validate.prefix :as vp]
+            [com.yetanalytics.flint.validate.scope  :as vs]))
 
 (deftest top-level-keyword-test
   (testing "all top level keywords are accounted for"
@@ -99,7 +101,8 @@
            (->> '{:select [?x]
                   :where [[?x :dc/title "Foo"]]}
                 (s/conform qs/query-spec)
-                (pre/validate-prefixes {})
+                v/collect-nodes
+                (vp/validate-prefixes {})
                 (err/prefix-error-msg))))
     (is (= (str "4 IRIs cannot be expanded due to missing prefixes "
                 ":$, :dc and :foaf!")
@@ -110,19 +113,22 @@
                            [[?x :foaf/name "Bar"]]
                            [[?x :foaf/name "Buu"]]]]}
                 (s/conform qs/query-spec)
-                (pre/validate-prefixes {})
+                v/collect-nodes
+                (vp/validate-prefixes {})
                 (err/prefix-error-msg))))
     (is (= (str "3 IRIs cannot be expanded due to missing prefixes "
                 ":$ and :dc!")
            (->> '{:delete-data [[:fish :dc/title :food]]}
                 (s/conform us/update-spec)
-                (pre/validate-prefixes {})
+                v/collect-nodes
+                (vp/validate-prefixes {})
                 (err/prefix-error-msg))))
     (is (= (str "3 IRIs at index 0 cannot be expanded due to missing prefixes "
                 ":$ and :dc!")
            (->> ['{:delete-data [[:fish :dc/title :food]]}]
                 (map (partial s/conform us/update-spec))
-                (map (partial pre/validate-prefixes {}))
+                (map v/collect-nodes)
+                (map (partial vp/validate-prefixes {}))
                 (map-indexed (fn [idx err] (err/prefix-error-msg err idx)))
                 first)))))
 
@@ -133,20 +139,55 @@
                   :where  [[?x ?y ?z]
                            [:bind [3 ?x]]]}
                 (s/conform qs/query-spec)
-                scope/validate-scoped-vars
+                v/collect-nodes
+                vs/validate-scoped-vars
                 err/scope-error-msg)))
     (is (= "2 variables in 2 `expr AS var` clauses were already defined in scope: ?x and ?y!'"
            (->> '{:select [[2 ?y]]
                   :where  [[?x ?y ?z]
                            [:bind [3 ?x]]]}
                 (s/conform qs/query-spec)
-                scope/validate-scoped-vars
+                v/collect-nodes
+                vs/validate-scoped-vars
                 err/scope-error-msg)))
     (is (= "1 variable at index 0 in 1 `expr AS var` clause was already defined in scope: ?x!'"
            (->> '[{:delete [[?x ?y ?z]]
                    :where  [[?x ?y ?z]
                             [:bind [3 ?x]]]}]
                 (map (partial s/conform us/update-spec))
-                (map scope/validate-scoped-vars)
+                (map v/collect-nodes)
+                (map vs/validate-scoped-vars)
                 (map-indexed (fn [idx err] (err/scope-error-msg err idx)))
                 first)))))
+
+(deftest bnode-error-msg-test
+  (testing "blank node error messages"
+    (is (= "1 blank node was duplicated in multiple BGPs: _1!"
+           (->> '{:select [?x]
+                  :where  [[:where [[?x :foo/bar _1]]]
+                           [:where [[?y :baz/qux _1]]]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vb/validate-bnodes
+                second
+                err/bnode-error-msg)))
+    (is (= "2 blank nodes were duplicated in multiple BGPs: _2 and _1!"
+           (->> '{:select [?x]
+                  :where  [[:where [{_2 {:foo/bar #{_1}
+                                         :baz/qux #{_1}}}]]
+                           [:where [{_2 {:fii/fie #{_1}
+                                         :foe/fum #{_1}}}]]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vb/validate-bnodes
+                second
+                err/bnode-error-msg)))
+    (is (= "2 blank nodes at index 1 were duplicated from previous updates: _1 and _2!"
+           (let [emap (->> '{:insert [[?x :foo/bar _1]]
+                             :where  [[:where [[?x :foo/bar _2]
+                                               [?y :baz/qux _3]]]]}
+                           (s/conform us/update-spec)
+                           v/collect-nodes
+                           (vb/validate-bnodes #{'_1 '_2})
+                           second)]
+             (err/bnode-error-msg emap 1))))))
