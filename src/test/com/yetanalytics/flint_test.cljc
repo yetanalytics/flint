@@ -3,6 +3,7 @@
             [com.yetanalytics.flint :as flint :refer [format-query
                                                       format-update
                                                       format-updates]]
+            [com.yetanalytics.flint.validate.bnode :as vb]
             #?@(:clj [[clojure.string  :as cstr]
                       [clojure.edn     :as edn]
                       [clojure.java.io :as io]]))
@@ -100,6 +101,28 @@
     (is (= ::flint/invalid-prefixes
            (try (format-updates ['{:copy :foo :to :bar}
                                  '{:copy :baz :to :qux}])
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-scoped-vars
+           (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
+                                :select [[2 ?x]]
+                                :where [[?x :foo/bar ?y]]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::vb/dupe-bnodes-bgp
+           (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
+                                :select [?x]
+                                :where [[?x :foo/bar _1]
+                                        [:optional [[?y :foo/baz _1]]]]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::vb/dupe-bnodes-update
+           (try (format-updates '[{:prefixes {:foo "<http://foo.org/>"}
+                                   :insert-data [[:foo/bar :foo/baz _1]]}
+                                  {:insert-data [[:foo/bar :foo/baz _1]]}])
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))

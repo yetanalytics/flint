@@ -1,4 +1,4 @@
-(ns com.yetanalytics.flint.scope
+(ns com.yetanalytics.flint.validate.scope
   (:require [clojure.zip :as zip]))
 
 (defn- get-kv
@@ -12,6 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti get-scope-vars
+  "Return a coll of all variables in the scope of the AST branch."
   (fn [x] (if (and (vector? x) (= 2 (count x)) (keyword? (first x)))
             (first x)
             :default)))
@@ -117,92 +118,65 @@
   (mapcat get-scope-vars (first values)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; AST Traversal
+;; Validation on AST zipper
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- ast-branch?
-  [x]
-  (and (vector? x)
-       (= 2 (count x))
-       (keyword? (first x))
-       (not= "ax" (namespace (first x)))))
-
-(defn- ast-zipper
-  "Create a zipper out of the AST, where each AST node `[:keyword children]`
-   is treated as a zipper branch."
-  [ast]
-  (zip/zipper ast-branch?
-              (fn [[_ children]]
-                (if (or (ast-branch? children)
-                        (not (coll? children)))
-                  [children]
-                  children))
-              identity
-              ast))
-
-(defn- scope-error-map
+(defn- scope-err-map
   [var scope-vars zip-loc k]
   {:variable   var
    :scope-vars scope-vars
-   :path       (conj (->> zip-loc
-                          zip/path
-                          (filter #(-> % first keyword?))
-                          (mapv #(-> % first)))
-                     k)})
+   :path       (conj (->> zip-loc zip/path (mapv first)) k)})
 
 (defn- get-bind-var
+  "Starting at an `:expr/as-var` node, get the `var` in `expr AS var`."
   [ast-node]
-  ;; [:where/bind [:expr/as-var ...]] OR
-  ;; [:select/expr-as-var [:expr/as-var ...]]
-  (-> ast-node
-      second ; [:expr/as-var [expr var]]
-      second ; [expr var]
-      second ; [:ax/var ?var]
+  (-> ast-node ; [:expr/as-var [expr var]]
+      second   ; [expr var]
+      second   ; [:ax/var ?var]
       second))
 
+(defn- validate-bind
+  "Validate `BIND (expr AS var)`"
+  [bind loc]
+  (let [bind-var   (get-bind-var bind)
+        prev-elems (zip/lefts loc)
+        scope      (set (mapcat get-scope-vars prev-elems))]
+    (when (contains? scope bind-var)
+      (scope-err-map bind-var scope loc :where/bind))))
+
+(defn- validate-select
+  "Validate `SELECT ... (expr AS var) ..."
+  [select-clause loc]
+  (let [bind-var (get-bind-var select-clause)
+        prev-elems (zip/lefts loc)
+        sel-query (->> loc
+                       zip/up ; :select/var-or-exprs
+                       zip/up ; :select
+                       zip/up ; :query/select or :where-sub/select
+                       zip/node)
+        where (get-kv (second sel-query) :where)
+        where-vars (get-scope-vars (second where))
+        prev-vars (mapcat get-scope-vars prev-elems)
+        scope (set (concat where-vars prev-vars))]
+    (when (contains? scope bind-var)
+      (scope-err-map bind-var scope loc :select/expr-as-var))))
+
+(defn- validate-node-locs
+  [validation-fn node-locs]
+  (mapcat (fn [[node locs]]
+            (->> locs
+                 (map (partial validation-fn node))
+                 (filter some?)))
+          node-locs))
+
 (defn validate-scoped-vars
-  [ast]
-  (loop [loc  (ast-zipper ast)
-         errs []]
-    (if-not (zip/end? loc)
-      (let [ast-node (zip/node loc)]
-        (cond
-          ;; BIND (expr AS var)
-          (and (zip/branch? loc)
-               (= :where/bind (first ast-node)))
-          (let [bind-var   (get-bind-var ast-node)
-                prev-elems (zip/lefts loc)
-                scope      (set (mapcat get-scope-vars prev-elems))]
-            (if (contains? scope bind-var)
-              (recur (zip/next loc)
-                     (conj errs (scope-error-map bind-var
-                                                 scope
-                                                 loc
-                                                 (first ast-node))))
-              (recur (zip/next loc)
-                     errs)))
-          ;; SELECT ... (expr AS var) ...
-          (and (zip/branch? loc)
-               (= :select/expr-as-var (first ast-node)))
-          (let [bind-var   (get-bind-var ast-node)
-                prev-elems (zip/lefts loc)
-                sel-query  (->> loc
-                                zip/up ; :select/var-or-exprs
-                                zip/up ; :select
-                                zip/up ; :query/select or :where-sub/select
-                                zip/node)
-                where      (get-kv (second sel-query) :where)
-                where-vars (get-scope-vars (second where))
-                prev-vars  (mapcat get-scope-vars prev-elems)
-                scope      (set (concat where-vars prev-vars))]
-            (if (contains? scope bind-var)
-              (recur (zip/next loc)
-                     (conj errs (scope-error-map bind-var
-                                                 scope
-                                                 loc
-                                                 (first ast-node))))
-              (recur (zip/next loc)
-                     errs)))
-          :else
-          (recur (zip/next loc) errs)))
-      (not-empty errs))))
+  "Given `node-m` a map from nodes to zipper locs, check that each var in
+   a `expr AS var` node does not already exist in scope. If invalid, return
+   a vector of error maps; otherwise return `nil`."
+  [node-m]
+  (let [binds          (:where/bind node-m)
+        select-clauses (:select/expr-as-var node-m)]
+    (some->> (concat (validate-node-locs validate-bind binds)
+                     (validate-node-locs validate-select select-clauses))
+             not-empty
+             vec)))

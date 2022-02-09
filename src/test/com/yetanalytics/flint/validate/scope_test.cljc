@@ -1,52 +1,53 @@
-(ns com.yetanalytics.flint.scope-test
+(ns com.yetanalytics.flint.validate.scope-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.scope :as scope]
-            [com.yetanalytics.flint.spec.query  :as qs]))
+            [com.yetanalytics.flint.validate       :as v]
+            [com.yetanalytics.flint.validate.scope :as vs]
+            [com.yetanalytics.flint.spec.query     :as qs]))
 
 (deftest get-scope-vars-test
   (testing "Searching for in-scope variables"
     (is (nil? (not-empty
-               (scope/get-scope-vars
+               (vs/get-scope-vars
                 '[:ax/num-lit 1]))))
     (is (= '[?x]
-           (scope/get-scope-vars
+           (vs/get-scope-vars
             '[:ax/var ?x])))
     (is (= '[?z]
-           (scope/get-scope-vars
+           (vs/get-scope-vars
             '[:expr/as-var
               [[:expr/terminal [:ax/num-lit 2]]
                [:ax/var ?z]]])))
     (is (= '[]
-           (scope/get-scope-vars
+           (vs/get-scope-vars
             '[:where-sub/empty []])))
     (testing "in basic graph patterns"
       (is (= '[?x ?y ?z]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:triple/vec [[:ax/var ?x]
                              [:ax/var ?y]
                              [:ax/var ?z]]])))
       (is (= '[?s ?p ?o]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:triple/nform
                 [:triple/spo
                  [[[:ax/var ?s]
                    [:triple/po [[[:ax/var ?p]
                                  [:triple/o [[:ax/var ?o]]]]]]]]]])))
       (is (= '[?x ?y ?z]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:where-sub/where
                 [[:triple/vec [[:ax/var ?x]
                                [:ax/var ?y]
                                [:ax/var ?z]]]]])))
       (is (= '[?x ?y ?z]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:where-sub/where
                 [[:triple/vec [[:ax/var ?x]
                                [:ax/var ?y]
                                [:ax/var ?z]]]]])))
       (is (= '[?x ?ya ?yb ?z]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:triple/vec
                 [[:ax/var ?x]
                  [:triple/path
@@ -57,7 +58,7 @@
                  [:ax/var ?z]]]))))
     (testing "in sub-SELECT queries"
       (is (= '[?x ?y ?z]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:where-sub/select
                 [[:select [:ax/wildcard '*]]
                  [:where [:where-sub/where
@@ -65,7 +66,7 @@
                                          [:ax/var ?y]
                                          [:ax/var ?z]]]]]]]])))
       (is (= '[?a ?b ?c]
-             (scope/get-scope-vars
+             (vs/get-scope-vars
               '[:where-sub/select
                 [[:select [:select/var-or-exprs
                            [[:ax/var ?a]
@@ -86,7 +87,7 @@
              ?serviceSilentTerm ?s7 ?p7 ?o7
              ?foo
              ?v1 ?v2]
-           (scope/get-scope-vars
+           (vs/get-scope-vars
             '[:where-sub/where
               [[:where/recurse
                 [:where-sub/where
@@ -139,35 +140,49 @@
                  [[:triple/vec
                    [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]])))))
 
+
 (deftest scope-validation-test
   (testing "Bind var scope validation"
     (is (nil? (->> '{:select [?x]
                      :where  [[?x ?y ?z]]}
                    (s/conform qs/query-spec)
-                   scope/validate-scoped-vars)))
+                   v/collect-nodes
+                   vs/validate-scoped-vars)))
     (is (nil? (->> '{:select [?x [2 ?new]]
                      :where  [[?x ?y ?z]]}
                    (s/conform qs/query-spec)
-                   scope/validate-scoped-vars)))
+                   v/collect-nodes
+                   vs/validate-scoped-vars)))
     (is (nil? (->> '{:select [?x]
                      :where  [[?x ?y ?z]
                               [:bind [3 ?new]]]}
                    (s/conform qs/query-spec)
-                   scope/validate-scoped-vars)))
+                   v/collect-nodes
+                   vs/validate-scoped-vars)))
     (is (= [{:variable   '?x
              :scope-vars #{'?x '?y '?z}
              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
            (->> '{:select [[2 ?x]]
                   :where [[?x ?y ?z]]}
                 (s/conform qs/query-spec)
-                scope/validate-scoped-vars)))
+                v/collect-nodes
+                vs/validate-scoped-vars)))
+    (is (= [{:variable   '?z
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
+           (->> '{:select [[2 ?z]]
+                  :where [{?x {?y #{?z}}}]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars)))
     (is (= [{:variable   '?x
              :scope-vars #{'?x '?y '?z '?w}
              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
            (->> '{:select [?w [2 ?x]]
                   :where [[?x ?y ?z]]}
                 (s/conform qs/query-spec)
-                scope/validate-scoped-vars)))
+                v/collect-nodes
+                vs/validate-scoped-vars)))
     (is (= [{:variable   '?y
              :scope-vars #{'?x '?y '?z}
              :path       [:query/select :where :where-sub/where :where/bind]}]
@@ -175,15 +190,18 @@
                   :where [[?x ?y ?z]
                           [:bind [3 ?y]]]}
                 (s/conform qs/query-spec)
-                scope/validate-scoped-vars)))
-    (is (= [{:variable   '?x
-             :scope-vars #{'?x '?y '?z '?w}
-             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}
-            {:variable   '?y
-             :scope-vars #{'?x '?y '?z}
-             :path       [:query/select :where :where-sub/where :where/bind]}]
+                v/collect-nodes
+                vs/validate-scoped-vars)))
+    (is (= #{{:variable   '?x
+              :scope-vars #{'?x '?y '?z '?w}
+              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}
+             {:variable   '?y
+              :scope-vars #{'?x '?y '?z}
+              :path       [:query/select :where :where-sub/where :where/bind]}}
            (->> '{:select [?w [2 ?x]]
                   :where [[?x ?y ?z]
                           [:bind [3 ?y]]]}
                 (s/conform qs/query-spec)
-                scope/validate-scoped-vars)))))
+                v/collect-nodes
+                vs/validate-scoped-vars
+                set)))))

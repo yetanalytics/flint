@@ -81,6 +81,16 @@
                    :triple/nform ts/normal-form-novar-spec)
              :kind vector?))
 
+(def triples-noblank-spec
+  (s/coll-of (s/or :triple/vec ts/triple-vec-noblank-spec
+                   :triple/nform ts/normal-form-noblank-spec)
+             :kind vector?))
+
+(def triples-novar-noblank-spec
+  (s/coll-of (s/or :triple/vec ts/triple-vec-novar-noblank-spec
+                   :triple/nform ts/normal-form-novar-noblank-spec)
+             :kind vector?))
+
 (def quad-spec
   (s/tuple #{:graph}
            ax/var-or-iri-spec
@@ -90,6 +100,16 @@
   (s/tuple #{:graph}
            ax/var-or-iri-spec
            triples-novar-spec))
+
+(def quad-noblank-spec
+  (s/tuple #{:graph}
+           ax/var-or-iri-spec
+           triples-noblank-spec))
+
+(def quad-novar-noblank-spec
+  (s/tuple #{:graph}
+           ax/var-or-iri-spec
+           triples-novar-noblank-spec))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :triple/vec  ts/triple-vec-nopath-spec
@@ -101,6 +121,18 @@
   (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-spec
                    :triple/nform ts/normal-form-novar-spec
                    :triple/quads quad-novar-spec)
+             :kind vector?))
+
+(def triple-or-quads-noblank-spec
+  (s/coll-of (s/or :triple/vec  ts/triple-vec-noblank-spec
+                   :triple/nform ts/normal-form-noblank-spec
+                   :triple/quads quad-noblank-spec)
+             :kind vector?))
+
+(def triple-or-quads-novar-noblank-spec
+  (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-noblank-spec
+                   :triple/nform ts/normal-form-novar-noblank-spec
+                   :triple/quads quad-novar-noblank-spec)
              :kind vector?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -174,20 +206,20 @@
   (smap->vec (s/keys :req-un [::insert-data]
                      :opt-un [::ps/base ::ps/prefixes])))
 
-(s/def ::delete-data triple-or-quads-novar-spec)
+(s/def ::delete-data triple-or-quads-novar-noblank-spec)
 
 (def delete-data-update-spec
   (smap->vec (s/keys :req-un [::delete-data]
                      :opt-un [::ps/base ::ps/prefixes])))
 
-(s/def ::delete-where triple-or-quads-spec)
+(s/def ::delete-where triple-or-quads-noblank-spec)
 
 (def delete-where-update-spec
   (smap->vec (s/keys :req-un [::delete-where]
                      :opt-un [::ps/base ::ps/prefixes])))
 
 (s/def ::insert triple-or-quads-spec)
-(s/def ::delete triple-or-quads-spec)
+(s/def ::delete triple-or-quads-noblank-spec)
 
 (def modify-update-spec
   (smap->vec (s/keys :req-un [(or ::delete ::insert)
