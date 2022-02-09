@@ -6,7 +6,7 @@
 (def select-spec
   (s/or :select/var-or-exprs
         (s/* (s/alt :ax/var ax/variable?
-                    :select/expr-as-var ::es/expr-as-var))
+                    :select/expr-as-var ::es/agg-expr-as-var))
         :ax/wildcard
         ax/wildcard?))
 
