@@ -59,10 +59,10 @@
 
 (defn- assert-prefixes-err-map
   [prefix-errs sparql ast]
-  {:kind  ::invalid-prefixes
-   :error prefix-errs
-   :input sparql
-   :ast   ast})
+  {:kind   ::invalid-prefixes
+   :errors prefix-errs
+   :input  sparql
+   :ast    ast})
 
 (defn- assert-prefixes
   ([sparql ast nodes-m ?prefixes]
@@ -79,10 +79,10 @@
 
 (defn- assert-scope-err-map
   [scope-errs sparql ast]
-  {:kind  ::invalid-scoped-vars
-   :error scope-errs
-   :input sparql
-   :ast   ast})
+  {:kind   ::invalid-scoped-vars
+   :errors scope-errs
+   :input  sparql
+   :ast    ast})
 
 (defn- assert-scoped-vars
   ([sparql ast nodes-m]
@@ -95,15 +95,20 @@
                      (assoc (assert-scope-err-map errs sparql ast)
                             :index index))))))
 
+(defn- assert-bnode-err-map
+  [{:keys [kind errors prev-bnodes]} sparql ast]
+  (cond-> {:kind   kind
+           :errors errors
+           :input  sparql
+           :ast    ast}
+    prev-bnodes (assoc :prev-bnodes prev-bnodes)))
+
 (defn- assert-bnodes
   [sparql ast nodes-m]
   (let [res (vb/validate-bnodes nodes-m)]
     (when-some [errs (second res)]
-      (throw (ex-info "Invalid blank nodes!"
-                      {:kind  (:kind res)
-                       :error errs
-                       :input sparql
-                       :ast   ast})))))
+      (throw (ex-info (err/bnode-error-msg errs)
+                      (assert-bnode-err-map errs sparql ast))))))
 
 (defn- assert-bnodes-coll
   [sparql-coll ast-coll nodes-m-coll]
@@ -112,15 +117,14 @@
          nodes-ms nodes-m-coll
          bnodes   #{}
          idx      0]
-    (when-some [nodes-m (first asts)]
+    (when-some [nodes-m (first nodes-ms)]
       (let [res (vb/validate-bnodes bnodes nodes-m)]
         (if-some [errs (second res)]
-          (throw (ex-info "Invalid blank nodes!"
-                          {:kind  (:kind errs)
-                           :error errs
-                           :input (first inputs)
-                           :ast   (first asts)
-                           :index idx}))
+          (throw (ex-info (err/bnode-error-msg errs idx)
+                          (assoc (assert-bnode-err-map errs
+                                                       (first inputs)
+                                                       (first asts))
+                                 :index idx)))
           (recur (rest inputs)
                  (rest asts)
                  (rest nodes-ms)

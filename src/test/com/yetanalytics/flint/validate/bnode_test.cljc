@@ -3,7 +3,8 @@
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.validate       :as v]
             [com.yetanalytics.flint.validate.bnode :as vb]
-            [com.yetanalytics.flint.spec.query     :as qs]))
+            [com.yetanalytics.flint.spec.query     :as qs]
+            [com.yetanalytics.flint.spec.update    :as us]))
 
 (deftest bnode-test
   (testing "valid blank nodes"
@@ -159,9 +160,48 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind   ::vb/dupe-bnodes-update
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0 :where/recurse :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where 0 :where/recurse :where-sub/where 0]}]
+                    :prev-bnodes #{'_1}}]
            (->> '{:select [?x]
                   :where  [[:where [[?x :foo/bar _1]]]]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
-                (vb/validate-bnodes #{'_1}))))))
+                (vb/validate-bnodes #{'_1}))))
+    (is (= [[#{'_1} {:kind   ::vb/dupe-bnodes-bgp
+                     :errors [{:bnode '_1
+                               :path  [:update/modify :where :where-sub/where 0 :where/recurse :where-sub/where 0]}
+                              {:bnode '_1
+                               :path  [:update/modify :insert]}]}]]
+           (->> '[{:insert [[?x :foo/bar _1]]
+                   :where  [[:where [[?x :foo/bar _1]]]]}]
+                (map (partial s/conform us/update-spec))
+                (map v/collect-nodes)
+                (map vb/validate-bnodes))))
+    (is (= [#{'_1 '_2} nil]
+           (->> '[{:insert [[?x :foo/bar _1]]
+                   :where  [[:where [[?x :foo/bar _2]]]]}
+                  {:insert [[?x :foo/bar _1]]
+                   :where  [[:where [[?x :foo/bar _2]]]]}]
+                first
+                (s/conform us/update-spec)
+                v/collect-nodes
+                vb/validate-bnodes)))
+    (is (= [#{'_1 '_2 '_3}
+            {:kind
+             ::vb/dupe-bnodes-update
+             :errors
+             [{:bnode '_1
+               :path  [:update/modify :insert]}
+              {:bnode '_2
+               :path  [:update/modify :where :where-sub/where 0 :where/recurse :where-sub/where 0]}]
+             :prev-bnodes
+             #{'_1 '_2}}]
+           (->> '[{:insert [[?x :foo/bar _1]]
+                   :where  [[:where [[?x :foo/bar _2]]]]}
+                  {:insert [[?x :foo/bar _1]]
+                   :where  [[:where [[?x :foo/bar _2]
+                                     [?y :baz/qux _3]]]]}]
+                second
+                (s/conform us/update-spec)
+                v/collect-nodes
+                (vb/validate-bnodes #{'_1 '_2}))))))
