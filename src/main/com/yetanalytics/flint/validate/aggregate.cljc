@@ -62,6 +62,10 @@
          :loc       loc}))))
 
 (defn validate-agg-selects
+  "Validate, given `node-m` that contains a map from `SELECT` AST nodes to
+   their zipper locs, that any SELECT that includes aggregates are valid
+   according to the SPARQL spec. Returns `nil` if valid, a coll of error
+   maps otherwise."
   [node-m]
   (->> (:agg/select node-m)
        (map validate-agg-select)
