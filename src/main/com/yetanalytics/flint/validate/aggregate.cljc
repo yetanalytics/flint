@@ -36,7 +36,7 @@
 
 (defmulti invalid-agg-expr-vars (fn [_ [k _]] k))
 
-(defmethod invalid-agg-expr-vars :default [_] [])
+(defmethod invalid-agg-expr-vars :default [_ _] [])
 
 (defmethod invalid-agg-expr-vars :expr/branch [valid-vars [_ [op-kv args-kv]]]
   (let [[_ op] op-kv
@@ -103,4 +103,5 @@
   [node-m]
   (->> (:agg/select node-m)
        (map validate-agg-select)
-       (filter some?)))
+       (filter some?)
+       not-empty))
