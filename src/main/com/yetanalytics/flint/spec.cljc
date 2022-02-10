@@ -32,7 +32,8 @@
                         req-un (conj :req-un req-un)
                         opt-un (conj :opt-un opt-un)
                         true seq)]
-       `(s/and ~@map-specs
+       `(s/and map?
+               ~@map-specs
                ;; `restrict-keys` taken from xapi-schema.spec
                #(every? ~keys-set# (keys %))
                ~keys-spec#
