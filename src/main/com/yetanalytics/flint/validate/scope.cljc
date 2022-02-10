@@ -1,11 +1,6 @@
 (ns com.yetanalytics.flint.validate.scope
-  (:require [clojure.zip :as zip]))
-
-(defn- get-kv
-  "Given `coll` of `[:keyword value]` pairs, return the pair
-   with keyword `k`."
-  [coll k]
-  (some #(when (-> % first (= k)) %) coll))
+  (:require [clojure.zip :as zip]
+            [com.yetanalytics.flint.util :as u]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Computing variables and var scopes
@@ -102,8 +97,8 @@
   (get-scope-vars ev))
 
 (defmethod get-scope-vars :where-sub/select [[_ s]]
-  (let [[_ select] (get-kv s :select)
-        where      (get-kv s :where)]
+  (let [[_ select] (u/get-kv-pair s :select)
+        where      (u/get-kv-pair s :where)]
     (case (first select)
       :ax/wildcard
       (get-scope-vars where)
@@ -156,45 +151,30 @@
    :scope-vars scope-vars
    :path       (conj (->> zip-loc zip/path (mapv first)) k)})
 
-(defn- get-bind-expr
-  "Starting at an `:expr/as-var` node, get the `var` in `expr AS var`."
-  [ast-node]
-  (-> ast-node ; [:expr/as-var [expr var]]
-      second   ; [expr var]
-      first))
-
-(defn- get-bind-var
-  "Starting at an `:expr/as-var` node, get the `var` in `expr AS var`."
-  [ast-node]
-  (-> ast-node ; [:expr/as-var [expr var]]
-      second   ; [expr var]
-      second   ; [:ax/var ?var]
-      second))
-
 (defn- validate-bind
   "Validate `BIND (expr AS var)`"
-  [bind loc]
-  (let [bind-var   (get-bind-var bind)
-        prev-elems (zip/lefts loc)
-        scope      (set (mapcat get-scope-vars prev-elems))]
+  [[_expr-as-var-k [_ v-kv]] loc]
+  (let [[_ bind-var] v-kv
+        prev-elems   (zip/lefts loc)
+        scope        (set (mapcat get-scope-vars prev-elems))]
     (when (contains? scope bind-var)
       (in-scope-err-map bind-var scope loc :where/bind))))
 
 (defn- validate-select
   "Validate `SELECT ... (expr AS var) ..."
-  [select-clause loc]
-  (let [expr-vars  (get-expr-vars (get-bind-expr select-clause))
-        bind-var   (get-bind-var select-clause)
-        prev-elems (zip/lefts loc)
-        sel-query  (->> loc
-                        zip/up ; :select/var-or-exprs
-                        zip/up ; :select
-                        zip/up ; :query/select or :where-sub/select
-                        zip/node)
-        where      (get-kv (second sel-query) :where)
-        where-vars (get-scope-vars (second where))
-        prev-vars  (mapcat get-scope-vars prev-elems)
-        scope      (set (concat where-vars prev-vars))]
+  [[_expr-as-var-k [expr v-kv]] loc]
+  (let [[_ bind-var] v-kv
+        expr-vars    (get-expr-vars expr)
+        prev-elems   (zip/lefts loc)
+        sel-query    (->> loc
+                          zip/up ; :select/var-or-exprs
+                          zip/up ; :select
+                          zip/up ; :query/select or :where-sub/select
+                          zip/node)
+        where        (-> sel-query second (u/get-kv-pair :where))
+        where-vars   (-> where second get-scope-vars)
+        prev-vars    (mapcat get-scope-vars prev-elems)
+        scope        (set (concat where-vars prev-vars))]
     (if-some [bad-expr-vars (not-empty (filter #(not (scope %)) expr-vars))]
       (not-in-scope-err-map bad-expr-vars scope loc :select/expr-as-var)
       (when (contains? scope bind-var)

@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.validate.aggregate
-  (:require [com.yetanalytics.flint.spec.expr :as es]))
+  (:require [com.yetanalytics.flint.spec.expr :as es]
+            [com.yetanalytics.flint.util :as u]))
 
 ;; In a query level which uses aggregates, only expressions consisting of
 ;; aggregates and constants may be projected, with one exception.
@@ -15,6 +16,8 @@
 ;;   SELECT (AVG(?x)) AS ?avg) ((?x + ?y) AS ?sum) WHERE { ?x ?y ?z }
 ;;   SELECT ?y ?z WHERE { ?x ?y ?z } GROUP BY ?x
 
+;; GROUP BY projection vars
+
 (defmulti group-by-projected-vars (fn [[k _]] k))
 
 (defmethod group-by-projected-vars :group-by [[_ group-by-coll]]
@@ -29,15 +32,19 @@
 (defmethod group-by-projected-vars :mod/expr-as-var [[_ expr-as-var]]
   (-> expr-as-var second second second))
 
+;; SELECT exprs
+
 (defmulti invalid-agg-expr-vars (fn [_ [k _]] k))
 
 (defmethod invalid-agg-expr-vars :default [_] [])
 
-(defmethod invalid-agg-expr-vars :expr/branch [valid-vars [_ [[_ op] [_ args]]]]
-  (if (or (es/aggregate-ops op)
-          (not (symbol? op)))
-    []
-    (mapcat (partial invalid-agg-expr-vars valid-vars) args)))
+(defmethod invalid-agg-expr-vars :expr/branch [valid-vars [_ [op-kv args-kv]]]
+  (let [[_ op] op-kv
+        [_ args] args-kv]
+    (if (or (es/aggregate-ops op)
+            (not (symbol? op)))
+      []
+      (mapcat (partial invalid-agg-expr-vars valid-vars) args))))
 
 (defmethod invalid-agg-expr-vars :expr/terminal [valid-vars [_ x]]
   (invalid-agg-expr-vars valid-vars x))
@@ -45,19 +52,29 @@
 (defmethod invalid-agg-expr-vars :ax/var [valid-vars [_ v]]
   (if-not (valid-vars v) [v] []))
 
+;; Validation
+
 (defn- validate-agg-select-clause
+  "Return a coll of invalid vars in a SELECT clause with aggregates, or
+   `nil` if valid."
   [group-by-vars sel-clause]
   (let [err-or-valid
         (reduce (fn [valid-vars [k x]]
                   (case k
                     :ax/var
-                    (if (valid-vars x)
-                      valid-vars
-                      (reduced {:errors [x]}))
+                    (if-not (valid-vars x)
+                      (reduced {:errors [x]})
+                      valid-vars)
                     :select/expr-as-var
-                    (let [[_expr-as-var-kw [expr [_v-kw v]]] x]
-                      (if-some [bad-evars (not-empty (invalid-agg-expr-vars valid-vars expr))]
+                    (let [[_ [expr v-kv]] x
+                          [_ v]         v-kv]
+                      (if-some [bad-evars
+                                (->> expr
+                                     (invalid-agg-expr-vars valid-vars)
+                                     not-empty)]
                         (reduced {:errors bad-evars})
+                        ;; Somehow already-projected vars are now valid,
+                        ;; at least according to Apache Jena's query parser
                         (conj valid-vars v)))))
                 group-by-vars
                 sel-clause)]
@@ -65,20 +82,21 @@
       bad-vars
       nil)))
 
-(defn validate-agg-select
-  [select loc]
-  (let [select-cls  (some #(when (= :select (first %)) (second %)) (second select))
-        ?group-by   (some #(when (= :group-by (first %)) (second %)) (second select))
-        group-by-vs (if ?group-by
-                      (->> ?group-by
-                           (map group-by-projected-vars)
-                           (filter some?)
-                           set)
-                      #{})]
-    (if (= :ax/wildcard (first select-cls))
+(defn- validate-agg-select
+  [[[_select-k select] loc]]
+  (let [[_ select-cls] (u/get-kv-pair select :select)
+        [_ ?group-by]  (u/get-kv-pair select :group-by)
+        group-by-vs    (if ?group-by
+                         (->> ?group-by
+                              (map group-by-projected-vars)
+                              (filter some?)
+                              set)
+                         #{})
+        [sel-k sel-v]  select-cls]
+    (if (= :ax/wildcard sel-k)
       {:kind ::wildcard-group-by
        :loc  loc}
-      (when-some [bad-vars (validate-agg-select-clause group-by-vs (second select-cls))]
+      (when-some [bad-vars (validate-agg-select-clause group-by-vs sel-v)]
         {:kind      ::invalid-aggregate-var
          :variables bad-vars
          :loc       loc}))))
@@ -86,5 +104,5 @@
 (defn validate-agg-selects
   [node-m]
   (->> (:agg/select node-m)
-       (map (fn [[sel loc]] (validate-agg-select sel loc)))
+       (map validate-agg-select)
        (filter some?)))

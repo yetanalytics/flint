@@ -1,6 +1,7 @@
 (ns com.yetanalytics.flint.validate
   (:require [clojure.zip :as zip]
-            [com.yetanalytics.flint.spec.expr :as es]))
+            [com.yetanalytics.flint.spec.expr :as es]
+            [com.yetanalytics.flint.util :as u]))
 
 (def axiom-keys
   #{:ax/iri :ax/prefix-iri :ax/var :ax/bnode :ax/wildcard :ax/rdf-type :ax/nil
@@ -8,16 +9,9 @@
     ;; Not actually axioms but still counted as AST terminals
     :distinct? :separator})
 
-(defn- get-keyword
-  [x]
-  (when (vector? x)
-    (let [fst (first x)]
-      (when (keyword? fst)
-        fst))))
-
 (defn- ast-branch?
   [x]
-  (when-some [k (get-keyword x)]
+  (when-some [k (u/get-keyword x)]
     (not (axiom-keys k))))
 
 (defn- ast-children
@@ -56,7 +50,7 @@
   (loop [loc loc]
     (when-not (nil? loc) ; Reached the top w/o finding a SELECT
       (let [ast-node (zip/node loc)]
-        (if (#{:query/select :where-sub/select} (get-keyword ast-node))
+        (if (#{:query/select :where-sub/select} (u/get-keyword ast-node))
           loc
           (recur (zip/up loc)))))))
 
@@ -66,7 +60,7 @@
          node-m {}]
     (if-not (zip/end? loc)
       (let [ast-node (zip/node loc)]
-        (if-some [k (get-keyword ast-node)]
+        (if-some [k (u/get-keyword ast-node)]
           (cond
             ;; Prefixes, blank nodes, and BIND clauses
             (node-keys k)

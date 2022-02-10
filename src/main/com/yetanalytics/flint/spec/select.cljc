@@ -30,11 +30,3 @@
 (s/def ::select select-spec)
 (s/def ::select-distinct select-spec)
 (s/def ::select-reduced select-spec)
-
-(comment
-  (no-duplicate-vars?
-   '[[:ax/var ?x]
-     [:ax/var ?x]
-     [:select/expr-as-var [:expr/as-var
-                           [[:expr/terminal [:ax/num-lit 2]]
-                            [:ax/var ?z]]]]]))
