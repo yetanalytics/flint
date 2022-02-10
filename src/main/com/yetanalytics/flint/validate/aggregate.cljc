@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.validate.aggregate
-  (:require [com.yetanalytics.flint.validate.variable :as vv]
+  (:require [clojure.zip :as zip]
+            [com.yetanalytics.flint.validate.variable :as vv]
             [com.yetanalytics.flint.util              :as u]))
 
 ;; In a query level which uses aggregates, only expressions consisting of
@@ -55,11 +56,11 @@
         [sel-k sel-v]  select-cls]
     (if (= :ax/wildcard sel-k)
       {:kind ::wildcard-group-by
-       :loc  loc}
+       :path (->> loc zip/path (mapv first))}
       (when-some [bad-vars (validate-agg-select-clause group-by-vs sel-v)]
         {:kind      ::invalid-aggregate-var
          :variables bad-vars
-         :loc       loc}))))
+         :path      (->> loc zip/path (mapv first))}))))
 
 (defn validate-agg-selects
   "Validate, given `node-m` that contains a map from `SELECT` AST nodes to

@@ -117,7 +117,7 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))
+                (map #(dissoc % :path)))))
     (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?z]}]
            (->> '{:select [[("<http://custom.agg>" ?x) ?sum] [(str ?z) ?str]]
@@ -125,7 +125,7 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))
+                (map #(dissoc % :path)))))
     (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?z]}]
            (->> '{:select   [?z]
@@ -134,7 +134,7 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))
+                (map #(dissoc % :path)))))
     (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?y '?z]}]
            (->> '{:select   [?y ?z]
@@ -143,7 +143,7 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))
+                (map #(dissoc % :path)))))
     (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?z]}]
            (->> '{:select [?x]
@@ -153,7 +153,7 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))
+                (map #(dissoc % :path)))))
     (is (= [{:kind ::va/wildcard-group-by}]
            (->> '{:select   :*
                   :where    [[?x ?y ?z]]
@@ -161,7 +161,7 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))
+                (map #(dissoc % :path)))))
     (is (= [{:kind ::va/wildcard-group-by}]
            (->> '{:select :*
                   :where  {:select   :*
@@ -170,4 +170,4 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects
-                (map #(dissoc % :loc)))))))
+                (map #(dissoc % :path)))))))
