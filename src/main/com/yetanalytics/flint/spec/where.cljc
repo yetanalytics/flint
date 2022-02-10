@@ -5,7 +5,11 @@
             [com.yetanalytics.flint.spec.modifier :as ms]
             [com.yetanalytics.flint.spec.select   :as ss]
             [com.yetanalytics.flint.spec.triple   :as ts]
-            [com.yetanalytics.flint.spec.values   :as vs]))
+            [com.yetanalytics.flint.spec.values   :as vs])
+  #?(:clj (:require
+           [com.yetanalytics.flint.spec :refer [sparql-keys]])
+     :cljs (:require-macros
+            [com.yetanalytics.flint.spec :refer [sparql-keys]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sub-SELECT query
@@ -30,19 +34,18 @@
     (- n1 n2)))
 
 (s/def ::select
-  (s/and (s/keys :req-un [(or ::ss/select
-                              ::ss/select-distinct
-                              ::ss/select-reduced)
-                          ::where]
-                 :opt-un [::vs/values
-                          ;; s/merge does not result in correct conformation
-                          ::ms/group-by
-                          ::ms/order-by
-                          ::ms/having
-                          ::ms/limit
-                          ::ms/offset])
-         (s/conformer #(into [] %))
-         (s/conformer #(sort-by first key-comp %))))
+  (sparql-keys :req-un [(or ::ss/select
+                            ::ss/select-distinct
+                            ::ss/select-reduced)
+                        ::where]
+               :opt-un [::vs/values
+                        ;; s/merge does not result in correct conformation
+                        ::ms/group-by
+                        ::ms/order-by
+                        ::ms/having
+                        ::ms/limit
+                        ::ms/offset]
+               :key-comp-fn key-comp))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; WHERE clause

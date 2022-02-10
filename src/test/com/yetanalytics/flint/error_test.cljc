@@ -31,19 +31,19 @@
 
 (deftest spec-error-msg-test
   (testing "query spec error messages"
-    (is (= "Syntax errors exist due to missing clauses!"
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
            (->> '{}
                 (s/explain-data qs/query-spec)
                 err/spec-error-msg)))
-    (is (= "Syntax errors exist due to missing clauses!"
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
            (->> '{:select [?x]}
                 (s/explain-data qs/query-spec)
                 err/spec-error-msg)))
-    (is (= "Syntax errors exist due to missing clauses!"
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
            (->> '{:select [?x] :from "<http://foo.org>"}
                 (s/explain-data qs/query-spec)
                 err/spec-error-msg)))
-    (is (= "Syntax errors exist due to missing clauses!"
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
            (->> '{:where [[?x ?y ?z]]}
                 (s/explain-data qs/query-spec)
                 err/spec-error-msg)))
@@ -70,27 +70,35 @@
                 (s/explain-data qs/query-spec)
                 err/spec-error-msg))))
   (testing "update spec error messages"
-    (is (= "Syntax errors exist due to missing clauses!"
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
            (->> '{}
                 (s/explain-data us/update-spec)
                 err/spec-error-msg)))
-    (is (= ["Syntax errors exist at index 0 due to missing clauses!"
-            "Syntax errors exist at index 1 due to missing clauses!"]
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
+           (->> '[:copy "http://example.org" :to "<foo.org>"]
+                (s/explain-data us/update-spec)
+                err/spec-error-msg)))
+    (is (= "Syntax errors exist due to invalid map, or invalid or extra clauses!"
+           (->> '{:copy "http://example.org" :to "<foo.org>" :from "<bar.org>"}
+                (s/explain-data us/update-spec)
+                err/spec-error-msg)))
+    (is (= ["Syntax errors exist at index 0 due to invalid map, or invalid or extra clauses!"
+            "Syntax errors exist at index 1 due to invalid map, or invalid or extra clauses!"]
            (->> ['{} '{}]
                 (map (partial s/explain-data us/update-spec))
                 (map-indexed (fn [idx ed] (err/spec-error-msg ed idx))))))
-    (is (= ["Syntax errors exist at index 0 due to missing clauses!"
-            "Syntax errors exist at index 1 due to missing clauses!"]
+    (is (= ["Syntax errors exist at index 0 due to invalid map, or invalid or extra clauses!"
+            "Syntax errors exist at index 1 due to invalid map, or invalid or extra clauses!"]
            (->> ['{:copy "<http://example.org>"} '{}]
                 (map (partial s/explain-data us/update-spec))
                 (map-indexed (fn [idx ed] (err/spec-error-msg ed idx))))))
     (is (= ["Syntax errors exist at index 0 in the TO clause!"
-            "Syntax errors exist at index 1 due to missing clauses!"]
+            "Syntax errors exist at index 1 due to invalid map, or invalid or extra clauses!"]
            (->> ['{:copy "<http://example.org>" :to "foo.org"} '{}]
                 (map (partial s/explain-data us/update-spec))
                 (map-indexed (fn [idx ed] (err/spec-error-msg ed idx))))))
-    (is (= ["Syntax errors exist at index 0 in the TO and COPY clauses!"
-            "Syntax errors exist at index 1 due to missing clauses!"]
+    (is (= ["Syntax errors exist at index 0 in the COPY and TO clauses!"
+            "Syntax errors exist at index 1 due to invalid map, or invalid or extra clauses!"]
            (->> ['{:copy "http://example.org" :to "foo.org"} '{}]
                 (map (partial s/explain-data us/update-spec))
                 (map-indexed (fn [idx ed] (err/spec-error-msg ed idx))))))))

@@ -138,19 +138,31 @@
                                                [[:expr/op 'not]
                                                 [:expr/args [[:expr/terminal [:ax/bool-lit true]]]]]]]]]]]]]]
                 format-ast)))
-    (is (= "GROUP_CONCAT(?foo; SEPARATOR = ';')"
+    (is (= "GROUP_CONCAT(?foo)"
            (->> [:expr/branch [[:expr/op 'group-concat]
-                               [:expr/args [[:expr/terminal [:ax/var '?foo]]
-                                            [:expr/terminal [:expr/kwarg
-                                                             [[:expr/k :separator]
-                                                              [:expr/v ";"]]]]]]]]
+                               [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
                 format-ast)))
-    (is (= "GROUP_CONCAT(DISTINCT ?foo; SEPARATOR = ';')"
-           (->> [:expr/branch [[:expr/op 'group-concat-distinct]
-                               [:expr/args [[:expr/terminal [:ax/var '?foo]]
-                                            [:expr/terminal [:expr/kwarg
-                                                             [[:expr/k :separator]
-                                                              [:expr/v ";"]]]]]]]]
+    (is (= "GROUP_CONCAT(DISTINCT ?foo)"
+           (->> [:expr/branch [[:expr/op 'group-concat]
+                               [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                               [:expr/kwargs [[:distinct? true]]]]]
+                format-ast)))
+    (is (= "GROUP_CONCAT(?foo; SEPARATOR = \";\")"
+           (->> [:expr/branch [[:expr/op 'group-concat]
+                               [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                               [:expr/kwargs [[:separator ";"]]]]]
+                format-ast)))
+    (is (= "GROUP_CONCAT(DISTINCT ?foo; SEPARATOR = \";\")"
+           (->> [:expr/branch [[:expr/op 'group-concat]
+                               [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                               [:expr/kwargs [[:distinct? true]
+                                              [:separator ";"]]]]]
+                format-ast)))
+    (is (= "GROUP_CONCAT(DISTINCT ?foo; SEPARATOR = \";\")"
+           (->> [:expr/branch [[:expr/op 'group-concat]
+                               [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                               [:expr/kwargs [[:separator ";"]
+                                              [:distinct? true]]]]]
                 format-ast)))
     (is (= "ENCODE_FOR_URI(?foo)"
            (->> [:expr/branch [[:expr/op 'encode-for-uri]

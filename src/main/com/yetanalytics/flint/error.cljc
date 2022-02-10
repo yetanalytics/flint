@@ -41,10 +41,10 @@
   [spec-ed index-str]
   (let [spec-paths  (->> spec-ed ::s/problems (map :path))]
     (if (every? #(= 1 (count %)) spec-paths)
-      ;; Every spec path is of the form `[:select-query]`, `[:ask-query]`,
-      ;; etc. This is indicative that no top-level clasues exist for spec
-      ;; to traverse through.
-      (fmt "Syntax errors exist%s due to missing clauses!"
+      ;; Every spec path is of the form `[:query/select]`, `[:query/ask]`,
+      ;; etc. This is indicative that spec cannot traverse inside clauses
+      ;; due to errors at the top level.
+      (fmt "Syntax errors exist%s due to invalid map, or invalid or extra clauses!"
            index-str)
       ;; Here, "missing clause" errors will not show up in the error msg.
       ;; But they will re-emerge once the user fixes the other errors.
