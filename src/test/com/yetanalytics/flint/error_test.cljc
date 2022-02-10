@@ -5,9 +5,10 @@
             [com.yetanalytics.flint.spec.update :as us]
             [com.yetanalytics.flint.error       :as err]
             [com.yetanalytics.flint.validate    :as v]
-            [com.yetanalytics.flint.validate.bnode  :as vb]
-            [com.yetanalytics.flint.validate.prefix :as vp]
-            [com.yetanalytics.flint.validate.scope  :as vs]))
+            [com.yetanalytics.flint.validate.aggregate  :as va]
+            [com.yetanalytics.flint.validate.bnode      :as vb]
+            [com.yetanalytics.flint.validate.prefix     :as vp]
+            [com.yetanalytics.flint.validate.scope      :as vs]))
 
 (deftest top-level-keyword-test
   (testing "all top level keywords are accounted for"
@@ -173,6 +174,51 @@
                 (map v/collect-nodes)
                 (map vs/validate-scoped-vars)
                 (map-indexed (fn [idx err] (err/scope-error-msg err idx)))
+                first)))))
+
+(deftest aggregate-error-msg-test
+  (testing "aggregates error messages"
+    (is (= "1 SELECT clause has both wildcard and GROUP BY!"
+           (->> '{:select   :*
+                  :where    [[?x ?y ?z]]
+                  :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                err/aggregate-error-msg)))
+    (is (= "1 SELECT clause has both wildcard and GROUP BY!"
+           (->> '{:select   :*
+                  :where    [[?x ?y ?z]]
+                  :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                err/aggregate-error-msg)))
+    (is (= "1 variable was illegally used in SELECTs with aggregates: ?y!"
+           (->> '{:select [?x ?y]
+                  :where  [[?x ?y ?z]]
+                  :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                err/aggregate-error-msg)))
+    (is (= "2 variables were illegally used in SELECTs with aggregates: ?y and ?z!"
+           (->> '{:select [?x ?y ?z]
+                  :where  [[?x ?y ?z]]
+                  :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                err/aggregate-error-msg)))
+    (is (= "2 variables at index 0 were illegally used in SELECTs with aggregates: ?y and ?z!"
+           (->> '[{:delete [[?x ?y ?z]]
+                   :where  {:select   [?x ?y ?z]
+                            :where    [[?x ?y ?z]]
+                            :group-by [?x]}}]
+                (map (partial s/conform us/update-spec))
+                (map v/collect-nodes)
+                (map va/validate-agg-selects)
+                (map-indexed (fn [i x] (err/aggregate-error-msg x i)))
                 first)))))
 
 (deftest bnode-error-msg-test

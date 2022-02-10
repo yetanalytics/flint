@@ -127,6 +127,15 @@
                 va/validate-agg-selects
                 (map #(dissoc % :loc)))))
     (is (= [{:kind ::va/invalid-aggregate-var
+             :variables ['?y '?z]}]
+           (->> '{:select   [?y ?z]
+                  :where    [[?x ?y ?z]]
+                  :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                (map #(dissoc % :loc)))))
+    (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?z]}]
            (->> '{:select [?x]
                   :where  {:select   [?z]

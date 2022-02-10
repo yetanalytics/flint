@@ -58,29 +58,27 @@
   "Return a coll of invalid vars in a SELECT clause with aggregates, or
    `nil` if valid."
   [group-by-vars sel-clause]
-  (let [err-or-valid
-        (reduce (fn [valid-vars [k x]]
+  (let [[_ bad-vars]
+        (reduce (fn [[valid-vars bad-vars] [k x]]
                   (case k
                     :ax/var
                     (if-not (valid-vars x)
-                      (reduced {:errors [x]})
-                      valid-vars)
+                      [valid-vars (conj bad-vars x)]
+                      [valid-vars bad-vars])
                     :select/expr-as-var
                     (let [[_ [expr v-kv]] x
-                          [_ v]         v-kv]
-                      (if-some [bad-evars
+                          [_ v]           v-kv]
+                      (if-some [bad-expr-vars
                                 (->> expr
                                      (invalid-agg-expr-vars valid-vars)
                                      not-empty)]
-                        (reduced {:errors bad-evars})
+                        [valid-vars (concat bad-vars bad-expr-vars)]
                         ;; Somehow already-projected vars are now valid,
                         ;; at least according to Apache Jena's query parser
-                        (conj valid-vars v)))))
-                group-by-vars
+                        [(conj valid-vars v) bad-vars]))))
+                [group-by-vars []]
                 sel-clause)]
-    (if-some [bad-vars (:errors err-or-valid)]
-      bad-vars
-      nil)))
+    (not-empty bad-vars)))
 
 (defn- validate-agg-select
   [[[_select-k select] loc]]
