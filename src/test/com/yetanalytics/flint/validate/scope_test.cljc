@@ -1,58 +1,59 @@
 (ns com.yetanalytics.flint.validate.scope-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.validate       :as v]
-            [com.yetanalytics.flint.validate.scope :as vs]
-            [com.yetanalytics.flint.spec.query     :as qs]))
+            [com.yetanalytics.flint.validate          :as v]
+            [com.yetanalytics.flint.validate.scope    :as vs]
+            [com.yetanalytics.flint.validate.variable :as vv]
+            [com.yetanalytics.flint.spec.query        :as qs]))
 
 (deftest get-scope-vars-test
   (testing "Searching for in-scope variables"
     (is (nil? (not-empty
-               (vs/get-scope-vars
+               (vv/get-scope-vars
                 '[:ax/num-lit 1]))))
     (is (= '[?x]
-           (vs/get-scope-vars
+           (vv/get-scope-vars
             '[:ax/var ?x])))
     (is (= '[?z]
-           (vs/get-scope-vars
+           (vv/get-scope-vars
             '[:expr/as-var
               [[:expr/terminal [:ax/num-lit 2]]
                [:ax/var ?z]]])))
     (is (= '[?z]
-           (vs/get-scope-vars
+           (vv/get-scope-vars
             '[:expr/as-var
               [[:expr/terminal [:ax/var ?y]]
                [:ax/var ?z]]])))
     (is (= '[]
-           (vs/get-scope-vars
+           (vv/get-scope-vars
             '[:where-sub/empty []])))
     (testing "in basic graph patterns"
       (is (= '[?x ?y ?z]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:triple/vec [[:ax/var ?x]
                              [:ax/var ?y]
                              [:ax/var ?z]]])))
       (is (= '[?s ?p ?o]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:triple/nform
                 [:triple/spo
                  [[[:ax/var ?s]
                    [:triple/po [[[:ax/var ?p]
                                  [:triple/o [[:ax/var ?o]]]]]]]]]])))
       (is (= '[?x ?y ?z]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:where-sub/where
                 [[:triple/vec [[:ax/var ?x]
                                [:ax/var ?y]
                                [:ax/var ?z]]]]])))
       (is (= '[?x ?y ?z]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:where-sub/where
                 [[:triple/vec [[:ax/var ?x]
                                [:ax/var ?y]
                                [:ax/var ?z]]]]])))
       (is (= '[?x ?ya ?yb ?z]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:triple/vec
                 [[:ax/var ?x]
                  [:triple/path
@@ -63,7 +64,7 @@
                  [:ax/var ?z]]]))))
     (testing "in sub-SELECT queries"
       (is (= '[?x ?y ?z]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:where-sub/select
                 [[:select [:ax/wildcard '*]]
                  [:where [:where-sub/where
@@ -71,7 +72,7 @@
                                          [:ax/var ?y]
                                          [:ax/var ?z]]]]]]]])))
       (is (= '[?a ?b ?c]
-             (vs/get-scope-vars
+             (vv/get-scope-vars
               '[:where-sub/select
                 [[:select [:select/var-or-exprs
                            [[:ax/var ?a]
@@ -92,7 +93,7 @@
              ?serviceSilentTerm ?s7 ?p7 ?o7
              ?foo
              ?v1 ?v2]
-           (vs/get-scope-vars
+           (vv/get-scope-vars
             '[:where-sub/where
               [[:where/recurse
                 [:where-sub/where
@@ -166,6 +167,12 @@
     (is (nil? (->> '{:select [?x]
                      :where  [[?x ?y ?z]
                               [:bind [3 ?new]]]}
+                   (s/conform qs/query-spec)
+                   v/collect-nodes
+                   vs/validate-scoped-vars)))
+    (is (nil? (->> '{:select [[?q ?q2]]
+                     :where  [[?x ?y ?z]]
+                     :group-by [?q]}
                    (s/conform qs/query-spec)
                    v/collect-nodes
                    vs/validate-scoped-vars)))

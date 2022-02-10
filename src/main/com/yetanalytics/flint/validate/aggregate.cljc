@@ -1,6 +1,6 @@
 (ns com.yetanalytics.flint.validate.aggregate
-  (:require [com.yetanalytics.flint.spec.expr :as es]
-            [com.yetanalytics.flint.util :as u]))
+  (:require [com.yetanalytics.flint.validate.variable :as vv]
+            [com.yetanalytics.flint.util              :as u]))
 
 ;; In a query level which uses aggregates, only expressions consisting of
 ;; aggregates and constants may be projected, with one exception.
@@ -15,44 +15,6 @@
 ;; BAD:
 ;;   SELECT (AVG(?x)) AS ?avg) ((?x + ?y) AS ?sum) WHERE { ?x ?y ?z }
 ;;   SELECT ?y ?z WHERE { ?x ?y ?z } GROUP BY ?x
-
-;; GROUP BY projection vars
-
-(defmulti group-by-projected-vars (fn [[k _]] k))
-
-(defmethod group-by-projected-vars :group-by [[_ group-by-coll]]
-  (->> group-by-coll
-       (map group-by-projected-vars)
-       (filter some?)))
-
-(defmethod group-by-projected-vars :mod/expr [_] nil)
-
-(defmethod group-by-projected-vars :ax/var [[_ v]] v)
-
-(defmethod group-by-projected-vars :mod/expr-as-var [[_ expr-as-var]]
-  (-> expr-as-var second second second))
-
-;; SELECT exprs
-
-(defmulti invalid-agg-expr-vars (fn [_ [k _]] k))
-
-(defmethod invalid-agg-expr-vars :default [_ _] [])
-
-(defmethod invalid-agg-expr-vars :expr/branch [valid-vars [_ [op-kv args-kv]]]
-  (let [[_ op] op-kv
-        [_ args] args-kv]
-    (if (or (es/aggregate-ops op)
-            (not (symbol? op)))
-      []
-      (mapcat (partial invalid-agg-expr-vars valid-vars) args))))
-
-(defmethod invalid-agg-expr-vars :expr/terminal [valid-vars [_ x]]
-  (invalid-agg-expr-vars valid-vars x))
-
-(defmethod invalid-agg-expr-vars :ax/var [valid-vars [_ v]]
-  (if-not (valid-vars v) [v] []))
-
-;; Validation
 
 (defn- validate-agg-select-clause
   "Return a coll of invalid vars in a SELECT clause with aggregates, or
@@ -70,7 +32,7 @@
                           [_ v]           v-kv]
                       (if-some [bad-expr-vars
                                 (->> expr
-                                     (invalid-agg-expr-vars valid-vars)
+                                     (vv/invalid-agg-expr-vars valid-vars)
                                      not-empty)]
                         [valid-vars (concat bad-vars bad-expr-vars)]
                         ;; Somehow already-projected vars are now valid,
@@ -86,7 +48,7 @@
         [_ ?group-by]  (u/get-kv-pair select :group-by)
         group-by-vs    (if ?group-by
                          (->> ?group-by
-                              (map group-by-projected-vars)
+                              (map vv/group-by-projected-vars)
                               (filter some?)
                               set)
                          #{})
