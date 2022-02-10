@@ -8,8 +8,29 @@
   (some #(when (-> % first (= k)) %) coll))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Computing variable scopes
+;; Computing variables and var scopes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti get-expr-vars
+  (fn [x] (if (and (vector? x) (= 2 (count x)) (keyword? (first x)))
+            (first x)
+            :default)))
+
+(defmethod get-expr-vars :default [_] nil)
+
+(defmethod get-expr-vars :ax/var [[_ v]] [v])
+
+(defmethod get-expr-vars :expr/as-var [[_ [expr _v]]]
+  (get-expr-vars expr))
+
+(defmethod get-expr-vars :expr/branch [[_ expr]]
+  (mapcat get-expr-vars expr))
+
+(defmethod get-expr-vars :expr/args [[_ args]]
+  (mapcat get-expr-vars args))
+
+(defmethod get-expr-vars :expr/terminal [[_ expr-term]]
+  (get-expr-vars expr-term))
 
 (defmulti get-scope-vars
   "Return a coll of all variables in the scope of the AST branch."
@@ -21,17 +42,8 @@
 
 (defmethod get-scope-vars :ax/var [[_ v]] [v])
 
-(defmethod get-scope-vars :expr/as-var [[_ [expr v]]]
-  (concat (get-scope-vars expr) (get-scope-vars v)))
-
-(defmethod get-scope-vars :expr/branch [[_ expr]]
-  (mapcat get-scope-vars expr))
-
-(defmethod get-scope-vars :expr/args [[_ args]]
-  (mapcat get-scope-vars args))
-
-(defmethod get-scope-vars :expr/terminal [[_ expr-term]]
-  (get-scope-vars expr-term))
+(defmethod get-scope-vars :expr/as-var [[_ [_expr v]]]
+  (get-scope-vars v))
 
 ;; SELECT in-scope vars
 
@@ -171,7 +183,7 @@
 (defn- validate-select
   "Validate `SELECT ... (expr AS var) ..."
   [select-clause loc]
-  (let [expr-vars  (get-scope-vars (get-bind-expr select-clause))
+  (let [expr-vars  (get-expr-vars (get-bind-expr select-clause))
         bind-var   (get-bind-var select-clause)
         prev-elems (zip/lefts loc)
         sel-query  (->> loc

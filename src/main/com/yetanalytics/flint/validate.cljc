@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.validate
-  (:require [clojure.zip :as zip]))
+  (:require [clojure.zip :as zip]
+            [com.yetanalytics.flint.spec.expr :as es]))
 
 (def axiom-keys
   #{:ax/iri :ax/prefix-iri :ax/var :ax/bnode :ax/wildcard :ax/rdf-type :ax/nil
@@ -50,6 +51,15 @@
     ;; SELECT ... (expr AS var) ...
     :select/expr-as-var})
 
+(defn- get-agg-select-loc
+  [loc]
+  (loop [loc loc]
+    (when-not (nil? loc) ; Reached the top w/o finding a SELECT
+      (let [ast-node (zip/node loc)]
+        (if (#{:query/select :where-sub/select} (get-keyword ast-node))
+          loc
+          (recur (zip/up loc)))))))
+
 (defn collect-nodes
   [ast]
   (loop [loc    (ast-zipper ast)
@@ -57,9 +67,28 @@
     (if-not (zip/end? loc)
       (let [ast-node (zip/node loc)]
         (if-some [k (get-keyword ast-node)]
-          (if (node-keys k)
+          (cond
+            ;; Prefixes, blank nodes, and BIND clauses
+            (node-keys k)
             (recur (zip/next loc)
                    (update-in node-m [k (second ast-node)] conj loc))
+            ;; SELECT with GROUP BY
+            (#{:group-by} k)
+            (let [select-loc (zip/up loc)
+                  select     (zip/node select-loc)]
+              (recur (zip/next loc)
+                     (update node-m :agg/select assoc select select-loc)))
+            ;; SELECT with an aggregate expression
+            (and (#{:expr/branch} k)
+                 (es/aggregate-ops (-> ast-node ; [:expr/branch ...]
+                                       second   ; [[:expr/op ...] [:expr/args ...]]
+                                       first    ; [:expr/op ...]
+                                       second)))
+            (let [select-loc (get-agg-select-loc loc)
+                  select     (zip/node select-loc)]
+              (recur (zip/next loc)
+                     (update node-m :agg/select assoc select select-loc)))
+            :else
             (recur (zip/next loc) node-m))
           (recur (zip/next loc) node-m)))
       node-m)))

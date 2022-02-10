@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.spec.expr
   (:require [clojure.spec.alpha :as s]
+            [clojure.set :as cset]
             [com.yetanalytics.flint.spec.axiom :as ax])
   #?(:cljs (:require-macros
             [com.yetanalytics.flint.spec.expr :refer [keyword-args]])))
@@ -67,6 +68,9 @@
 
 (def unary-agg-sep-ops
   #{'group-concat})
+
+(def aggregate-ops
+  (cset/union unary-agg-ops unary-agg-wild-ops unary-agg-sep-ops))
 
 (def unary-var-ops
   #{'bound})

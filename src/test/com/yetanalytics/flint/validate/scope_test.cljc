@@ -18,7 +18,7 @@
             '[:expr/as-var
               [[:expr/terminal [:ax/num-lit 2]]
                [:ax/var ?z]]])))
-    (is (= '[?y ?z]
+    (is (= '[?z]
            (vs/get-scope-vars
             '[:expr/as-var
               [[:expr/terminal [:ax/var ?y]]

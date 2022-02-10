@@ -39,12 +39,23 @@
 
 (comment
   (QueryFactory/create
-   "SELECT ?a
+   "SELECT (SUM(?x + ?y) AS ?sum) (str(?sum) AS ?z2)
     WHERE {
       ?x ?y ?z .
-      BIND (?q AS ?w)
     }
-    GROUP BY (?w AS ?a)")
+    ORDER BY ?x")
+  (QueryFactory/create
+   "SELECT ((?z + SUM(?y + ?x)) AS ?sum) (?sum AS ?z2)
+    WHERE {
+      ?x ?y ?z .
+    }
+    GROUP BY ?z")
+  (QueryFactory/create
+   "SELECT ?q
+    WHERE {
+      ?x ?y ?z .
+    }
+    GROUP BY ?q")
 
   (QueryFactory/create
    "SELECT (COUNT(DISTINCT ?z) AS ?z)
