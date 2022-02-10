@@ -116,11 +116,15 @@
 
 (defn- assert-bnode-err-map
   [{:keys [kind errors prev-bnodes]} sparql ast]
-  (cond-> {:kind   kind
-           :errors errors
+  (cond-> {:errors errors
            :input  sparql
            :ast    ast}
-    prev-bnodes (assoc :prev-bnodes prev-bnodes)))
+    (= ::vb/dupe-bnodes-bgp kind)
+    (assoc :kind ::invalid-bnodes-bgp)
+    (= ::vb/dupe-bnodes-update kind)
+    (assoc :kind ::invalid-bnodes-update)
+    prev-bnodes
+    (assoc :prev-bnodes prev-bnodes)))
 
 (defn- assert-bnodes
   [sparql ast nodes-m]
