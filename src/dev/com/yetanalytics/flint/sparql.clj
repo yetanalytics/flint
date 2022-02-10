@@ -39,11 +39,12 @@
 
 (comment
   (QueryFactory/create
-   "SELECT *
+   "SELECT ?a
     WHERE {
       ?x ?y ?z .
+      BIND (?q AS ?w)
     }
-    GROUP BY ?x")
+    GROUP BY (?w AS ?a)")
 
   (QueryFactory/create
    "SELECT (COUNT(DISTINCT ?z) AS ?z)
