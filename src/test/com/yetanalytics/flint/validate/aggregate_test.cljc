@@ -73,6 +73,13 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects)))
+    ;; All custom fns in SELECT queries are treated as custom aggregates
+    (is (= []
+           (->> '{:select [[("<http://custom.agg>" ?x) ?sum]]
+                  :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects)))
     (is (= []
            (->> '{:select   [?x]
                   :where    [[?x ?y ?z]]
@@ -87,9 +94,24 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects)))
+    (is (= []
+           (->> '{:select   [?x]
+                  :where    [{:select [[(sum ?y) ?sum]]
+                              :where [?x ?y ?z]}]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects)))
     (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?z]}]
            (->> '{:select [[(sum ?x) ?sum] [(str ?z) ?str]]
+                  :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                (map #(dissoc % :loc)))))
+    (is (= [{:kind ::va/invalid-aggregate-var
+             :variables ['?z]}]
+           (->> '{:select [[("<http://custom.agg>" ?x) ?sum] [(str ?z) ?str]]
                   :where  [[?x ?y ?z]]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
@@ -104,10 +126,29 @@
                 v/collect-nodes
                 va/validate-agg-selects
                 (map #(dissoc % :loc)))))
+    (is (= [{:kind ::va/invalid-aggregate-var
+             :variables ['?z]}]
+           (->> '{:select [?x]
+                  :where  {:select   [?z]
+                           :where    [[?x ?y ?z]]
+                           :group-by [?x [2 ?y]]}}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                (map #(dissoc % :loc)))))
     (is (= [{:kind ::va/wildcard-group-by}]
            (->> '{:select   :*
                   :where    [[?x ?y ?z]]
                   :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                (map #(dissoc % :loc)))))
+    (is (= [{:kind ::va/wildcard-group-by}]
+           (->> '{:select :*
+                  :where  {:select   :*
+                           :where    [[?x ?y ?z]]
+                           :group-by [?x]}}
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects

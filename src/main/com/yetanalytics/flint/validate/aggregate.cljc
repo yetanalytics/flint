@@ -34,7 +34,8 @@
 (defmethod invalid-agg-expr-vars :default [_] [])
 
 (defmethod invalid-agg-expr-vars :expr/branch [valid-vars [_ [[_ op] [_ args]]]]
-  (if (es/aggregate-ops op)
+  (if (or (es/aggregate-ops op)
+          (not (symbol? op)))
     []
     (mapcat (partial invalid-agg-expr-vars valid-vars) args)))
 

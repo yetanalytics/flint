@@ -79,15 +79,22 @@
               (recur (zip/next loc)
                      (update node-m :agg/select assoc select select-loc)))
             ;; SELECT with an aggregate expression
-            (and (#{:expr/branch} k)
-                 (es/aggregate-ops (-> ast-node ; [:expr/branch ...]
-                                       second   ; [[:expr/op ...] [:expr/args ...]]
-                                       first    ; [:expr/op ...]
-                                       second)))
-            (let [select-loc (get-agg-select-loc loc)
-                  select     (zip/node select-loc)]
-              (recur (zip/next loc)
-                     (update node-m :agg/select assoc select select-loc)))
+            (#{:expr/branch} k)
+            (let [op (-> ast-node ; [:expr/branch ...]
+                         second   ; [[:expr/op ...] [:expr/args ...]]
+                         first    ; [:expr/op ...]
+                         second)]
+              (if (or (not (symbol? op))
+                      (es/aggregate-ops op))
+                (let [node-m* (if-some [select-loc (get-agg-select-loc loc)]
+                                (update node-m
+                                        :agg/select
+                                        assoc
+                                        (zip/node select-loc)
+                                        select-loc)
+                                node-m)]
+                  (recur (zip/next loc) node-m*))
+                (recur (zip/next loc) node-m)))
             :else
             (recur (zip/next loc) node-m))
           (recur (zip/next loc) node-m)))
