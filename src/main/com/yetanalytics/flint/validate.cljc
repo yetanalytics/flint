@@ -3,7 +3,9 @@
 
 (def axiom-keys
   #{:ax/iri :ax/prefix-iri :ax/var :ax/bnode :ax/wildcard :ax/rdf-type :ax/nil
-    :ax/str-lit :ax/lmap-list :ax/num-lit :ax/bool-lit :ax/dt-lit})
+    :ax/str-lit :ax/lmap-list :ax/num-lit :ax/bool-lit :ax/dt-lit
+    ;; Not actually axioms but still counted as AST terminals
+    :distinct? :separator})
 
 (defn- get-keyword
   [x]

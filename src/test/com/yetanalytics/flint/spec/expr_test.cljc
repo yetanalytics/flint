@@ -70,18 +70,40 @@
                             [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
              (s/conform ::es/agg-expr '(count ?foo))))
       (is (= [:expr/branch [[:expr/op 'count]
+                            [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                            [:expr/kwargs [[:distinct? true]]]]]
+             (s/conform ::es/agg-expr '(count ?foo :distinct? true))))
+      (is (= [:expr/branch [[:expr/op 'count]
                             [:expr/args [[:expr/terminal [:ax/wildcard '*]]]]]]
              (s/conform ::es/agg-expr '(count *))))
+      (is (= [:expr/branch [[:expr/op 'count]
+                            [:expr/args [[:expr/terminal [:ax/wildcard '*]]]]
+                            [:expr/kwargs [[:distinct? true]]]]]
+             (s/conform ::es/agg-expr '(count * :distinct? true))))
       (is (= [:expr/branch [[:expr/op 'group-concat]
-                            [:expr/args [[:expr/terminal [:ax/var '?foo]]
-                                         [:expr/terminal [:expr/kwarg
-                                                          [[:expr/k :separator]
-                                                           [:expr/v ";"]]]]]]]]
+                            [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                            [:expr/kwargs [[:separator ";"]]]]]
              (s/conform ::es/agg-expr '(group-concat ?foo :separator ";"))))
-      (is (= ::s/invalid
-             (s/conform ::es/expr '(count ?foo))))
-      (is (= ::s/invalid
-             (s/conform ::es/expr '(group-concat ?foo :separator ";")))))))
+      (is (= [:expr/branch [[:expr/op 'group-concat]
+                            [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                            [:expr/kwargs [[:distinct? true]
+                                           [:separator ";"]]]]]
+             (s/conform ::es/agg-expr '(group-concat ?foo :distinct? true :separator ";"))))
+      (is (= [:expr/branch [[:expr/op 'group-concat]
+                            [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                            [:expr/kwargs [[:separator ";"]
+                                           [:distinct? true]]]]]
+             (s/conform ::es/agg-expr '(group-concat ?foo :separator ";" :distinct? true))))
+      (is (= [:expr/branch [[:expr/op [:ax/prefix-iri :my/fn]]
+                            [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
+                            [:expr/kwargs [[:distinct? true]]]]]
+             (s/conform ::es/agg-expr '(:my/fn ?foo :distinct? true))))
+      (is (s/invalid?
+           (s/conform ::es/expr '(count ?foo))))
+      (is (s/invalid?
+           (s/conform ::es/expr '(group-concat ?foo :separator ";"))))
+      (is (s/invalid?
+           (s/conform ::es/expr '(:my/fn ?foo :distinct? true)))))))
 
 (deftest invalid-expr-test
   (testing "Invalid expressions"
@@ -202,4 +224,11 @@
                                           [:expr/terminal [:ax/str-lit " "]]
                                           [:expr/terminal [:ax/var ?S]]]]]]
               [:ax/var ?name]]]
-           (s/conform ::es/expr-as-var '[(concat ?G " " ?S) ?name])))))
+           (s/conform ::es/expr-as-var '[(concat ?G " " ?S) ?name])))
+    (is (= '[:expr/as-var
+             [[:expr/branch [[:expr/op avg]
+                             [:expr/args [[:expr/terminal [:ax/var ?x]]]]]]
+              [:ax/var ?avg]]]
+           (s/conform ::es/agg-expr-as-var '[(avg ?x) ?avg])))
+    (is (s/invalid?
+         (s/conform ::es/expr-as-var '[(avg ?x) ?avg])))))

@@ -20,11 +20,7 @@
   [op]
   (#{'not} op))
 
-(defn- semicolon-sep?
-  [op]
-  (#{'group-concat 'group-concat-distinct} op))
-
-(defn- graph-pat-exp?
+(defn- where-op?
   [op]
   (#{'exists 'not-exists} op))
 
@@ -40,20 +36,17 @@
       "not-in" "NOT IN"
       "not"    "!"
       ;; Function names with unique hyphen rules
-      "encode-for-uri"        "ENCODE_FOR_URI"
-      "group-concat"          "GROUP_CONCAT"
-      "group-concat-distinct" "GROUP_CONCAT"
-      "not-exists"            "NOT EXISTS"
+      "encode-for-uri" "ENCODE_FOR_URI"
+      "group-concat"   "GROUP_CONCAT"
+      "not-exists"     "NOT EXISTS"
       (if-not (or (cstr/includes? op-name "<")
                   (cstr/includes? op-name ":"))
+        ;; Hyphenate and convert `pred?` to `isPred`
         (if-some [pred-prefix (second (re-matches #"(.+)\?" op-name))]
           (str "is" (cstr/upper-case pred-prefix))
           (cstr/upper-case (cstr/replace op-name #"-" "")))
+        ;; Custom name
         op-name))))
-
-(defn- distinct-op?
-  [op]
-  (re-matches #"(.+)-distinct" (name op)))
 
 (defn- parens-if-nests
   "Super-basic precedence comparison to wrap parens if there's an inner
@@ -70,16 +63,29 @@
 
 (defmethod f/format-ast-node :expr/args [_ [_ args]] args)
 
-(defmethod f/format-ast-node :expr/branch [_ [_ [op args]]]
-  (let [op-str (op->str op)
-        ?dist  (when (distinct-op? op) "DISTINCT ")]
+;; Keywords - don't convert to string
+
+(defmethod f/format-ast-node :expr/kwargs [_ [_ kwargs]]
+  (into {} kwargs))
+
+(defmethod f/format-ast-node :distinct? [_ x] x)
+
+(defmethod f/format-ast-node :separator [_ x] x)
+
+(defmethod f/format-ast-node :expr/branch [_ [_ [op args ?kwargs]]]
+  (let [op-str (op->str op)]
     (cond
+      ?kwargs ; ops with kwargs all have regular fn syntax
+      (let [{?dist :distinct?
+             ?sep  :separator} ?kwargs
+            ?dist-str (when ?dist "DISTINCT ")
+            ?sep-str  (when ?sep (str "; SEPARATOR = \"" ?sep "\""))]
+        (str op-str "(" ?dist-str (cstr/join ", " args) ?sep-str ")"))
       (elist-op? op) (str "(" (first args) " " op-str " (" (cstr/join ", " (rest args)) "))")
       (infix-op? op) (str "(" (cstr/join (str " " op-str " ") args) ")")
       (unary-op? op) (str op-str (-> args first parens-if-nests))
-      (semicolon-sep? op) (str op-str "(" ?dist (cstr/join "; " args) ")")
-      (graph-pat-exp? op) (str op-str " " (first args))
-      :else (str op-str "(" ?dist (cstr/join ", " args) ")"))))
+      (where-op? op) (str op-str " " (first args))
+      :else (str op-str "(" (cstr/join ", " args) ")"))))
 
 (defmethod f/format-ast-node :expr/terminal [_ [_ terminal]]
   terminal)
