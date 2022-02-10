@@ -7,8 +7,10 @@
             [com.yetanalytics.flint.spec.triple   :as ts]
             [com.yetanalytics.flint.spec.where    :as ws]
             [com.yetanalytics.flint.spec.values   :as vs])
-  #?(:cljs (:require-macros
-            [com.yetanalytics.flint.spec.query :refer [smap->vec]])))
+  #?(:clj (:require
+           [com.yetanalytics.flint.spec :refer [sparql-keys]])
+     :cljs (:require-macros
+            [com.yetanalytics.flint.spec :refer [sparql-keys]])))
 
 (def key-order-map
   {:base            0
@@ -29,19 +31,11 @@
    :offset          10
    :values          11})
 
-#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-private-var])}
-(defn- qkey-comp
+(defn- key-comp
   [k1 k2]
   (let [n1 (get key-order-map k1 100)
         n2 (get key-order-map k2 100)]
     (- n1 n2)))
-
-#?(:clj
-   (defmacro smap->vec
-     [form]
-     `(s/and ~form
-             (s/conformer #(into [] %))
-             (s/conformer #(sort-by first qkey-comp %)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dataset Clause specs
@@ -65,18 +59,19 @@
 ;; Cannot use `s/merge` since conformance does not work properly with it
 
 (def select-query-spec
-  (smap->vec (s/keys :req-un [(or ::ss/select
-                                  ::ss/select-distinct
-                                  ::ss/select-reduced)
-                              ::ws/where]
-                     :opt-un [::ps/base ::ps/prefixes
-                              ::from ::from-named
-                              ::ms/group-by
-                              ::ms/order-by
-                              ::ms/having
-                              ::ms/limit
-                              ::ms/offset
-                              ::vs/values])))
+  (sparql-keys :req-un [(or ::ss/select
+                            ::ss/select-distinct
+                            ::ss/select-reduced)
+                        ::ws/where]
+               :opt-un [::ps/base ::ps/prefixes
+                        ::from ::from-named
+                        ::ms/group-by
+                        ::ms/order-by
+                        ::ms/having
+                        ::ms/limit
+                        ::ms/offset
+                        ::vs/values]
+               :key-comp-fn key-comp))
 
 (def triples-spec
   (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
@@ -87,14 +82,15 @@
 (s/def ::construct triples-spec)
 
 (def construct-query-spec
-  (smap->vec (s/keys :req-un [::construct ::ws/where]
-                     :opt-un [::ps/base ::ps/prefixes
-                              ::from ::from-named
-                              ::ms/group-by
-                              ::ms/order-by
-                              ::ms/having
-                              ::ms/limit
-                              ::ms/offset])))
+  (sparql-keys :req-un [::construct ::ws/where]
+               :opt-un [::ps/base ::ps/prefixes
+                        ::from ::from-named
+                        ::ms/group-by
+                        ::ms/order-by
+                        ::ms/having
+                        ::ms/limit
+                        ::ms/offset]
+               :key-comp-fn key-comp))
 
 (s/def ::describe
   (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec
@@ -103,27 +99,29 @@
         :ax/wildcard ax/wildcard?))
 
 (def describe-query-spec
-  (smap->vec (s/keys :req-un [::describe]
-                     :opt-un [::ps/base ::ps/prefixes
-                              ::from ::from-named
-                              ::ws/where
-                              ::ms/group-by
-                              ::ms/order-by
-                              ::ms/having
-                              ::ms/limit
-                              ::ms/offset])))
+  (sparql-keys :req-un [::describe]
+               :opt-un [::ps/base ::ps/prefixes
+                        ::from ::from-named
+                        ::ws/where
+                        ::ms/group-by
+                        ::ms/order-by
+                        ::ms/having
+                        ::ms/limit
+                        ::ms/offset]
+               :key-comp-fn key-comp))
 
 (s/def ::ask empty?)
 
 (def ask-query-spec
-  (smap->vec (s/keys :req-un [::ask ::ws/where]
-                     :opt-un [::ps/base ::ps/prefixes
-                              ::from ::from-named
-                              ::ms/group-by
-                              ::ms/order-by
-                              ::ms/having
-                              ::ms/limit
-                              ::ms/offset])))
+  (sparql-keys :req-un [::ask ::ws/where]
+               :opt-un [::ps/base ::ps/prefixes
+                        ::from ::from-named
+                        ::ms/group-by
+                        ::ms/order-by
+                        ::ms/having
+                        ::ms/limit
+                        ::ms/offset]
+               :key-comp-fn key-comp))
 
 (def query-spec
   (s/or :query/select    select-query-spec

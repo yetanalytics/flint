@@ -89,7 +89,7 @@
            (->> ['{:copy "<http://example.org>" :to "foo.org"} '{}]
                 (map (partial s/explain-data us/update-spec))
                 (map-indexed (fn [idx ed] (err/spec-error-msg ed idx))))))
-    (is (= ["Syntax errors exist at index 0 in the TO and COPY clauses!"
+    (is (= ["Syntax errors exist at index 0 in the COPY and TO clauses!"
             "Syntax errors exist at index 1 due to missing clauses!"]
            (->> ['{:copy "http://example.org" :to "foo.org"} '{}]
                 (map (partial s/explain-data us/update-spec))
