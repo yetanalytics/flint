@@ -20,7 +20,10 @@
 
 #?(:clj
    (defmacro sparql-keys
-     [& {:keys [map-specs key-comp-fn req opt req-un opt-un]
+     "A variant of `s/keys` that automatically conforms the map into
+      a kv-pair vector sorted by `key-comp-fn`. In addition, keys
+      are restricted to those in the spec."
+     [& {:keys [key-comp-fn req opt req-un opt-un]
          :or {key-comp-fn compare}}]
      (let [keys-set#  (set (concat (collect-keys req)
                                    (collect-keys opt)
@@ -33,7 +36,6 @@
                         opt-un (conj :opt-un opt-un)
                         true seq)]
        `(s/and map?
-               ~@map-specs
                ;; `restrict-keys` taken from xapi-schema.spec
                #(every? ~keys-set# (keys %))
                ~keys-spec#
