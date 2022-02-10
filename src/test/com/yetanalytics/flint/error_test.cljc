@@ -150,6 +150,13 @@
                 v/collect-nodes
                 vs/validate-scoped-vars
                 err/scope-error-msg)))
+    (is (= "2 variables in 1 `expr AS var` clause was not defined in scope: ?u and ?v!'"
+           (->> '{:select [[(+ ?u ?v) ?x]]
+                  :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars
+                err/scope-error-msg)))
     (is (= "2 variables in 2 `expr AS var` clauses were already defined in scope: ?x and ?y!'"
            (->> '{:select [[2 ?y]]
                   :where  [[?x ?y ?z]

@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string     :as cstr]
             [com.yetanalytics.flint.validate.bnode :as vb]
+            [com.yetanalytics.flint.validate.scope :as vs]
             #?@(:clj [[clojure.core :refer [format]]]
                 :cljs [[goog.string :as gstring]
                        [goog.string.format]])))
@@ -100,21 +101,26 @@
 
 (defn- scope-error-msg*
   [scope-errs index-str]
-  (let [var-coll  (->> scope-errs (map :variable) distinct sort)
-        var-count (->> var-coll count)
-        var-strs  (->> var-coll (map name))
-        var-str   (if (= 1 var-count)
-                    (first var-strs)
-                    (fmt "%s and %s"
-                         (cstr/join ", " (butlast var-strs))
-                         (last var-strs)))]
-    (fmt "%d variable%s%s in %d `expr AS var` clause%s %s already defined in scope: %s!'"
+  (let [[nots ins] (split-with #(= ::vs/var-not-in-scope (:kind %))
+                               scope-errs)
+        var-coll   (if (not-empty nots)
+                     (->> nots (mapcat :variables) distinct sort)
+                     (->> ins (map :variable) distinct sort))
+        var-count  (->> var-coll count)
+        var-strs   (->> var-coll (map name))
+        var-str    (if (= 1 var-count)
+                     (first var-strs)
+                     (fmt "%s and %s"
+                          (cstr/join ", " (butlast var-strs))
+                          (last var-strs)))]
+    (fmt "%d variable%s%s in %d `expr AS var` clause%s %s %s defined in scope: %s!'"
          var-count
          (if (= 1 var-count) "" "s")
          index-str
          (count scope-errs)
          (if (= 1 (count scope-errs)) "" "s")
          (if (= 1 var-count) "was" "were")
+         (if (not-empty nots) "not" "already")
          var-str)))
 
 (defn scope-error-msg

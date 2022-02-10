@@ -18,6 +18,11 @@
             '[:expr/as-var
               [[:expr/terminal [:ax/num-lit 2]]
                [:ax/var ?z]]])))
+    (is (= '[?y ?z]
+           (vs/get-scope-vars
+            '[:expr/as-var
+              [[:expr/terminal [:ax/var ?y]]
+               [:ax/var ?z]]])))
     (is (= '[]
            (vs/get-scope-vars
             '[:where-sub/empty []])))
@@ -153,13 +158,29 @@
                    (s/conform qs/query-spec)
                    v/collect-nodes
                    vs/validate-scoped-vars)))
+    (is (nil? (->> '{:select [?x [?x ?old] [?old ?new]]
+                     :where  [[?x ?y ?z]]}
+                   (s/conform qs/query-spec)
+                   v/collect-nodes
+                   vs/validate-scoped-vars)))
     (is (nil? (->> '{:select [?x]
                      :where  [[?x ?y ?z]
                               [:bind [3 ?new]]]}
                    (s/conform qs/query-spec)
                    v/collect-nodes
                    vs/validate-scoped-vars)))
-    (is (= [{:variable   '?x
+    (is (= [{:kind       ::vs/var-not-in-scope
+             :variables  ['?u '?v]
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
+           ;; The not-in-scope error is found before the in-scope error
+           (->> '{:select [[(+ ?u ?v) ?x]]
+                  :where [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars)))
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '?x
              :scope-vars #{'?x '?y '?z}
              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
            (->> '{:select [[2 ?x]]
@@ -167,7 +188,17 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 vs/validate-scoped-vars)))
-    (is (= [{:variable   '?z
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '?x
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
+           (->> '{:select [[2 ?x]]
+                  :where [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars)))
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '?z
              :scope-vars #{'?x '?y '?z}
              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
            (->> '{:select [[2 ?z]]
@@ -175,7 +206,8 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 vs/validate-scoped-vars)))
-    (is (= [{:variable   '?x
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '?x
              :scope-vars #{'?x '?y '?z '?w}
              :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
            (->> '{:select [?w [2 ?x]]
@@ -183,7 +215,8 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 vs/validate-scoped-vars)))
-    (is (= [{:variable   '?y
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '?y
              :scope-vars #{'?x '?y '?z}
              :path       [:query/select :where :where-sub/where :where/bind]}]
            (->> '{:select [?x]
@@ -192,10 +225,12 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 vs/validate-scoped-vars)))
-    (is (= #{{:variable   '?x
+    (is (= #{{:kind       ::vs/var-in-scope
+              :variable   '?x
               :scope-vars #{'?x '?y '?z '?w}
               :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}
-             {:variable   '?y
+             {:kind       ::vs/var-in-scope
+              :variable   '?y
               :scope-vars #{'?x '?y '?z}
               :path       [:query/select :where :where-sub/where :where/bind]}}
            (->> '{:select [?w [2 ?x]]

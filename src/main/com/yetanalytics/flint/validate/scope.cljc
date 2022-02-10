@@ -21,13 +21,22 @@
 
 (defmethod get-scope-vars :ax/var [[_ v]] [v])
 
-(defmethod get-scope-vars :expr/as-var [[_ [_expr v]]]
-  (get-scope-vars v))
+(defmethod get-scope-vars :expr/as-var [[_ [expr v]]]
+  (concat (get-scope-vars expr) (get-scope-vars v)))
+
+(defmethod get-scope-vars :expr/branch [[_ expr]]
+  (mapcat get-scope-vars expr))
+
+(defmethod get-scope-vars :expr/args [[_ args]]
+  (mapcat get-scope-vars args))
+
+(defmethod get-scope-vars :expr/terminal [[_ expr-term]]
+  (get-scope-vars expr-term))
 
 ;; SELECT in-scope vars
 
-(defmethod get-scope-vars :select/expr-as-var [[_ [_expr v]]]
-  (get-scope-vars v))
+(defmethod get-scope-vars :select/expr-as-var [[_ expr-as-var]]
+  (get-scope-vars expr-as-var))
 
 ;; WHERE in-scope vars
 
@@ -121,11 +130,26 @@
 ;; Validation on AST zipper
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- scope-err-map
+(defn- in-scope-err-map
   [var scope-vars zip-loc k]
-  {:variable   var
+  {:kind       ::var-in-scope
+   :variable   var
    :scope-vars scope-vars
    :path       (conj (->> zip-loc zip/path (mapv first)) k)})
+
+(defn- not-in-scope-err-map
+  [vars scope-vars zip-loc k]
+  {:kind       ::var-not-in-scope
+   :variables  vars
+   :scope-vars scope-vars
+   :path       (conj (->> zip-loc zip/path (mapv first)) k)})
+
+(defn- get-bind-expr
+  "Starting at an `:expr/as-var` node, get the `var` in `expr AS var`."
+  [ast-node]
+  (-> ast-node ; [:expr/as-var [expr var]]
+      second   ; [expr var]
+      first))
 
 (defn- get-bind-var
   "Starting at an `:expr/as-var` node, get the `var` in `expr AS var`."
@@ -142,24 +166,27 @@
         prev-elems (zip/lefts loc)
         scope      (set (mapcat get-scope-vars prev-elems))]
     (when (contains? scope bind-var)
-      (scope-err-map bind-var scope loc :where/bind))))
+      (in-scope-err-map bind-var scope loc :where/bind))))
 
 (defn- validate-select
   "Validate `SELECT ... (expr AS var) ..."
   [select-clause loc]
-  (let [bind-var (get-bind-var select-clause)
+  (let [expr-vars  (get-scope-vars (get-bind-expr select-clause))
+        bind-var   (get-bind-var select-clause)
         prev-elems (zip/lefts loc)
-        sel-query (->> loc
-                       zip/up ; :select/var-or-exprs
-                       zip/up ; :select
-                       zip/up ; :query/select or :where-sub/select
-                       zip/node)
-        where (get-kv (second sel-query) :where)
+        sel-query  (->> loc
+                        zip/up ; :select/var-or-exprs
+                        zip/up ; :select
+                        zip/up ; :query/select or :where-sub/select
+                        zip/node)
+        where      (get-kv (second sel-query) :where)
         where-vars (get-scope-vars (second where))
-        prev-vars (mapcat get-scope-vars prev-elems)
-        scope (set (concat where-vars prev-vars))]
-    (when (contains? scope bind-var)
-      (scope-err-map bind-var scope loc :select/expr-as-var))))
+        prev-vars  (mapcat get-scope-vars prev-elems)
+        scope      (set (concat where-vars prev-vars))]
+    (if-some [bad-expr-vars (not-empty (filter #(not (scope %)) expr-vars))]
+      (not-in-scope-err-map bad-expr-vars scope loc :select/expr-as-var)
+      (when (contains? scope bind-var)
+        (in-scope-err-map bind-var scope loc :select/expr-as-var)))))
 
 (defn- validate-node-locs
   [validation-fn node-locs]
