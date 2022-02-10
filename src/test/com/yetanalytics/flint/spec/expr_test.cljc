@@ -99,6 +99,10 @@
                             [:expr/kwargs [[:distinct? true]]]]]
              (s/conform ::es/agg-expr '(:my/fn ?foo :distinct? true))))
       (is (s/invalid?
+           (s/conform ::es/agg-expr '(count ?foo :bad? true))))
+      (is (s/invalid?
+           (s/conform ::es/agg-expr '(group-concat ?foo :separator ";" :bad? true))))
+      (is (s/invalid?
            (s/conform ::es/expr '(count ?foo))))
       (is (s/invalid?
            (s/conform ::es/expr '(group-concat ?foo :separator ";"))))

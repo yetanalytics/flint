@@ -2,11 +2,9 @@
   (:require [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.spec.axiom :as ax])
   #?(:cljs (:require-macros
-            [com.yetanalytics.flint.spec.expr :refer [kwarg-spec]])))
+            [com.yetanalytics.flint.spec.expr :refer [keyword-args]])))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Specs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Terminals
 
 (def expr-terminal-spec
   (s/and
@@ -26,55 +24,25 @@
   (s/or :expr/terminal
         (s/or :ax/wildcard ax/wildcard?)))
 
+;; Keyword arguments
+
 (s/def ::distinct? boolean?)
 (s/def ::separator ax/valid-string?)
-
-;; (defn- conform-kwargs [kvs]
-;;   (->> kvs
-;;        (into (sorted-map))
-;;        (reduce-kv (fn [acc k v]
-;;                     (conj acc [:expr/terminal [:expr/kwarg [k v]]]))
-;;                   [])))
 
 (defn- kvs->map [kvs]
   (reduce (fn [m {k :expr/k v :expr/v}] (assoc m k v))
           {}
           kvs))
 
-(defmacro kwarg-spec
+(defmacro keyword-args
   [& kspecs]
   `(s/& (s/* (s/cat :expr/k keyword? :expr/v any?))
         (s/conformer kvs->map)
         (s/keys :opt-un ~kspecs)
+        #(every? ~(->> kspecs (map (comp keyword name)) set) (keys %))
         (s/conformer #(into [] %))))
 
-;; (defn- conform-kwarg
-;;   [kwarg-m]
-;;   [:expr/terminal [:expr/kwarg (into [] kwarg-m)]])
-
-;; (defn- kwargs->map
-;;   [kwarg-ms]
-;;   (reduce (fn [m {k :expr/k v :expr/v}] (assoc m k v))
-;;           {}
-;;           kwarg-ms))
-
-(defn- conform-expr
-  [{op     :expr/op
-    arg-1  :expr/arg-1
-    arg-2  :expr/arg-2
-    arg-3  :expr/arg-3
-    arg-4  :expr/arg-4
-    vargs  :expr/vargs
-    kwargs :expr/kwargs}]
-  (cond-> [[:expr/op op]
-           [:expr/args (cond-> []
-                         arg-1 (conj arg-1)
-                         arg-2 (conj arg-2)
-                         arg-3 (conj arg-3)
-                         arg-4 (conj arg-4)
-                         vargs (concat vargs)
-                         true vec)]]
-    kwargs (conj [:expr/kwargs kwargs])))
+;; Op symbols
 
 (def nilary-ops
   #{'rand 'now 'uuid 'struuid 'bnode})
@@ -128,6 +96,26 @@
 (def varardic-ops
   #{'concat 'coalesce})
 
+;; Branches
+
+(defn- conform-expr
+  [{op     :expr/op
+    arg-1  :expr/arg-1
+    arg-2  :expr/arg-2
+    arg-3  :expr/arg-3
+    arg-4  :expr/arg-4
+    vargs  :expr/vargs
+    kwargs :expr/kwargs}]
+  (cond-> [[:expr/op op]
+           [:expr/args (cond-> []
+                         arg-1 (conj arg-1)
+                         arg-2 (conj arg-2)
+                         arg-3 (conj arg-3)
+                         arg-4 (conj arg-4)
+                         vargs (concat vargs)
+                         true vec)]]
+    kwargs (conj [:expr/kwargs kwargs])))
+
 (def agg-expr-branch-spec
   (s/and
    list?
@@ -137,13 +125,14 @@
                                :expr/arg-1 ::agg-expr)
     :expr/unary-agg     (s/cat :expr/op unary-agg-ops
                                :expr/arg-1 ::agg-expr
-                               :expr/kwargs (kwarg-spec ::distinct?))
+                               :expr/kwargs (keyword-args ::distinct?))
     :expr/unary-wild    (s/cat :expr/op unary-agg-wild-ops
                                :expr/arg-1 wildcard-terminal-spec
-                               :expr/kwargs (kwarg-spec ::distinct?))
+                               :expr/kwargs (keyword-args ::distinct?))
     :expr/unary-agg-sep (s/cat :expr/op unary-agg-sep-ops
                                :expr/arg-1 ::agg-expr
-                               :expr/kwargs (kwarg-spec ::distinct? ::separator))
+                               :expr/kwargs (keyword-args ::distinct?
+                                                          ::separator))
     :expr/unary-var     (s/cat :expr/op unary-var-ops
                                :expr/arg-1 var-terminal-spec)
     :expr/unary-where   (s/cat :expr/op unary-where-ops
@@ -169,7 +158,7 @@
     ;; Only custom functions that are aggregates use the DISTINCT keyword
     :expr/custom        (s/cat :expr/op ax/iri-spec
                                :expr/vargs (s/* ::agg-expr)
-                               :expr/kwargs (kwarg-spec ::distinct?)))
+                               :expr/kwargs (keyword-args ::distinct?)))
    (s/conformer second)
    (s/conformer conform-expr)))
 
@@ -207,6 +196,8 @@
    (s/conformer second)
    (s/conformer conform-expr)))
 
+;; Expr specs
+
 (s/def ::expr
   (s/or :expr/terminal expr-terminal-spec
         :expr/branch expr-branch-spec))
@@ -214,6 +205,8 @@
 (s/def ::agg-expr
   (s/or :expr/terminal expr-terminal-spec
         :expr/branch agg-expr-branch-spec))
+
+;; Expr AS var specs
 
 (s/def ::expr-as-var
   (s/or :expr/as-var (s/tuple ::expr (s/or :ax/var ax/variable?))))
