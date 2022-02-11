@@ -186,9 +186,11 @@
                 v/collect-nodes
                 va/validate-agg-selects
                 err/aggregate-error-msg)))
-    (is (= "1 SELECT clause has both wildcard and GROUP BY!"
+    (is (= "2 SELECT clauses have both wildcard and GROUP BY!"
            (->> '{:select   :*
-                  :where    [[?x ?y ?z]]
+                  :where    {:select   :*
+                             :where    [[?x ?y ?z]]
+                             :group-by [?x]}
                   :group-by [?x]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
