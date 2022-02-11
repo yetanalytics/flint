@@ -102,6 +102,11 @@
               (s/conform qs/query-spec)
               v/collect-nodes
               va/validate-agg-selects)))
+    (is (nil? ; ORDER BY and HAVING do not factor into any of this
+         (->> '{:select [[(sum ?x) ?sum]]
+                :where  [[?x ?y ?z]]
+                :order-by [(sum ?x) ?y]
+                :having   [(sum ?x) (+ ?y ?y)]})))
     (is (nil?
          ;; Taken from select-agg-3.edn
          (->> '{:select   [?g [(avg ?p) ?avg] [(/ (+ (min ?p) (max ?p)) 2) ?c]]

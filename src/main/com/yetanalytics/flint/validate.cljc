@@ -45,13 +45,22 @@
     ;; SELECT ... (expr AS var) ...
     :select/expr-as-var})
 
-(defn- get-agg-select-loc
+(defn- get-select-clause-loc
+  "Return the loc at a SELECT, SELECT DISTINCT, or SELECT REDUCED clause."
   [loc]
   (loop [loc loc]
     (when-not (nil? loc) ; Reached the top w/o finding a SELECT
-      (let [ast-node (zip/node loc)]
-        (if (#{:query/select :where-sub/select} (u/get-keyword ast-node))
+      (let [ast-node (zip/node loc)
+            k        (u/get-keyword ast-node)]
+        (cond
+          (#{:select :select-distinct :select-reduced} k)
           loc
+          ;; These are the only other nodes where aggregate functions may
+          ;; be contained in. Since that means it's not in a SELECT clause,
+          ;; we can short circuit.
+          (#{:order-by :having} k)
+          nil
+          :else
           (recur (zip/up loc)))))))
 
 (defn collect-nodes
@@ -78,15 +87,16 @@
                          second   ; [[:expr/op ...] [:expr/args ...]]
                          first    ; [:expr/op ...]
                          second)]
-              (if (or (not (symbol? op))
-                      (es/aggregate-ops op))
-                (let [node-m* (if-some [select-loc (get-agg-select-loc loc)]
-                                (update node-m
-                                        :agg/select
-                                        assoc
-                                        (zip/node select-loc)
-                                        select-loc)
-                                node-m)]
+              (if-some [select-cls-loc (and (or (not (symbol? op))
+                                                (es/aggregate-ops op))
+                                            (get-select-clause-loc loc))]
+                (let [select-loc (zip/up select-cls-loc)
+                      select     (zip/node select-loc) 
+                      node-m*    (update node-m
+                                         :agg/select
+                                         assoc
+                                         select
+                                         select-loc)]
                   (recur (zip/next loc) node-m*))
                 (recur (zip/next loc) node-m)))
             :else
