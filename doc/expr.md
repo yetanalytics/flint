@@ -7,7 +7,11 @@ SPARQL supports expressions, which can be used to compute values and filter quer
 - As part of a `GROUP BY` clause, either as a freestanding expression or in an `expr AS var` form.
 - To aggregate or compute values in a `SELECT`, `ORDER BY` or `HAVING` clause.
 
-Flint represents SPARQL expressions as Clojure functions, i.e. they follow the form `(op expr1 expr2 ...)`. Like in Clojure, every expression is a list that consists of an operation symbol followed by zero or more expressions (with certain exceptions, like `exists` and `not-exists`).
+In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or one of the following terminals:
+- A variable
+- A Flint literal.
+
+With certain exceptions, like `exists` and `not-exists`, expressions only accept other expressions as arguments.
 
 <!--TODO: Example-->
 
