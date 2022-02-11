@@ -4,8 +4,10 @@
             [com.yetanalytics.flint.spec.prologue :as ps]
             [com.yetanalytics.flint.spec.triple   :as ts]
             [com.yetanalytics.flint.spec.where    :as ws])
-  #?(:cljs (:require-macros
-            [com.yetanalytics.flint.spec.update :refer [smap->vec]])))
+  #?(:clj (:require
+           [com.yetanalytics.flint.spec :refer [sparql-keys]])
+     :cljs (:require-macros
+            [com.yetanalytics.flint.spec :refer [sparql-keys]])))
 
 (def key-order-map
   {:base          0
@@ -37,19 +39,11 @@
    :using         5
    :where         6})
 
-#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-private-var])}
-(defn- qkey-comp
+(defn- key-comp
   [k1 k2]
   (let [n1 (get key-order-map k1 100)
         n2 (get key-order-map k2 100)]
     (- n1 n2)))
-
-#?(:clj
-   (defmacro smap->vec
-     [form]
-     `(s/and ~form
-             (s/conformer #(into [] %))
-             (s/conformer #(sort-by first qkey-comp %)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper specs
@@ -81,6 +75,16 @@
                    :triple/nform ts/normal-form-novar-spec)
              :kind vector?))
 
+(def triples-noblank-spec
+  (s/coll-of (s/or :triple/vec ts/triple-vec-noblank-spec
+                   :triple/nform ts/normal-form-noblank-spec)
+             :kind vector?))
+
+(def triples-novar-noblank-spec
+  (s/coll-of (s/or :triple/vec ts/triple-vec-novar-noblank-spec
+                   :triple/nform ts/normal-form-novar-noblank-spec)
+             :kind vector?))
+
 (def quad-spec
   (s/tuple #{:graph}
            ax/var-or-iri-spec
@@ -90,6 +94,16 @@
   (s/tuple #{:graph}
            ax/var-or-iri-spec
            triples-novar-spec))
+
+(def quad-noblank-spec
+  (s/tuple #{:graph}
+           ax/var-or-iri-spec
+           triples-noblank-spec))
+
+(def quad-novar-noblank-spec
+  (s/tuple #{:graph}
+           ax/var-or-iri-spec
+           triples-novar-noblank-spec))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :triple/vec  ts/triple-vec-nopath-spec
@@ -103,6 +117,18 @@
                    :triple/quads quad-novar-spec)
              :kind vector?))
 
+(def triple-or-quads-noblank-spec
+  (s/coll-of (s/or :triple/vec  ts/triple-vec-noblank-spec
+                   :triple/nform ts/normal-form-noblank-spec
+                   :triple/quads quad-noblank-spec)
+             :kind vector?))
+
+(def triple-or-quads-novar-noblank-spec
+  (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-noblank-spec
+                   :triple/nform ts/normal-form-novar-noblank-spec
+                   :triple/quads quad-novar-noblank-spec)
+             :kind vector?))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -113,8 +139,9 @@
 (s/def ::load-silent ::load)
 
 (def load-update-spec
-  (smap->vec (s/keys :req-un [(or ::load ::load-silent)]
-                     :opt-un [::ps/base ::ps/prefixes ::into])))
+  (sparql-keys :req-un [(or ::load ::load-silent)]
+               :opt-un [::ps/base ::ps/prefixes ::into]
+               :key-comp-fn key-comp))
 
 (s/def ::clear
   (s/or :ax/iri    ax/iri-spec
@@ -123,8 +150,9 @@
 (s/def ::clear-silent ::clear)
 
 (def clear-update-spec
-  (smap->vec (s/keys :req-un [(or ::clear ::clear-silent)]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [(or ::clear ::clear-silent)]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 (s/def ::drop
   (s/or :ax/iri    ax/iri-spec
@@ -133,36 +161,41 @@
 (s/def ::drop-silent ::drop)
 
 (def drop-update-spec
-  (smap->vec (s/keys :req-un [(or ::drop ::drop-silent)]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [(or ::drop ::drop-silent)]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 (s/def ::create ax/iri-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
-  (smap->vec (s/keys :req-un [(or ::create ::create-silent)]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [(or ::create ::create-silent)]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 (s/def ::add graph-or-default-spec)
 (s/def ::add-silent ::add)
 
 (def add-update-spec
-  (smap->vec (s/keys :req-un [(or ::add ::add-silent) ::to]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [(or ::add ::add-silent) ::to]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 (s/def ::move graph-or-default-spec)
 (s/def ::move-silent ::move)
 
 (def move-update-spec
-  (smap->vec (s/keys :req-un [(or ::move ::move-silent) ::to]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [(or ::move ::move-silent) ::to]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 (s/def ::copy graph-or-default-spec)
 (s/def ::copy-silent ::copy)
 
 (def copy-update-spec
-  (smap->vec (s/keys :req-un [(or ::copy ::copy-silent) ::to]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [(or ::copy ::copy-silent) ::to]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
@@ -171,33 +204,37 @@
 (s/def ::insert-data triple-or-quads-novar-spec)
 
 (def insert-data-update-spec
-  (smap->vec (s/keys :req-un [::insert-data]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [::insert-data]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
-(s/def ::delete-data triple-or-quads-novar-spec)
+(s/def ::delete-data triple-or-quads-novar-noblank-spec)
 
 (def delete-data-update-spec
-  (smap->vec (s/keys :req-un [::delete-data]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [::delete-data]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
-(s/def ::delete-where triple-or-quads-spec)
+(s/def ::delete-where triple-or-quads-noblank-spec)
 
 (def delete-where-update-spec
-  (smap->vec (s/keys :req-un [::delete-where]
-                     :opt-un [::ps/base ::ps/prefixes])))
+  (sparql-keys :req-un [::delete-where]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
 
 (s/def ::insert triple-or-quads-spec)
-(s/def ::delete triple-or-quads-spec)
+(s/def ::delete triple-or-quads-noblank-spec)
 
 (def modify-update-spec
-  (smap->vec (s/keys :req-un [(or ::delete ::insert)
-                              ::ws/where]
-                     :opt-un [::ps/base
-                              ::ps/prefixes
-                              ::delete
-                              ::insert
-                              ::with
-                              ::using])))
+  (sparql-keys :req-un [(or ::delete ::insert)
+                        ::ws/where]
+               :opt-un [::ps/base
+                        ::ps/prefixes
+                        ::delete
+                        ::insert
+                        ::with
+                        ::using]
+               :key-comp-fn key-comp))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Update Request

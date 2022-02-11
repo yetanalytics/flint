@@ -5,7 +5,7 @@
 
 (deftest conform-modifier-test
   (testing "Conforming solution modifiers"
-    (is (= [[:mod/expr [:expr/terminal [:ax/var '?foo]]]]
+    (is (= [[:ax/var '?foo]]
            (s/conform ::ms/group-by ['?foo])))
     (is (= '[[:mod/expr-as-var
               [:expr/as-var
@@ -14,6 +14,8 @@
                                             [:expr/terminal [:ax/num-lit 2]])]]]
                 [:ax/var ?foo]]]]]
            (s/conform ::ms/group-by ['[(+ 2 2) ?foo]])))
+    (is (= '[[:ax/var ?foo]]
+           (s/conform ::ms/order-by '[?foo])))
     (is (= '[[:mod/asc-desc
               [[:mod/op asc]
                [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]

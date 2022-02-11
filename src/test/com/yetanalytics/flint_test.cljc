@@ -103,6 +103,36 @@
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-scoped-vars
+           (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
+                                :select [[2 ?x]]
+                                :where [[?x :foo/bar ?y]]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-aggregates
+           (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
+                                :select *
+                                :where [[?x ?y ?z]]
+                                :group-by [?x]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-bnodes-bgp
+           (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
+                                :select [?x]
+                                :where [[?x :foo/bar _1]
+                                        [:optional [[?y :foo/baz _1]]]]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-bnodes-update
+           (try (format-updates '[{:prefixes {:foo "<http://foo.org/>"}
+                                   :insert-data [[:foo/bar :foo/baz _1]]}
+                                  {:insert-data [[:foo/bar :foo/baz _1]]}])
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
     (testing "- short circuiting on error"
       (is (= 0
              (try (format-updates ['{:copy :foo :to :bar}

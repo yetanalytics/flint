@@ -1,6 +1,9 @@
 (ns com.yetanalytics.flint.error
   (:require [clojure.spec.alpha :as s]
             [clojure.string     :as cstr]
+            [com.yetanalytics.flint.validate.aggregate :as va]
+            [com.yetanalytics.flint.validate.bnode     :as vb]
+            [com.yetanalytics.flint.validate.scope     :as vs]
             #?@(:clj [[clojure.core :refer [format]]]
                 :cljs [[goog.string :as gstring]
                        [goog.string.format]])))
@@ -26,6 +29,42 @@
     :group-by :order-by :having :limit :offset :values
     :to :into :with :using})
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; String formatting helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- join-str-coll
+  "Join `str-coll` in the form `... x, y and z`."
+  [str-coll]
+  (if (= 1 (count str-coll))
+    (first str-coll)
+    (fmt "%s and %s"
+         (cstr/join ", " (butlast str-coll))
+         (last str-coll))))
+
+(defn- plural-s
+  "Add `s` to the end of `word` if `count` is not 1."
+  [count]
+  (if (= 1 count) "" "s"))
+
+(defn- plural-has
+  "Return `have` if `count` is not 1, `has` otherwise."
+  [count]
+  (if (= 1 count) "has" "have"))
+
+(defn- plural-was
+  "Return `were` if `count` is not 1, `was` otherwise."
+  [count]
+  (if (= 1 count) "was" "were"))
+
+(defn- make-index-str
+  [index]
+  (fmt " at index %d" index))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Spec errors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn- spec-clause-strs
   [spec-paths]
   (->> spec-paths
@@ -40,10 +79,10 @@
   [spec-ed index-str]
   (let [spec-paths  (->> spec-ed ::s/problems (map :path))]
     (if (every? #(= 1 (count %)) spec-paths)
-      ;; Every spec path is of the form `[:select-query]`, `[:ask-query]`,
-      ;; etc. This is indicative that no top-level clasues exist for spec
-      ;; to traverse through.
-      (fmt "Syntax errors exist%s due to missing clauses!"
+      ;; Every spec path is of the form `[:query/select]`, `[:query/ask]`,
+      ;; etc. This is indicative that spec cannot traverse inside clauses
+      ;; due to errors at the top level.
+      (fmt "Syntax errors exist%s due to invalid map, or invalid or extra clauses!"
            index-str)
       ;; Here, "missing clause" errors will not show up in the error msg.
       ;; But they will re-emerge once the user fixes the other errors.
@@ -69,7 +108,11 @@
   ([spec-ed]
    (spec-error-msg* spec-ed ""))
   ([spec-ed index]
-   (spec-error-msg* spec-ed (fmt " at index %d" index))))
+   (spec-error-msg* spec-ed (make-index-str index))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Prefix errors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- prefix-error-msg*
   [prefix-errs index-str]
@@ -78,14 +121,10 @@
         prefix-strs (->> prefix-kws
                          (map name)
                          (map (partial fmt ":%s")))
-        prefix-str  (if (= 1 (count prefix-strs))
-                      (first prefix-strs)
-                      (fmt "%s and %s"
-                           (cstr/join ", " (butlast prefix-strs))
-                           (last prefix-strs)))]
+        prefix-str  (join-str-coll prefix-strs)]
     (fmt "%d IRI%s%s cannot be expanded due to missing prefixes %s!"
          iri-count
-         (if (= 1 iri-count) "" "s")
+         (plural-s iri-count)
          index-str
          prefix-str)))
 
@@ -95,25 +134,30 @@
   ([prefix-errs]
    (prefix-error-msg* prefix-errs ""))
   ([prefix-errs index]
-   (prefix-error-msg* prefix-errs (fmt " at index %d" index))))
+   (prefix-error-msg* prefix-errs (make-index-str index))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Scope errors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- scope-error-msg*
   [scope-errs index-str]
-  (let [var-coll  (->> scope-errs (map :variable) distinct sort)
-        var-count (->> var-coll count)
-        var-strs  (->> var-coll (map name))
-        var-str   (if (= 1 var-count)
-                    (first var-strs)
-                    (fmt "%s and %s"
-                         (cstr/join ", " (butlast var-strs))
-                         (last var-strs)))]
-    (fmt "%d variable%s%s in %d `expr AS var` clause%s %s already defined in scope: %s!'"
+  (let [[nots ins] (split-with #(= ::vs/var-not-in-scope (:kind %))
+                               scope-errs)
+        var-coll   (if (not-empty nots)
+                     (->> nots (mapcat :variables) distinct sort)
+                     (->> ins (map :variable) distinct sort))
+        var-count  (->> var-coll count)
+        var-strs   (->> var-coll (map name))
+        var-str    (join-str-coll var-strs)]
+    (fmt "%d variable%s%s in %d `expr AS var` clause%s %s %s defined in scope: %s!'"
          var-count
-         (if (= 1 var-count) "" "s")
+         (plural-s var-count)
          index-str
          (count scope-errs)
          (if (= 1 (count scope-errs)) "" "s")
-         (if (= 1 var-count) "was" "were")
+         (plural-was var-count)
+         (if (not-empty nots) "not" "already")
          var-str)))
 
 (defn scope-error-msg
@@ -123,3 +167,65 @@
    (scope-error-msg* scope-errs ""))
   ([scope-errs index]
    (scope-error-msg* scope-errs (fmt " at index %d" index))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Aggregate errors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- aggregate-error-msg*
+  [agg-errs index-str]
+  (let [[wilds errs] (split-with #(= ::va/wildcard-group-by (:kind %))
+                                 agg-errs)]
+    (if (not-empty wilds)
+      (let [wild-count (count wilds)]
+        (fmt "%d SELECT clause%s%s %s both wildcard and GROUP BY!"
+             wild-count
+             (plural-s wild-count)
+             index-str
+             (plural-has wild-count)))
+      (let [var-coll (->> errs (mapcat :variables) distinct sort)
+            var-count (->> var-coll count)
+            var-strs  (->> var-coll (map name))
+            var-str   (join-str-coll var-strs)]
+        (fmt "%d variable%s%s %s illegally used in SELECTs with aggregates: %s!"
+             var-count
+             (plural-s var-count)
+             index-str
+             (plural-was var-count)
+             var-str)))))
+
+(defn aggregate-error-msg
+  ([agg-errs]
+   (aggregate-error-msg* agg-errs ""))
+  ([agg-errs index]
+   (aggregate-error-msg* agg-errs (make-index-str index))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Blank node errors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- bnode-error-msg*
+  [bnode-err-m index-str]
+  (let [bnode-coll  (->> bnode-err-m :errors (map :bnode) distinct)
+        bnode-count (count bnode-coll)
+        bnode-strs  (->> bnode-coll (map name))
+        bnode-str   (if (= 1 bnode-count)
+                      (first bnode-strs)
+                      (fmt "%s and %s"
+                           (cstr/join ", " (butlast bnode-strs))
+                           (last bnode-strs)))]
+    (fmt "%d blank node%s%s %s duplicated %s: %s!"
+         bnode-count
+         (plural-s bnode-count)
+         index-str
+         (plural-was bnode-count)
+         (case (:kind bnode-err-m)
+           ::vb/dupe-bnodes-update "from previous updates"
+           ::vb/dupe-bnodes-bgp    "in multiple BGPs")
+         bnode-str)))
+
+(defn bnode-error-msg
+  ([bnode-err-m]
+   (bnode-error-msg* bnode-err-m ""))
+  ([bnode-err-m index]
+   (bnode-error-msg* bnode-err-m (make-index-str index))))
