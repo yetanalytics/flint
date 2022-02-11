@@ -3,7 +3,6 @@
             [com.yetanalytics.flint :as flint :refer [format-query
                                                       format-update
                                                       format-updates]]
-            [com.yetanalytics.flint.validate.bnode :as vb]
             #?@(:clj [[clojure.string  :as cstr]
                       [clojure.edn     :as edn]
                       [clojure.java.io :as io]]))
@@ -111,7 +110,15 @@
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
-    (is (= ::vb/dupe-bnodes-bgp
+    (is (= ::flint/invalid-aggregates
+           (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
+                                :select *
+                                :where [[?x ?y ?z]]
+                                :group-by [?x]})
+                (catch #?(:clj clojure.lang.ExceptionInfo
+                          :cljs js/Error) e
+                  (-> e ex-data :kind)))))
+    (is (= ::flint/invalid-bnodes-bgp
            (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
                                 :select [?x]
                                 :where [[?x :foo/bar _1]
@@ -119,7 +126,7 @@
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
-    (is (= ::vb/dupe-bnodes-update
+    (is (= ::flint/invalid-bnodes-update
            (try (format-updates '[{:prefixes {:foo "<http://foo.org/>"}
                                    :insert-data [[:foo/bar :foo/baz _1]]}
                                   {:insert-data [[:foo/bar :foo/baz _1]]}])

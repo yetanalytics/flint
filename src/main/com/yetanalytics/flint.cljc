@@ -1,15 +1,16 @@
 (ns com.yetanalytics.flint
   (:require [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.spec.query      :as qs]
-            [com.yetanalytics.flint.spec.update     :as us]
-            [com.yetanalytics.flint.format          :as f]
             [com.yetanalytics.flint.format.query]
-            [com.yetanalytics.flint.format.update   :as uf]
-            [com.yetanalytics.flint.error           :as err]
-            [com.yetanalytics.flint.validate        :as v]
-            [com.yetanalytics.flint.validate.bnode  :as vb]
-            [com.yetanalytics.flint.validate.prefix :as vp]
-            [com.yetanalytics.flint.validate.scope  :as vs]))
+            [com.yetanalytics.flint.spec.query         :as qs]
+            [com.yetanalytics.flint.spec.update        :as us]
+            [com.yetanalytics.flint.format             :as f]
+            [com.yetanalytics.flint.format.update      :as uf]
+            [com.yetanalytics.flint.error              :as err]
+            [com.yetanalytics.flint.validate           :as v]
+            [com.yetanalytics.flint.validate.aggregate :as va]
+            [com.yetanalytics.flint.validate.bnode     :as vb]
+            [com.yetanalytics.flint.validate.prefix    :as vp]
+            [com.yetanalytics.flint.validate.scope     :as vs]))
 
 (def xsd-iri-prefix
   "<http://www.w3.org/2001/XMLSchema#>")
@@ -95,13 +96,35 @@
                      (assoc (assert-scope-err-map errs sparql ast)
                             :index index))))))
 
+(defn- assert-aggregates-err-map
+  [agg-errs sparql ast]
+  {:kind   ::invalid-aggregates
+   :errors agg-errs
+   :input  sparql
+   :ast    ast})
+
+(defn- assert-aggregates
+  ([sparql ast nodes-m]
+   (when-some [errs (va/validate-agg-selects nodes-m)]
+     (throw (ex-info (err/aggregate-error-msg errs)
+                     (assert-aggregates-err-map errs sparql ast)))))
+  ([sparql ast nodes-m index]
+   (when-some [errs (va/validate-agg-selects nodes-m)]
+     (throw (ex-info (err/aggregate-error-msg errs)
+                     (assoc (assert-aggregates-err-map errs sparql ast)
+                            :index index))))))
+
 (defn- assert-bnode-err-map
   [{:keys [kind errors prev-bnodes]} sparql ast]
-  (cond-> {:kind   kind
-           :errors errors
+  (cond-> {:errors errors
            :input  sparql
            :ast    ast}
-    prev-bnodes (assoc :prev-bnodes prev-bnodes)))
+    (= ::vb/dupe-bnodes-bgp kind)
+    (assoc :kind ::invalid-bnodes-bgp)
+    (= ::vb/dupe-bnodes-update kind)
+    (assoc :kind ::invalid-bnodes-update)
+    prev-bnodes
+    (assoc :prev-bnodes prev-bnodes)))
 
 (defn- assert-bnodes
   [sparql ast nodes-m]
@@ -146,6 +169,7 @@
                    (let [nodes-m (v/collect-nodes ast)]
                      (assert-prefixes query ast nodes-m prefix-m)
                      (assert-scoped-vars query ast nodes-m)
+                     (assert-aggregates query ast nodes-m)
                      (assert-bnodes query ast nodes-m)))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
@@ -166,7 +190,8 @@
         _        (when validate?
                    (let [nodes-m (v/collect-nodes ast)]
                      (assert-prefixes update ast nodes-m prefix-m)
-                     (assert-scoped-vars update nodes-m ast)
+                     (assert-scoped-vars update ast nodes-m)
+                     (assert-aggregates update ast nodes-m)
                      (assert-bnodes update ast nodes-m)))
         ?xsd-pre (get-xsd-prefix prefix-m)
         opt-m    (cond-> {:pretty? pretty?}
@@ -191,6 +216,7 @@
                        (let [nodes-m-coll (map v/collect-nodes asts)]
                          (dorun (map assert-prefixes updates asts nodes-m-coll prefix-ms idxs))
                          (dorun (map assert-scoped-vars updates asts nodes-m-coll idxs))
+                         (dorun (map assert-aggregates updates asts nodes-m-coll idxs))
                          (assert-bnodes-coll updates asts nodes-m-coll)))
         xsd-prefixes (map get-xsd-prefix prefix-ms)
         opt-maps     (map (fn [?xsd-pre]

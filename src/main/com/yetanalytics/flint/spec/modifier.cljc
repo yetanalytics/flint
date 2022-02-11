@@ -4,17 +4,17 @@
             [com.yetanalytics.flint.spec.expr  :as es]))
 
 (s/def ::group-by
-  (s/coll-of (s/or :mod/expr        ::es/expr
-                   :ax/var          ax/variable?
+  (s/coll-of (s/or :ax/var          ax/variable?
+                   :mod/expr        ::es/expr
                    :mod/expr-as-var ::es/expr-as-var)
              :min-count 1
              :kind vector?))
 
 (s/def ::order-by
-  (s/coll-of (s/or :mod/asc-desc (s/& (s/cat :mod/op #{'asc 'desc}
+  (s/coll-of (s/or :ax/var       ax/variable?
+                   :mod/asc-desc (s/& (s/cat :mod/op #{'asc 'desc}
                                              :mod/expr ::es/agg-expr)
                                       (s/conformer #(into [] %)))
-                   :ax/var       ax/variable?
                    :mod/expr     ::es/agg-expr)
              :min-count 1
              :kind vector?))
