@@ -21,6 +21,12 @@
                [:ax/var ?z]]])))
     (is (= '[?z]
            (vv/get-scope-vars
+            '[:select/expr-as-var
+              [:expr/as-var
+               [[:expr/terminal [:ax/num-lit 2]]
+                [:ax/var ?z]]]])))
+    (is (= '[?z]
+           (vv/get-scope-vars
             '[:expr/as-var
               [[:expr/terminal [:ax/var ?y]]
                [:ax/var ?z]]])))
@@ -71,6 +77,17 @@
                           [[:triple/vec [[:ax/var ?x]
                                          [:ax/var ?y]
                                          [:ax/var ?z]]]]]]]])))
+      ;; This is an illegal sub-SELECT since it has both a wildcard and
+      ;; GROUP BY, but we want to cover all of our bases.
+      (is (= '[?x ?y ?z ?w]
+             (vv/get-scope-vars
+              '[:where-sub/select
+                [[:select [:ax/wildcard '*]]
+                 [:where [:where-sub/where
+                          [[:triple/vec [[:ax/var ?x]
+                                         [:ax/var ?y]
+                                         [:ax/var ?z]]]]]]
+                 [:group-by [[:ax/var ?w]]]]])))
       (is (= '[?a ?b ?c]
              (vv/get-scope-vars
               '[:where-sub/select
@@ -83,7 +100,10 @@
                  [:where [:where-sub/where
                           [[:triple/vec [[:ax/var ?x]
                                          [:ax/var ?y]
-                                         [:ax/var ?z]]]]]]]]))))
+                                         [:ax/var ?z]]]]]]
+                 [:group-by [[:ax/var ?a]
+                             [:ax/var ?b]
+                             [:ax/var ?c]]]]]))))
     (is (= '[?s1 ?p1 ?o1
              ?s2 ?p2 ?o2
              ?s3 ?p3 ?o3

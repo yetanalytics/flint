@@ -4,31 +4,6 @@
             [com.yetanalytics.flint.util              :as u]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Computing variables and var scopes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmulti get-expr-vars
-  (fn [x] (if (and (vector? x) (= 2 (count x)) (keyword? (first x)))
-            (first x)
-            :default)))
-
-(defmethod get-expr-vars :default [_] nil)
-
-(defmethod get-expr-vars :ax/var [[_ v]] [v])
-
-(defmethod get-expr-vars :expr/as-var [[_ [expr _v]]]
-  (get-expr-vars expr))
-
-(defmethod get-expr-vars :expr/branch [[_ expr]]
-  (mapcat get-expr-vars expr))
-
-(defmethod get-expr-vars :expr/args [[_ args]]
-  (mapcat get-expr-vars args))
-
-(defmethod get-expr-vars :expr/terminal [[_ expr-term]]
-  (get-expr-vars expr-term))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Validation on AST zipper
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -59,7 +34,7 @@
   "Validate `SELECT ... (expr AS var) ..."
   [[_expr-as-var-k [expr v-kv]] loc]
   (let [[_ bind-var] v-kv
-        expr-vars    (get-expr-vars expr)
+        expr-vars    (vv/get-expr-vars expr)
         prev-elems   (zip/lefts loc)
         sel-query    (->> loc
                           zip/up ; :select/var-or-exprs

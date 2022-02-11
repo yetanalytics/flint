@@ -3,10 +3,33 @@
             [com.yetanalytics.flint.spec.expr :as es]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Expression variables
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti get-expr-vars
+  "Return all the variables in an expression."
+  (fn [[k _]] k))
+
+(defmethod get-expr-vars :default [_] nil)
+
+(defmethod get-expr-vars :expr/branch [[_ expr]]
+  (mapcat get-expr-vars expr))
+
+(defmethod get-expr-vars :expr/args [[_ args]]
+  (mapcat get-expr-vars args))
+
+(defmethod get-expr-vars :expr/terminal [[_ expr-term]]
+  (get-expr-vars expr-term))
+
+(defmethod get-expr-vars :ax/var [[_ v]] [v])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SELECT aggregate variables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmulti invalid-agg-expr-vars (fn [_ [k _]] k))
+(defmulti invalid-agg-expr-vars
+  "Return a coll of invalid aggregate variables in an expression."
+  (fn [_valid-vars [k _]] k))
 
 (defmethod invalid-agg-expr-vars :default [_ _] [])
 
@@ -28,7 +51,10 @@
 ;; GROUP BY projection variables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmulti group-by-projected-vars (fn [[k _]] k))
+(defmulti group-by-projected-vars
+  "Return a coll of vars that are projected in a GROUP BY clause (i.e.
+   all vars not contained within an expression.)"
+  (fn [[k _]] k))
 
 (defmethod group-by-projected-vars :group-by [[_ group-by-coll]]
   (->> group-by-coll
@@ -43,40 +69,12 @@
   (-> expr-as-var second second second))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Expression variables
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmulti get-expr-vars
-  (fn [x] (if (and (vector? x) (= 2 (count x)) (keyword? (first x)))
-            (first x)
-            :default)))
-
-(defmethod get-expr-vars :default [_] nil)
-
-(defmethod get-expr-vars :ax/var [[_ v]] [v])
-
-(defmethod get-expr-vars :expr/as-var [[_ [expr _v]]]
-  (get-expr-vars expr))
-
-(defmethod get-expr-vars :expr/branch [[_ expr]]
-  (mapcat get-expr-vars expr))
-
-(defmethod get-expr-vars :expr/args [[_ args]]
-  (mapcat get-expr-vars args))
-
-(defmethod get-expr-vars :expr/terminal [[_ expr-term]]
-  (get-expr-vars expr-term))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Variable Scopes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti get-scope-vars
   "Return a coll of all variables in the scope of the AST branch."
-  (fn [x] (if (and (vector? x) (= 2 (count x)) (keyword? (first x)))
-            (first x)
-            :default)))
+  (fn [x] (if-some [k (u/get-keyword x)] k :default)))
 
 (defmethod get-scope-vars :default [_] nil)
 
@@ -148,8 +146,8 @@
     (case (first select)
       :ax/wildcard
       (cond-> (get-scope-vars where)
-        ?group-by
-        (mapcat (group-by-projected-vars group-by)))
+        ?group-by ; Should never happen in a legal SELECT query
+        (concat (group-by-projected-vars ?group-by)))
       :select/var-or-exprs
       (mapcat get-scope-vars (second select)))))
 
