@@ -106,7 +106,10 @@
          (->> '{:select [[(sum ?x) ?sum]]
                 :where  [[?x ?y ?z]]
                 :order-by [(sum ?x) ?y]
-                :having   [(sum ?x) (+ ?y ?y)]})))
+                :having   [(sum ?x) (+ ?y ?y)]}
+              (s/conform qs/query-spec)
+              v/collect-nodes
+              va/validate-agg-selects)))
     (is (nil?
          ;; Taken from select-agg-3.edn
          (->> '{:select   [?g [(avg ?p) ?avg] [(/ (+ (min ?p) (max ?p)) 2) ?c]]
