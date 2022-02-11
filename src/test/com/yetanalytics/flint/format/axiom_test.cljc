@@ -23,8 +23,6 @@
            (f/format-ast-node {} [:ax/rdf-type 'a])))
     (is (= "a"
            (f/format-ast-node {} [:ax/rdf-type :a])))
-    (is (= "NULL"
-           (f/format-ast-node {} [:ax/nil :a])))
     (is (= "\"My String\""
            (f/format-ast-node {} [:ax/str-lit "My String"])))
     (is (= "\"My String\"@en"

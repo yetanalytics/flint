@@ -21,9 +21,6 @@
 (defmethod f/format-ast-node :ax/rdf-type [_ [_ _]]
   "a")
 
-(defmethod f/format-ast-node :ax/nil [_ [_ _]]
-  "NULL")
-
 (defmethod f/format-ast-node :ax/str-lit [_ [_ str-value]]
   (str "\"" str-value "\""))
 
