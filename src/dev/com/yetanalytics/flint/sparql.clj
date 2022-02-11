@@ -59,7 +59,7 @@
 
   (QueryFactory/create
    "SELECT (COUNT(DISTINCT ?z) AS ?z)
-    WHERE { ?x a <htgtp://foo.org/Thing> }")
+    WHERE { ?x a <http://foo.org/Thing> }")
 
   (println
    (QueryFactory/create
