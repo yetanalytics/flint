@@ -83,22 +83,30 @@
 
 | Flint | SPARQL | Arglist
 | --- | --- | --- |
-| `sum` | `SUM` | `[expr]`
-| `min` | `MIN` | `[expr]`
-| `max` | `MAX` | `[expr]`
-| `avg` | `AVG` | `[expr]`
-| `sample` | `SAMPLE` | `[expr]`
-| `count` | `COUNT` | `[expr]` or `['*]`
-| `group-concat` | `GROUP` | `[expr & {:keys [separator]}]`
+| `sum` | `SUM` | `[expr & {:keys [distinct?]}]`
+| `min` | `MIN` | `[expr & {:keys [distinct?]}]`
+| `max` | `MAX` | `[expr & {:keys [distinct?]}]`
+| `avg` | `AVG` | `[expr & {:keys [distinct?]}]`
+| `sample` | `SAMPLE` | `[expr & {:keys [distinct?]}]`
+| `count` | `COUNT` | `[expr-or-wildcard & {:keys [distinct?]}]`
+| `group-concat` | `GROUP` | `[expr & {:keys [distinct? separator]}]`
 
-Each aggregate expression also has a `distinct` version, e.g. `sum-distinct`, where after formatting adds `DISTINCT` within the arg list, as so:
+The `count` aggregate can accept either a normal expression or a wildcard, so both (for example) `(count ?x)` and `(count *)` are valid.
+
+Unlike other expressions, aggregates in Flint support keyword arguments. Every aggregate function supports the `:distinct?` keyword arg, which accepts a boolean value. If `:distinct?` is `true`, then `DISTINCT` is added to the arg list in SPARQL. For example,
 ```clojure
-(sum-distinct ?x)
-;; => SUM(DISTINCT ?x)
+(sum ?x :distinct? true)
+```
+becomes
+```sparql
+SUM(DISTINCT ?x)
 ```
 
-`group-concat` (and by extension `group-concat-distinct`) have an additional `:separator` keyword arg that takes a separator string. If provided, Flint will add the `SEPARATOR` keyword arg to the arg list:
+`group-concat` has an additional `:separator` keyword arg that takes a separator string. Both `:distinct?` and `:separator` can be supported in the same expression, so:
 ```clojure
-(group-concat ?y :separator ";")
-;; => GROUP_CONCAT(?y; SEPARATOR = ";")
+(group-concat ?y :distinct? true :separator ";")
+```
+becomes
+```sparql
+GROUP_CONCAT(DISTINCT ?y SEPARATOR = ";")
 ```
