@@ -63,8 +63,8 @@ which can also be written as:
  :where    [{?x {:foaf/name  #{?name}
                  :foaf/title #{?title}
                  :foaf/age   #{?age}}}]
- :values   {?name  ["Levi Ackerman" nil]
-            ?title ["Erwin Smith" "Commander"]}}
+ :values   {?name  ["Levi Ackerman" "Erwin Smith"]
+            ?title [nil "Commander"]}}
 ```
 becomes:
 ```sparql
@@ -77,7 +77,7 @@ WHERE {
 }
 VALUES (?name ?title) {
     ("Levi Ackerman" UNDEF)
-    (UNDEF "Commander")
+    ("Erwin Smith" "Commander")
 }
 ```
 
