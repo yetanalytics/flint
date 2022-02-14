@@ -62,7 +62,7 @@ Reference: [6. Including Optional Values](https://www.w3.org/TR/sparql11-query/#
 
 The `:optional` keyword specifies patterns that do not need to exist in the solution. In Flint, an `:optional` graph pattern has the form `[:optional sub-where]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?firstName ?lastName]
@@ -87,7 +87,7 @@ Reference: [7. Matching Alternatives](https://www.w3.org/TR/sparql11-query/#alte
 
 The `:union` keyword takes the union of the results of multiple graph patterns. In Flint, a `:union` graph pattern has the form `[:union sub-where & sub-wheres]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?x]
@@ -115,7 +115,7 @@ Reference: [8.1 Filtering Using Graph Patterns](https://www.w3.org/TR/sparql11-q
 
 The `:filter` keyword is used to exclude results using [expressions](expr.md). In Flint, the `:filter` keyword is used in the form `[:filter expr]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age]
@@ -140,7 +140,7 @@ Reference: [8.2 Removing Possible Solutions](https://www.w3.org/TR/sparql11-quer
 
 The `:minus` keyword is used to remove the specified graph pattern from the result set. In Flint, the `:minus` graph pattern has the form `[:minus sub-where]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age]
@@ -167,7 +167,7 @@ Reference: [10.1 BIND: Assigning to Variables](https://www.w3.org/TR/sparql11-qu
 
 The `:bind` keyword is used to bind the result of an expression to a variable. In Flint, the `:bind` keyword is used with an `[expr var]` form in the form `[:bind [expr var]]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?isAdult]
@@ -192,7 +192,7 @@ Reference: [10.2 VALUES: Providing inline data](https://www.w3.org/TR/sparql11-q
 
 The `:values` keyword is used to inline values. In Flint, the `:values` keyword is used in the form `[:values values-map]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"
             :food "<http://example.org/food/>"}
@@ -225,7 +225,7 @@ Reference: [13.3 Querying the Dataset](https://www.w3.org/TR/sparql11-query/#que
 
 The `:graph` keyword is used to specify the named graph that the graph pattern exists in. In Flint, the `:graph` graph pattern has the form `[:graph iri-or-var sub-where]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select     [?name]
@@ -250,7 +250,7 @@ Reference: [SPARQL 1.1 Federated Query](https://www.w3.org/TR/2013/REC-sparql11-
 
 The `:service` keyword is used for federated queries, i.e. queries across networks. The `:service-silent` variant is used for queries to fail silently. In Flint, the `:service` graph pattern has the form `[:service iri-or-var sub-where]`.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name]

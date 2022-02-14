@@ -85,7 +85,7 @@ Reference: [15.3 Duplicate Solutions](https://www.w3.org/TR/sparql11-query/#modD
 
 The `:select-distinct` variant of `:select` eliminates duplicate values of a selected variable from the result set. The syntax and restrictions of a `:select-distinct` clause are exactly the same as those of a `:select` clause.
 
-Example:
+The example:
 ```clojure
 {:prefixes        {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select-distinct [?givenName]
@@ -108,7 +108,7 @@ Reference: [15.3 Duplicate Solutions](https://www.w3.org/TR/sparql11-query/#modD
 
 The `:select-reduced` variant of `:select` allows elimination of duplicate values from the result set. The syntax and restrictions of a `:select-reduced` clause are exactly the same as those of a `:select` clause.
 
-Example:
+The example:
 ```clojure
 {:prefixes       {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select-reduced [?givenName]
@@ -131,7 +131,7 @@ Reference: [16.2 CONSTRUCT](https://www.w3.org/TR/sparql11-query/#construct)
 
 A `:construct` query returns an RDF graph. Syntactically, the `:construct` clause is comprised of a series of [triples](triple.md), which can be written as vectors or IGraph normal form maps.
 
-Example:
+The example:
 ```clojure
 {:prefixes  {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :construct [[?x :foaf/familyName "Jaeger"]
@@ -166,7 +166,7 @@ Reference: [16.3 ASK](https://www.w3.org/TR/sparql11-query/#ask)
 
 A `:ask` query tests for existence, i.e. returns `true` if the data described by the `:where` clause exists. The `:ask` clause in Flint, to match SPARQL syntax, must be present and be either `nil` or an empty collection.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :ask      []
@@ -189,7 +189,7 @@ A `:describe` query is similar to `:construct` in that it returns an RDF graph; 
 - A wildcard: `*` or `:*`
 - A collection of variables, IRIs, or prefixed IRIs.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :describe [?x "<http://example.org>"]

@@ -9,7 +9,7 @@ The first is as a vector of three-element vectors. For example, the triples in t
  :where    [[?x :foaf/name ?name]
             [?x :foaf/age ?age]]}
 ```
-The query is represented in SPARQL as:
+which after SPARQL translation becomes:
 ```sparql
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 SELECT ?name ?age
@@ -19,14 +19,14 @@ WHERE {
 }
 ```
 
-The other way to write a triple block in Flint is as a [normal form map](https://github.com/ont-app/igraph#normal-form) of the [IGraph protocol](https://github.com/ont-app/igraph). Each normal form map associates subjects with predicate-object maps, and each predicate-object map associates predicates with object sets. For example:
+The other way to write a triple block in Flint is as a [normal form map](https://github.com/ont-app/igraph#normal-form) of the [IGraph protocol](https://github.com/ont-app/igraph). Each normal form map associates subjects with predicate-object maps, and each predicate-object map associates predicates with object sets. The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age]
  :where    [{?x {:foaf/name #{?name}
                  :foaf/age  #{?age}}}]}
 ```
-is represented in SPARQL as:
+becomes:
 ```sparql
 WHERE {
     ?x foaf:name ?name ;
@@ -40,7 +40,7 @@ Note that only when triples written as normal form maps in Flint will they share
  :select   [?y]
  :where    [{?y {:foaf/givenName #{"Ymir", "_Ymir"}}}]}
 ```
-becomes
+which becomes
 ```sparql
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 SELECT ?y
@@ -68,7 +68,7 @@ Both forms can be combined to form a graph pattern:
             [?y :dc/creator ?name]
             [?y :dc/title ?title]]}
 ```
-which becomes:
+which become:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX dc:   <http://purl.org/dc/elements/1.1/>

@@ -43,7 +43,7 @@ Reference: [3.1.1 INSERT DATA](https://www.w3.org/TR/2013/REC-sparql11-update-20
 
 The `:insert-data` clause inserts triples in an RDF graph. Syntactically, it consists of triples or quads.
 
-Example:
+The example:
 ```clojure
 {:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :insert-data [[:graph "<http://census.marley/districts/liberio>"
@@ -69,7 +69,7 @@ Reference: [3.1.2 DELETE DATA](https://www.w3.org/TR/2013/REC-sparql11-update-20
 
 The `:delete-data` clause deletes triples in an RDF graph. Syntactically, it consists of triples or quads.
 
-Example:
+The example:
 ```clojure
 {:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :delete-data [[:graph "<http://census.marley/districts/liberio>"
@@ -95,7 +95,7 @@ Reference: [3.1.3 DELETE/INSERT](https://www.w3.org/TR/2013/REC-sparql11-update-
 
 A `:delete` or `:insert` clause deletes or inserts triples, respectively, in an RDF graph with variables specified by a `:where` clause. Syntactically, both clauses consists of triples or quads. An update may contain either a `:delete` clause, an `:insert` clause, or both.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :delete   [[:graph "<http://census.marley/districts/liberio>"
@@ -135,7 +135,7 @@ Reference: [3.1.3.3 DELETE WHERE](https://www.w3.org/TR/2013/REC-sparql11-update
 
 The `:delete-where` clause is a shorthand for the combination `:delete` and `:where`, without `:insert` in between. Syntactically, the `:delete-where` clause consists of triples or quads.
 
-Example:
+The example:
 ```clojure
 {:prefixes     {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :delete-where [[:graph "<http://census.marley/districts/liberio>"
@@ -161,7 +161,7 @@ Reference: [3.1.4 LOAD](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/
 
 The `:load` update loads triples from a source specified by an IRI. The `:load` clause is followed by an optional `:into` clause (if the latter is omitted the data is loaded into the default graph). Syntactically, both the `:load` and `:into` clauses consist of an IRI or prefixed IRI.
 
-Example:
+The example:
 ```clojure
 {:load "<file:census/data/liberio.rdf>"
  :into "<http://census.marley/districts/liberio>"}
@@ -189,7 +189,7 @@ Reference: [3.1.5 CLEAR](https://www.w3.org/TR/2013/REC-sparql11-update-20130321
 
 The `:clear` update is used to clear all data from one or more RDF graphs. Syntactically, the `:clear` clause consists of either an explicit IRI or prefixed IRI, `:default`, `:named`, or `:all`.
 
-Example:
+The example:
 ```clojure
 {:clear :default}
 ```
@@ -204,7 +204,7 @@ Reference: [3.2.1 CREATE](https://www.w3.org/TR/2013/REC-sparql11-update-2013032
 
 The `:create` update creates a new empty graph in an RDF store. The `:create` clause consists of the IRI or prefixed of the new graph.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:dist "<http://census.marley/districts/>"
  :create   :dist/liberio}}
@@ -221,7 +221,7 @@ Reference: [3.2.2 DROP](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/
 
 The `:drop` update deletes one or more graphs in an RDF store. The `:drop` clause consists of either an explicit IRI or prefixed IRI, `:default`, `:named`, or `:all`.
 
-Example:
+The example:
 ```clojure
 {:drop :default}
 ```
@@ -236,7 +236,7 @@ Reference: [3.2.3 COPY](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/
 
 The `:copy` update transfers data from a source to a target graph, overwriting the latter in the process. Both the `:copy` and `:to` clauses consist of either an IRI or prefixed IRI or the `:default` keyword.
 
-Example:
+The example:
 ```clojure
 {:copy "<http://census.marley/districts/liberio>"
  :to   :default}
@@ -253,7 +253,7 @@ Reference: [3.2.4 MOVE](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/
 
 The `:move` update moves data from a source to a target graph, deleting the former and overwriting the latter. Both the `:move` and `:to` clauses consist of either an IRI or prefixed IRI or the `:default` keyword.
 
-Example:
+The example:
 ```clojure
 {:move "<http://census.marley/districts/liberio>"
  :to   :default}
@@ -270,7 +270,7 @@ Reference: [3.2.5 ADD](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#
 
 The `:add` update appends data from a source to a target graph. Both the `:add` and `:to` clauses consist of either an IRI or prefixed IRI or the `:default` keyword.
 
-Example:
+The example:
 ```clojure
 {:add "<http://census.marley/districts/liberio>"
  :to  :default}
@@ -285,7 +285,7 @@ TO DEFAULT
 
 Unlike SPARQL queries, SPARQL update requests can be chained together into sequences. In Flint, this is supported by the `format-updates` function, which accepts a collection of update maps instead of a single one.
 
-Example:
+The example:
 ```clojure
 [{:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
   :delete-data [[:graph "<http://census.marley/districts/liberio>"

@@ -24,8 +24,6 @@ which is translated into SPARQL as:
 IF((?x < ?y), STR(?x), (2 * (3 + 4)))
 ```
 
-For more information on SPARQL expressions, see [Expressions and Testing Values](https://www.w3.org/TR/sparql11-query/#expressions) in the SPARQL spec.
-
 **NOTE:** Due to the complexity of SPARQL type semantics, Flint does not make any attempt to typecheck or validate expression arguments or return values. However, Flint does restrict the use of certain expressions (namely aggregators) to particular clauses, as explained later.
 
 ## Boolean and Arithmetic Expressions
@@ -64,11 +62,11 @@ SPARQL accepts a number of built-in functions, which are translated from Flint's
 
 ### Graph Patterns
 
-Unlike most expressions, `exists` and `not-exists` only accept graph patterns as arguments. For example, the following:
+Unlike most expressions, `exists` and `not-exists` only accept graph patterns as arguments. The following example:
 ```clojure
 [:filter (exists [[?person :foaf/name ?name]])]
 ```
-is translated to
+becomes:
 ```sparql
 FILTER EXISTS {
     ?person foaf:name ?name .
@@ -187,7 +185,7 @@ Aggregates are special expressions that can only be used in `SELECT` (and its `D
 
 The `count` aggregate can accept either a normal expression or a wildcard, so both (for example) `(count ?x)` and `(count *)` are valid.
 
-Unlike other expressions, aggregates in Flint support keyword arguments. Every aggregate function supports the `:distinct?` keyword arg, which accepts a boolean value. If `:distinct?` is `true`, then `DISTINCT` is added to the arg list in SPARQL. For example,
+Unlike other expressions, aggregates in Flint support keyword arguments. Every aggregate function supports the `:distinct?` keyword arg, which accepts a boolean value. If `:distinct?` is `true`, then `DISTINCT` is added to the arg list in SPARQL. The example,
 ```clojure
 (sum ?x :distinct? true)
 ```
@@ -200,18 +198,18 @@ SUM(DISTINCT ?x)
 ```clojure
 (group-concat ?y :distinct? true :separator ";")
 ```
-becomes
+which becomes
 ```sparql
 GROUP_CONCAT(DISTINCT ?y SEPARATOR = ";")
 ```
 
 **NOTE:** Using aggregates in an invalid clause, e.g. a `FILTER` clause, will cause a spec error.
 
-**NOTE:** Using aggregates in a `SELECT` query, or including a `GROUP BY` in the query, introduces restrictions on the variables that can be used in the `SELECT` clause. In particular, all variables must be projected from an `expr AS var` form, be an argument to an aggregate expression, or be projected by the `GROUP BY` clause.
+**NOTE:** Using aggregates in a `SELECT` query, or including a `GROUP BY` in the query, introduces aggregate restrictions on the `SELECT` clause. See the [SPARQL Queries](query.md) page for more details.
 
 ## Custom Functions
 
-Users can write their own custom functions, which consist of using an IRI or prefixed IRI instead of a symbol. For example:
+Users can write their own custom functions, which consist of using an IRI or prefixed IRI instead of a symbol. The example:
 ```clojure
 [:filter (:func/isEven ?x)]
 ```
@@ -226,9 +224,7 @@ In `:select`, `:order-by` and `:having` clauses, custom aggregates are allowed, 
 
 ## Variable Binding
 
-Variables can be bound to the result of expressions in `:bind`, `:select`, and `:group-by` clauses. In Flint, they are written in as the vector `[expr var]`, which then is translated into `expr AS var` in SPARQL.
-
-For example:
+Variables can be bound to the result of expressions in `:bind`, `:select`, and `:group-by` clauses. In Flint, they are written in as the vector `[expr var]`, which then is translated into `expr AS var` in SPARQL. The example:
 ```clojure
 [(+ 2 2) ?four]
 ```

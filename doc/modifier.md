@@ -23,7 +23,7 @@ The `:values` clause associates values to variables in an inline fashion; it can
 - A literal value (number, string, etc.)
 - `nil`, which then becomes `UNDEF` during SPARQL translation.
 
-In Flint, the clause can be written in two ways. The first format follows how they are written in SPARQL, as a mapping of a variable vector to a collection of value vectors. For example:
+In Flint, the clause can be written in two ways. The first format follows how they are written in SPARQL, as a mapping of a variable vector to a collection of value vectors. For The example:
 ```clojure
 {:values {[?x ?y] [[:uri1 1] [:uri2 nil]]}}
 ```
@@ -46,7 +46,7 @@ A value can be one of the following:
 
 **NOTE:** In the first format, the number of variables must be equal to the number of value vectors. In addition, in both format the length of each value vector (including `nil` entries) must be the same.
 
-Example:
+The The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age],
@@ -90,7 +90,7 @@ A `:group-by` clause is used to group results by variables or expressions. Synta
 - Expressions
 - `[expr var]` forms.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [[(sample ?n) ?name]]
@@ -119,7 +119,7 @@ Reference: [11.3 HAVING](https://www.w3.org/TR/sparql11-query/#having)
 
 A `:having` clause filters out grouped results. Syntactically, it consists of a vector of one or more expressions (including aggregates.)
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"},
  :select   [[(sample ?n) ?name]]
@@ -149,7 +149,7 @@ An `:order-by` clause orders the result set. Syntactically, it consists of a vec
 - Expressions (including aggregates)
 - `(asc expr)` or `(desc expr)` forms.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"},
  :select   [?age ?name]
@@ -174,7 +174,7 @@ Reference: [15.4 OFFSET](https://www.w3.org/TR/sparql11-query/#modOffset)
 
 The `:offset` clause adds a pagination offset to the result set. Syntactically, it must be an integer.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"},
  :select   [?name]
@@ -197,7 +197,7 @@ Reference: [15.5 LIMIT](https://www.w3.org/TR/sparql11-query/#modResultLimit)
 
 The `:limit` clause limits the size of the result set. Syntactically, it must be a non-negative integer.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"},
  :select   [?name]

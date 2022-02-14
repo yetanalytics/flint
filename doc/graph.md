@@ -8,7 +8,7 @@ SPARQL contains a number of clauses that can be used to specify default and name
 
 Used in queries, `:from` denotes the _default_ graph that the query operates on. Syntactically, the `:from` clause can be an IRI or prefixed, or a vector of **one** such IRI.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?x]
@@ -29,7 +29,7 @@ WHERE {
 
 Used in updates, `:from-named` denotes the _named_ graphs that the query can operate on. Syntactically, the `:from-named` clause is a vector of one or more IRIs or prefixed IRIs.
 
-Example:
+The example:
 ```clojure
 {:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select     [?x]
@@ -67,7 +67,7 @@ Used only in `:delete`/`:insert` updates, `:using` specifies the graph used in t
 - An IRI or prefixed IRI, to specify the default graph.
 - A `[:named iri]` tuple, to specify a named graph.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :delete   [[:graph "<http://census.marley/districts/liberio>"
@@ -100,7 +100,7 @@ WHERE {
 
 Used only in `:delete`/`:insert` updates, `:with` specifies the graph for the query. Syntactically, it consists an IRI or prefixed IRI that specifies the graph.
 
-Example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :with     "<http://census.marley/districts/liberio>"
