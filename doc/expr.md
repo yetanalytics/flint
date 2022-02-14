@@ -222,11 +222,13 @@ In `:select`, `:order-by` and `:having` clauses, custom aggregates are allowed, 
 
 ## Variable Binding
 
-Variables can be bound to the result of expressions in `:bind`, `:select`, and `:group-by` clauses. In Flint, they are written in as the vector `[expr var]`, which then is translated into `expr AS var` in SPARQL. The example:
+Variables can be bound to the result of expressions in `:bind`, `:select`, and `:group-by` clauses. In Flint, they are written in as the vector `[expr var]`, such as in this example:
 ```clojure
 [(+ 2 2) ?four]
 ```
-becomes:
+which then becomes:
 ```sparql
 (2 + 2) AS ?four
 ```
+
+**NOTE:** In a `:select` or `:bind` clause, the variable being bound to cannot already be in-scope. In a `:select` clause, the var cannot be already defined in the `:where` clause, nor be previously projected in that same clause. In the `:bind` case, it cannot be already defined in previously-listed graph patterns.

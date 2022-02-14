@@ -62,6 +62,8 @@ Examples: `_`, `_b0`
 
 Blank nodes are written as symbols prefixed with an underscore `_`. When translating to SPARQL, a colon is added after the underscore, e.g. `_:b0`. The exception is with `_`, which is rewritten as `[]`. The characters after the underscore can be written as any word character; periods are also allowed in the middle.
 
+**NOTE:** Blank nodes have certain restrictions - they cannot be used in any delete-related clauses, nor can the same blank node be repeated across different [basic graph patterns](where.md) or SPARQL updates.
+
 ## Wildcard:
 
 Examples: `*` and `:*`

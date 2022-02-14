@@ -8,8 +8,8 @@ SPARQL/Flint `:where` clauses are written as _graph patterns_, which describe a 
 - [`:minus`](where.md#minus)
 - [`:bind`](where.md#bind)
 - [`:graph`](where.md#graph)
-- [`:service`](where.md#serviceservice-silent) (or [`:service-silent`]((where.md#serviceservice-silent))
-- [`:values`]
+- [`:service`](where.md#serviceservice-silent) (or [`:service-silent`](where.md#serviceservice-silent))
+- [`:values`](where.md#values)
 
 \* Technically a BGP also includes `:filter` clauses (though not the graph patterns described in the `:filter`).
 

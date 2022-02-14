@@ -1,27 +1,31 @@
 # SPARQL Queries
 
 A SPARQL query is used to find or test for values in an RDF graph database. There are four types of SPARQL queries:
-- [`:select`](query.md#select) (incl. [`:select-distinct`](query.md#select-distinct) and [`:select-reduced`](query.md#select-reduced))
-- [`:construct`](query.md#construct)
-- [`:ask`](query.md#ask)
-- [`:describe`](query.md#describe)
+- [`:select`](query.md#select) (incl. `:select-distinct` and `:select-reduced`)
+- `:construct`
+- `:ask`
+- `:describe`
 
 Each SPARQL query in Flint is a map that includes one of the four aforementioned clauses, as well as any of the following clauses:
 
-- [Prologue clauses](prologue.md)
+- Prologue clauses
   - `:base`
   - `:prefixes`
-- [Graph IRI clauses](graph.md)
+- Dataset clauses
   - `:from`
   - `:from-named`
-- [`:where`](where.md) (optional in `:describe` queries, required in others)
-- [Modifiers](modifier.md)
+- `:where` (optional in `:describe` queries, required in others)
+- Modifiers
   - `:group-by`
   - `:order-by`
   - `:having`
   - `:limit`
   - `:offset`
   - `:values` (`:select` queries only)
+
+**NOTE:** The `:where` clause is required in all queries except for `:describe`, where it is optional.
+
+**NOTE:** The `:values` clause is only used in `:select` queries.
 
 **NOTE:** Any key other than the above keywords is not allowed in a SPARQL query map.
 
@@ -32,7 +36,7 @@ Each SPARQL query in Flint is a map that includes one of the four aforementioned
 Reference: [16.1 SELECT](https://www.w3.org/TR/sparql11-query/#select)
 
 A `:select` query is used to select and return specific variables in a query. It can be one of two things:
-- A [wildcard](axiom.md#wildcard): `*` or `:*`
+- A wildcard: `*` or `:*`
 - A collection of variables or `[expr var]` forms.
 
 Example of a wildcard `:select`:
@@ -73,7 +77,7 @@ WHERE {
 
 **NOTE:** `:group-by` cannot be used with a wildcard `:select`.
 
-**NOTE:** [Aggregate expressions](expr.md#aggregate-expressions) introduce restrictions on variables in a `:select` clause, namely all variables must be projected from a `:group-by` clause, a `[expr var]` form, or be part of an aggregate.
+**NOTE:** Aggregate expressions introduce restrictions on variables in a `:select` clause, namely all variables must be projected from a `:group-by` clause, a `[expr var]` form, or be part of an aggregate.
 
 #### `:select-distinct`
 
