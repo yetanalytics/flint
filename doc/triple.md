@@ -84,7 +84,9 @@ Objects can be one of the following:
 
 **NOTE:** Blank nodes are not allowed in triples in `DELETE` clauses (including `DELETE WHERE` and `DELETE DATA`).
 
-**Note:** Variables are not allowed in triples in `DELETE DATA` OR `INSERT DATA` clauses.
+**NOTE:** Variables are not allowed in triples in `DELETE DATA` OR `INSERT DATA` clauses.
+
+**NOTE:** Technically literals are allowed in subject position according to the SPARQL spec, but no RDF implementation accepts that, so Flint does not allow for subject literals either.
 
 ## Property Paths
 

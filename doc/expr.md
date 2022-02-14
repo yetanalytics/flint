@@ -2,10 +2,10 @@
 
 SPARQL supports expressions, which can be used to compute values and filter query results. In particular, expressions can be used in the following circumstances:
 
-- As part of a `FILTER` clause.
-- As part of a `BIND` clause, in an `expr AS var` form.
-- As part of a `GROUP BY` clause, either as a freestanding expression or in an `expr AS var` form.
-- To aggregate or compute values in a `SELECT`, `ORDER BY` or `HAVING` clause.
+- As part of a `:filter` clause.
+- As part of a `:bind` clause, in an `[expr var]` form.
+- As part of a `:group-by` clause, either as a freestanding expression or in an `[expr var]` form.
+- To aggregate or compute values in a `:select`, `:order-by` or `:having` clause.
 
 In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or one of the following terminals:
 - A variable
@@ -216,4 +216,10 @@ FILTER func:isEven(?x)
 
 **NOTE:** Flint makes no attempt to validate that custom function IRIs resolve to valid resources, nor does it to attempt to validate input or output.
 
-In `SELECT`, `ORDER BY` and `HAVING` clauses, custom aggregates are allowed, and any custom function can accept the `:distinct?` keyword arg. During aggregate validation, all custom functions in these clauses are treated as aggregates.
+In `:select`, `:order-by` and `:having` clauses, custom aggregates are allowed, and any custom function can accept the `:distinct?` keyword arg. During aggregate validation, all custom functions in these clauses are treated as aggregates.
+
+## Variable Binding
+
+Variables can be bound to the result of expressions in `:bind`, `:select`, and `:group-by` clauses. In Flint, they are written in as the vector `[expr var]`, which then is translated into `expr AS var` in SPARQL.
+
+<!--TODO: Example-->
