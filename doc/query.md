@@ -1,31 +1,27 @@
 # SPARQL Queries
 
 A SPARQL query is used to find or test for values in an RDF graph database. There are four types of SPARQL queries:
-- [`:select`](query.md#select) (incl. `:select-distinct` and `:select-reduced`)
-- `:construct`
-- `:ask`
-- `:describe`
+- [`:select`](query.md#select) (incl. [`:select-distinct`](query.md#select-distinct) and [`:select-reduced`](query.md#select-reduced))
+- [`:construct`](query.md#construct)
+- [`:ask`](query.md#ask)
+- [`:describe`](query.md#describe)
 
 Each SPARQL query in Flint is a map that includes one of the four aforementioned clauses, as well as any of the following clauses:
 
-- Prologue clauses
+- [Prologue clauses](prologue.md)
   - `:base`
   - `:prefixes`
-- Dataset clauses
+- [Graph IRI clauses](graph.md)
   - `:from`
   - `:from-named`
-- `:where` (optional in `:describe` queries, required in others)
-- Modifiers
+- [`:where`](where.md) (optional in `:describe` queries, required in others)
+- [Modifiers](modifier.md)
   - `:group-by`
   - `:order-by`
   - `:having`
   - `:limit`
   - `:offset`
   - `:values` (`:select` queries only)
-
-**NOTE:** The `:where` clause is required in all queries except for `:describe`, where it is optional.
-
-**NOTE:** The `:values` clause is only used in `:select` queries.
 
 **NOTE:** Any key other than the above keywords is not allowed in a SPARQL query map.
 

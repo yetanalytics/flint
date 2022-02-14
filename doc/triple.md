@@ -1,5 +1,7 @@
 # Triples
 
+Reference: [4.2 Syntax for Triple Patterns](https://www.w3.org/TR/sparql11-query/#QSynTriples)
+
 The fundamental building block of RDF and SPARQL is the _triple_, a tuple consisting of a subject, predicate, and object. In Flint, there are two ways to write a series of triples.
 
 The first is as a vector of three-element vectors. For example, the triples in the `:where` clause here are represented as vectors:
@@ -84,21 +86,21 @@ WHERE {
 ## Restrictions
 
 Subjects can be one of the following:
-- Variables
-- IRIs or prefixed IRIs
-- Blank nodes
+- [Variables](axiom.md#variables)
+- [IRIs or prefixed IRIs](axiom.md#iris)
+- [Blank nodes](axiom.md#blank-nodes)
 
 Predicates can be one of the following:
 - Variables
 - IRIs or prefixed IRIs
-- `:a` or `a`, the `rdf:type` shorthand
-- Property paths
+- [`:a`](axiom.md#a)/[`a`](axiom.md#a)
+- [Property paths](triple.md#property-paths)
 
 Objects can be one of the following:
 - Variables
 - IRIs or prefixed IRIs
 - Blank nodes
-- Literals
+- [Literals](axiom.md#literals)
 
 **NOTE:** Property paths are not allowed in triples in `CONSTRUCT` clauses, nor in `DELETE` and `INSERT DATA` clauses.
 
@@ -107,6 +109,8 @@ Objects can be one of the following:
 **NOTE:** Variables are not allowed in triples in `DELETE DATA` OR `INSERT DATA` clauses.
 
 **NOTE:** Technically literals are allowed in subject position according to the SPARQL spec, but no RDF implementation accepts that, so Flint does not allow for subject literals either.
+
+**NOTE:** SPARQL has [syntactic sugar](https://www.w3.org/TR/sparql11-query/#collections) for easy writing of RDF lists, but for simplicity that is not implemented in Flint.
 
 ## Property Paths
 
