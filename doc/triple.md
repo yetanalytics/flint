@@ -90,6 +90,8 @@ Objects can be one of the following:
 
 ## Property Paths
 
+Reference: [9. Property Paths](https://www.w3.org/TR/sparql11-query/#propertypaths)
+
 Property paths act as syntactic sugar for predicate sequences in RDF graphs. A property path in Flint is an IRI (including `:a`) or a list of the form `(op path ...)`; this is similar to Clojure functions or [Flint expressions](expr.md). The following is a table of path operations:
 
 | Flint | SPARQL form | Arglist
