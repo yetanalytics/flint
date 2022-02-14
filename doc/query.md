@@ -79,7 +79,7 @@ WHERE {
 
 **NOTE:** Aggregate expressions introduce restrictions on variables in a `:select` clause, namely all variables must be projected from a `:group-by` clause, a `[expr var]` form, or be part of an aggregate.
 
-### `:select-distinct`
+#### `:select-distinct`
 
 Reference: [15.3 Duplicate Solutions](https://www.w3.org/TR/sparql11-query/#modDuplicates)
 
@@ -102,7 +102,7 @@ WHERE {
 }
 ```
 
-### `:select-reduced`
+#### `:select-reduced`
 
 Reference: [15.3 Duplicate Solutions](https://www.w3.org/TR/sparql11-query/#modDuplicates)
 

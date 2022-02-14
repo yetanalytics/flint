@@ -125,7 +125,7 @@ WHERE {
 
 **NOTE:** Blank nodes are not allowed in the `:delete` clause.
 
-### `:using`
+#### `:using`
 
 This clause, used only in `:delete`/`:insert` updates, specifies the graph used in the `:where` clause. Syntactically, it consists of either:
 - An IRI or prefixed IRI, to specify the default graph.
@@ -160,7 +160,7 @@ WHERE {
 }
 ```
 
-### `:with`
+#### `:with`
 
 This clause, used only in `:delete`/`:insert` updates, specifies the graph for the query. Syntactically, it consists an IRI or prefixed IRI that specifies the graph.
 
