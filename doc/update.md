@@ -33,13 +33,15 @@ Each SPARQL update in Flint is a map that includes one of the aforementioned cla
 - `:add`, `:move`, and `:copy`-specific clauses:
   - `:to`
 
+The triple insertion and deletion clauses accept both [triples](triple.md) and _quads_, which have the form `[:graph iri triples]`. This is similar to the `:graph` clause in [graph patterns](where.md), except that variables cannot be substituted in the graph IRI position.
+
 ## Update clauses
 
 ### `:insert-data`
 
 Reference: [3.1.1 INSERT DATA](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#insertData)
 
-The `:insert-data` clause inserts triples in an RDF graph. Syntactically, it consists of triples or quads, the latter of which uses `:graph` clause syntax.
+The `:insert-data` clause inserts triples in an RDF graph. Syntactically, it consists of triples or quads.
 
 Example:
 ```clojure
@@ -65,7 +67,7 @@ INSERT DATA {
 
 Reference: [3.1.2 DELETE DATA](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#deleteData)
 
-The `:delete-data` clause deletes triples in an RDF graph. Syntactically, it consists of triples or quads, the latter of which uses `:graph` clause syntax.
+The `:delete-data` clause deletes triples in an RDF graph. Syntactically, it consists of triples or quads.
 
 Example:
 ```clojure
@@ -125,67 +127,7 @@ WHERE {
 
 **NOTE:** Blank nodes are not allowed in the `:delete` clause.
 
-#### `:using`
-
-This clause, used only in `:delete`/`:insert` updates, specifies the graph used in the `:where` clause. Syntactically, it consists of either:
-- An IRI or prefixed IRI, to specify the default graph.
-- A `[:named iri]` tuple, to specify a named graph.
-
-Example:
-```clojure
-{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :delete   [[:graph "<http://census.marley/districts/liberio>"
-                  [[?x :foaf/familyName "Brown"]]]]
- :insert   [[:graph "<http://census.marley/districts/liberio>"
-                  [[?x :foaf/familyName "Braun"]]]]
- :using    "<http://census.marley/districts/liberio>"
- :where    [[?x :foaf/familyName "Brown"]]}
-```
-becomes:
-```sparql
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-DELETE {
-    GRAPH <http://census.marley/districts/liberio> {
-        ?x foaf:familyName "Brown" .
-    }
-}
-INSERT {
-    GRAPH <http://census.marley/districts/liberio> {
-        ?x foaf:familyName "Braun" .
-    }
-}
-USING <http://census.marley/districts/liberio>
-WHERE {
-    ?x foaf:familyName "Brown" .
-}
-```
-
-#### `:with`
-
-This clause, used only in `:delete`/`:insert` updates, specifies the graph for the query. Syntactically, it consists an IRI or prefixed IRI that specifies the graph.
-
-Example:
-```clojure
-{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :with     "<http://census.marley/districts/liberio>"
- :delete   [[?x :foaf/familyName "Brown"]]
- :insert   [[?x :foaf/familyName "Braun"]]
- :where    [[?x :foaf/familyName "Brown"]]}
-```
-becomes:
-```sparql
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-WITH <http://census.marley/districts/liberio>
-DELETE {
-    ?x foaf:familyName "Brown" .
-}
-INSERT {
-    ?x foaf:familyName "Braun" .
-}
-WHERE {
-    ?x foaf:familyName "Brown" .
-}
-```
+For information about `:using` and `:with` clauses, see [Graph IRIs](graph.md).
 
 ### `:delete-where`
 
