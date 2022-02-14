@@ -113,7 +113,7 @@ WHERE {
 
 Reference: [8.1 Filtering Using Graph Patterns](https://www.w3.org/TR/sparql11-query/#neg-pattern)
 
-The `:filter` keyword is used to exclude results using expressions. In Flint, the `:filter` keyword is used in the form `[:filter expr]`.
+The `:filter` keyword is used to exclude results using [expressions](expr.md). In Flint, the `:filter` keyword is used in the form `[:filter expr]`.
 
 Example:
 ```clojure
@@ -227,10 +227,12 @@ The `:graph` keyword is used to specify the named graph that the graph pattern e
 
 Example:
 ```clojure
-{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :select   [?name]
- :where    [[:graph "<http://survey-corps.com/graph-data/>"
-                    [[?x :foaf/name ?name]]]]}
+{:prefixes   {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select     [?name]
+ :from-named ["<http://survey-corps.com/graph-data/>"]
+ :where      [[:graph "<http://survey-corps.com/graph-data/>"
+                      [[?x :foaf/name ?name]]]]}
+```
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>

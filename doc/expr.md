@@ -1,5 +1,7 @@
 # Expressions
 
+Reference: [17. Expressions and Testing Values](https://www.w3.org/TR/sparql11-query/#expressions)
+
 SPARQL supports expressions, which can be used to compute values and filter query results. In particular, expressions can be used in the following circumstances:
 
 - As part of a `:filter` clause.
@@ -13,7 +15,14 @@ In Flint, an expression is either a list of the form `(op expr...)`, similar to 
 
 With certain exceptions, like `exists` and `not-exists`, expressions only accept other expressions as arguments.
 
-<!--TODO: Example-->
+The following is an example of an expression in Flint:
+```clojure
+(if (< ?x ?y) (str ?x) (* 2 (+ 3 4)))
+```
+which is translated into SPARQL as:
+```sparql
+IF((?x < ?y), STR(?x), (2 * (3 + 4)))
+```
 
 For more information on SPARQL expressions, see [Expressions and Testing Values](https://www.w3.org/TR/sparql11-query/#expressions) in the SPARQL spec.
 
@@ -61,7 +70,9 @@ Unlike most expressions, `exists` and `not-exists` only accept graph patterns as
 ```
 is translated to
 ```sparql
-FILTER EXISTS { ?person foaf:name ?name }
+FILTER EXISTS {
+    ?person foaf:name ?name .
+}
 ```
 
 | Flint | SPARQL | Arglist | Reference
@@ -194,14 +205,9 @@ becomes
 GROUP_CONCAT(DISTINCT ?y SEPARATOR = ";")
 ```
 
-For more information, see 
 **NOTE:** Using aggregates in an invalid clause, e.g. a `FILTER` clause, will cause a spec error.
 
-<!--TODO: Example-->
-
 **NOTE:** Using aggregates in a `SELECT` query, or including a `GROUP BY` in the query, introduces restrictions on the variables that can be used in the `SELECT` clause. In particular, all variables must be projected from an `expr AS var` form, be an argument to an aggregate expression, or be projected by the `GROUP BY` clause.
-
-<!--TODO: Example-->
 
 ## Custom Functions
 
@@ -222,4 +228,11 @@ In `:select`, `:order-by` and `:having` clauses, custom aggregates are allowed, 
 
 Variables can be bound to the result of expressions in `:bind`, `:select`, and `:group-by` clauses. In Flint, they are written in as the vector `[expr var]`, which then is translated into `expr AS var` in SPARQL.
 
-<!--TODO: Example-->
+For example:
+```clojure
+[(+ 2 2) ?four]
+```
+becomes:
+```sparql
+(2 + 2) AS ?four
+```
