@@ -31,8 +31,6 @@ Each function takes in the following keyword arguments:
 
 ## Examples
 
-<!-- TODO: Check that examples are correct Clojure and are paresable -->
-
 The following is a simple query that queries the name of the author who wrote the popular manga series [Attack on Titan](https://en.wikipedia.org/wiki/Attack_on_Titan):
 ```clojure
 (def query
