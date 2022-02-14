@@ -18,10 +18,10 @@ Each function takes in the following keyword arguments:
 The following is a simple query that queries the name of the author who wrote the popular manga series [Attack on Titan](https://en.wikipedia.org/wiki/Attack_on_Titan):
 ```clojure
 (def query
-  '{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"
+  '{:prefixes {:dc "<http://purl.org/dc/elements/1.1/>"}
     :select   [?author]
-    :where    [[?aot :dc/title "Attack on Titan"
-               [?aot :dc/creator ?author]]]}})
+    :where    [[?aot :dc/title "Attack on Titan"]
+               [?aot :dc/creator ?author]]})
 ```
 Note that the map needs to be quoted due to the presence of symbols in the map. We can then pass the query to the function `format-query`:
 ```clojure
@@ -34,8 +34,8 @@ and it will return a SPARQL string:
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 SELECT ?author
 WHERE {
-    ?x dc:title "Attack on Titan"
-    ?x dc:creator ?author
+    ?aot dc:title "Attack on Titan" .
+    ?aot dc:creator ?author .
 }
 ```
 One can then pass this query string to a Resource Description Framework (RDF) database and, depending on the data in the system, should return that `?author` is [Hajime Isayama](https://en.wikipedia.org/wiki/Hajime_Isayama).
@@ -47,16 +47,16 @@ The following is a more comprehensive example - a query that returns the titles 
                :xsd "<http://www.w3.org/2001/XMLSchema#>"}
     :select   [?title]
     :from     ["<http://my-anime-rdf-graph.com>"]
-    :where    [[:union [[{_b1 {:dc/title     #{{:en "Attack on Titan"}}
-                               :dc/publisher #{?publisher}}}]
-                        [{_b2 {:dc/title     #{{:jp "進撃の巨人"}}
-                               :dc/publisher #{?publisher}}}]]
+    :where    [[:union [{_b1 {:dc/title     #{{:en "Attack on Titan"}}
+                              :dc/publisher #{?publisher}}}]
+                       [{_b2 {:dc/title     #{{:jp "進撃の巨人"}}
+                              :dc/publisher #{?publisher}}}]]
                {?work {:dc/publisher #{?publisher}
                        :dc/title     #{?title}
                        :dc/date      #{?date}}}
                [:filter (<= #inst "2010-01-01T00:00:00Z" ?date)]]})
 ```
-which demonstrates several additional features, such as a alternate triple syntax based on maps instead of vectors, as well as syntax for blank nodes, language tags, and the `:union`, `:filter` and `:from` forms. When passed to `format-query`, it is translated to:
+which demonstrates several additional features, such as a alternate triple syntax based on maps instead of vectors, blank nodes, language tags, and the `:union`, `:filter` and `:from` clauses. When passed to `format-query`, it is translated to:
 ```sparql
 PREFIX dc:  <http://purl.org/dc/elements/1.1/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
