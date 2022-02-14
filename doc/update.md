@@ -19,7 +19,7 @@ Graph Update updates change existing RDF graphs without adding or deleting them,
 
 All Graph Management update clauses, as well as `:load` and `:clear`, have `-silent` versions, e.g. `:load-silent`, which will return success in all cases and only silently fail.
 
-Each SPARQL update in Flint is a map that includes one of the aformentioned clauses (or two in the case of having both `:delete` and `:insert` clauses), as well as one or more of the following clauses:
+Each SPARQL update in Flint is a map that includes one of the aforementioned clauses (or two in the case of having both `:delete` and `:insert` clauses), as well as one or more of the following clauses:
 
 - Prologue clauses
   - `:base`
@@ -230,6 +230,17 @@ LOAD <file:census/data/liberio.rdf>
 INTO <http://census.marley/districts/liberio>
 ```
 
+Example of silent mode:
+```clojure
+{:load-silent "<file:census/data/liberio.rdf>"
+ :into        "<http://census.marley/districts/liberio>"}
+```
+becomes:
+```sparql
+LOAD SILENT <file:census/data/liberio.rdf>
+INTO <http://census.marley/districts/liberio>
+```
+
 ### `:clear`/`:clear-silent`
 
 Reference: [3.1.5 CLEAR](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#clear)
@@ -327,3 +338,32 @@ becomes:
 ADD <http://census.marley/districts/liberio>
 TO DEFAULT
 ```
+
+## Update request sequences
+
+Unlike SPARQL queries, SPARQL update requests can be chained together into sequences. In Flint, this is supported by the `format-updates` function, which accepts a collection of update maps instead of a single one.
+
+Example:
+```clojure
+[{:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
+  :delete-data [[:graph "<http://census.marley/districts/liberio>"
+                        [["<http://census.marley/entry#11325>" :foaf/familyName "Brown"]]]]}
+ {:insert-data [[:graph "<http://census.marley/districts/liberio>"
+                        [["<http://census.marley/entry#11325>" :foaf/familyName "Braun"]]]]}]
+```
+becomes:
+```sparql
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+DELETE DATA {
+    GRAPH <http://census.marley/districts/liberio> {
+        <http://census.marley/entry#11325> foaf:familyName "Brown" .
+    }
+};
+INSERT DATA {
+    GRAPH <http://census.marley/districts/liberio> {
+        <http://census.marley/entry#11325> foaf:familyName "Braun" .
+    }
+}
+```
+
+Note that only the first update map has a `:prefixes` clause. In Flint, prefixes in subsequent update maps are merged and overwrite duplicate prefixes.
