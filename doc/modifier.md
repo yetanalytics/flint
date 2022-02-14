@@ -77,7 +77,7 @@ WHERE {
 }
 VALUES (?name ?title) {
     ("Levi Ackerman" UNDEF)
-    (UNDEF "Scout Regiment Commander")
+    (UNDEF "Commander")
 }
 ```
 
