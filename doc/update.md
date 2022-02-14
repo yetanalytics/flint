@@ -2,18 +2,18 @@
 
 A SPARQL update is used to edit RDF data. There are several types of updates, which follow under two categories:
 - Graph Update
-  - `:insert-data`
-  - `:delete-data`
-  - `:delete`/`:insert`
-  - `:delete-where`
-  - `:load`
-  - `:clear`
+  - [`:insert-data`](update.md#insert-data)
+  - [`:delete-data`](update.md#delete-data)
+  - [`:delete`/`:insert`](update.md#delete-and-insert)
+  - [`:delete-where`](update.md#delete-where)
+  - [`:load`](update.md#loadload-silent-and-into)
+  - [`:clear`](update.md#clearclear-silent)
 - Graph Management
-  - `:create`
-  - `:drop`
-  - `:copy`
-  - `:move`
-  - `:add`
+  - [`:create`](update.md#createcreate-silent)
+  - [`:drop`](update.md#dropdrop-silent)
+  - [`:copy`](update.md#copycopy-silent-and-to)
+  - [`:move`](update.md#movemove-silent-and-to)
+  - [`:add`](update.md#addadd-silent-and-to)
 
 Graph Update updates change existing RDF graphs without adding or deleting them, while Graph Management updates are free to add, delete, or move graphs.
 
@@ -21,7 +21,7 @@ All Graph Management update clauses, as well as `:load` and `:clear`, have `-sil
 
 Each SPARQL update in Flint is a map that includes one of the aforementioned clauses (or two in the case of having both `:delete` and `:insert` clauses), as well as one or more of the following clauses:
 
-- Prologue clauses
+- [Prologue clauses](prologue.md)
   - `:base`
   - `:prefixes`
 - `:delete`/`:insert`-specific clauses:
@@ -34,6 +34,8 @@ Each SPARQL update in Flint is a map that includes one of the aforementioned cla
   - `:to`
 
 The triple insertion and deletion clauses accept both [triples](triple.md) and _quads_, which have the form `[:graph iri triples]`. This is similar to the `:graph` clause in [graph patterns](where.md), except that variables cannot be substituted in the graph IRI position.
+
+**NOTE:** Any key other than the above keywords is not allowed in a SPARQL update map.
 
 ## Update clauses
 

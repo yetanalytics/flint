@@ -1,15 +1,15 @@
 # Graph Patterns
 
 SPARQL/Flint `:where` clauses are written as _graph patterns_, which describe a selection of RDF triples. The simplest graph pattern, known as a _basic graph pattern_ (or BGP) consists of a series of RDF triples.* However, there are a number of clauses that can be used to create more advanced graph patterns:
-- `:where`
-- `:optional`
-- `:union`
-- `:filter`
-- `:minus`
-- `:bind`
-- `:graph`
-- `:service` (or `:service-silent`)
-- `:values`
+- [`:where`](where.md#where)
+- [`:optional`](where.md#optional)
+- [`:union`](where.md#union)
+- [`:filter`](where.md#filter)
+- [`:minus`](where.md#minus)
+- [`:bind`](where.md#bind)
+- [`:graph`](where.md#graph)
+- [`:service`](where.md#serviceservice-silent) (or [`:service-silent`]((where.md#serviceservice-silent))
+- [`:values`]
 
 \* Technically a BGP also includes `:filter` clauses (though not the graph patterns described in the `:filter`).
 
@@ -244,7 +244,7 @@ WHERE {
 }
 ```
 
-### `:service` and `:service-silent`
+### `:service`/`:service-silent`
 
 Reference: [SPARQL 1.1 Federated Query](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/)
 

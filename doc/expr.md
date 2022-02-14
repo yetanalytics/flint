@@ -4,14 +4,12 @@ Reference: [17. Expressions and Testing Values](https://www.w3.org/TR/sparql11-q
 
 SPARQL supports expressions, which can be used to compute values and filter query results. In particular, expressions can be used in the following circumstances:
 
-- As part of a `:filter` clause.
-- As part of a `:bind` clause, in an `[expr var]` form.
-- As part of a `:group-by` clause, either as a freestanding expression or in an `[expr var]` form.
-- To aggregate or compute values in a `:select`, `:order-by` or `:having` clause.
+- As part of a [`:filter`](where.md#filter) clause.
+- As part of a [`:bind`](where.md#bind) clause, in an `[expr var]` form.
+- As part of a [`:group-by`](modifier.md#group-by) clause, either as a freestanding expression or in an `[expr var]` form.
+- To aggregate or compute values in a [`:select`](query.md#select), [`:order-by`](modifier.md#order-by) or [`:having`](modifier.md#having) clause.
 
-In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or one of the following terminals:
-- A variable
-- A Flint literal.
+In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or either a [variable](axiom.md#variables) or [literal](axiom.md#literals) terminal.
 
 With certain exceptions, like `exists` and `not-exists`, expressions only accept other expressions as arguments.
 

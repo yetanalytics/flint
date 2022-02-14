@@ -3,14 +3,14 @@
 The following clauses are used at the top level of SPARQL query maps and are used to modify the solution or introduce new values. These modifiers include:
 
 - Inline values
-  - `:values`
+  - [`:values`](modifier.md#values)
 - Grouping
-  - `:group-by`
-  - `:having`
+  - [`:group-by`](modifier.md#group-by)
+  - [`:having`](modifier.md#having)
 - Result modification
-  - `:order-by`
-  - `:offset`
-  - `:limit`
+  - [`:order-by`](modifier.md#order-by)
+  - [`:offset`](modifier.md#offset)
+  - [`:limit`](modifier.md#limit)
 
 ## Modifier clauses
 
