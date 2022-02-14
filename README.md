@@ -1,9 +1,27 @@
 # flint
 Flint is a Clojure(Script) DSL for creating SPARQL Query and Update strings.
 
+## Outline
+
+- Queries and Updates
+  - [SPARQL Queries](doc/query.md)
+  - [SPARQL Updates](doc/update.md)
+- Clauses and Subforms
+  - [Graph IRIs](doc/graph.md)
+  - [Graph Patterns](doc/where.md)
+  - [Modifiers](doc/modifier.md)
+- [Expressions](doc/expr.md)
+- [Triples](doc/triple.md)
+- [RDF Terms and Literals](doc/axiom.md)
+
 ## API
 
-Three functions exist in the Flint API: `format-query`, `format-update`, and `format-updates`. The first two functions format a single SPARQL Query or Update, respectively, while the third formats a collection of SPARQL Updates into a single Update Request.
+Three functions exist in the Flint API:
+- `format-query`
+- `format-update`
+- `format-updates`
+
+The first two functions format a single SPARQL Query or Update, respectively, while the third formats a collection of SPARQL Updates into a single Update Request.
 
 Each function takes in the following keyword arguments:
 | Argument | Description |
@@ -40,7 +58,7 @@ WHERE {
 ```
 One can then pass this query string to a Resource Description Framework (RDF) database and, depending on the data in the system, should return that `?author` is [Hajime Isayama](https://en.wikipedia.org/wiki/Hajime_Isayama).
 
-The following is a more comprehensive example - a query that returns the titles of all the works published by the publisher of Attack on Titan in or after 2010:
+The following is a more comprehensive example - a query that looks for the publisher of Attack on Titan, then returns the titles of all the works it published in 2010 or after:
 ```clojure
 (def query-2
   '{:prefixes {:dc  "<http://purl.org/dc/elements/1.1/>"
