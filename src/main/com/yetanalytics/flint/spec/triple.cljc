@@ -70,7 +70,6 @@
         :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
         :ax/bnode      ax/bnode?
-        :ax/nil        nil?
         :ax/str-lit    ax/valid-string?
         :ax/lmap-lit   ax/lang-map?
         :ax/num-lit    number?
@@ -81,7 +80,6 @@
   (s/or :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
         :ax/bnode      ax/bnode?
-        :ax/nil        nil?
         :ax/str-lit    ax/valid-string?
         :ax/lmap-lit   ax/lang-map?
         :ax/num-lit    number?
@@ -92,7 +90,6 @@
   (s/or :ax/var        ax/variable?
         :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
-        :ax/nil        nil?
         :ax/str-lit    ax/valid-string?
         :ax/lmap-lit   ax/lang-map?
         :ax/num-lit    number?
@@ -102,7 +99,6 @@
 (def obj-novar-noblank-spec
   (s/or :ax/iri        ax/iri?
         :ax/prefix-iri ax/prefix-iri?
-        :ax/nil        nil?
         :ax/str-lit    ax/valid-string?
         :ax/lmap-lit   ax/lang-map?
         :ax/num-lit    number?

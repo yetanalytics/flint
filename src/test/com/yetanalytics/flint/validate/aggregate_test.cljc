@@ -74,13 +74,6 @@
               (s/conform qs/query-spec)
               v/collect-nodes
               va/validate-agg-selects)))
-    ;; All custom fns in SELECT queries are treated as custom aggregates
-    (is (nil?
-         (->> '{:select [[("<http://custom.agg>" ?x) ?sum]]
-                :where  [[?x ?y ?z]]}
-              (s/conform qs/query-spec)
-              v/collect-nodes
-              va/validate-agg-selects)))
     (is (nil?
          (->> '{:select   [?x]
                 :where    [[?x ?y ?z]]
@@ -102,22 +95,52 @@
               (s/conform qs/query-spec)
               v/collect-nodes
               va/validate-agg-selects)))
-    (is (nil? ; ORDER BY and HAVING do not factor into any of this
-         (->> '{:select [[(sum ?x) ?sum]]
-                :where  [[?x ?y ?z]]
-                :order-by [(sum ?x) ?y]
-                :having   [(sum ?x) (+ ?y ?y)]}
-              (s/conform qs/query-spec)
-              v/collect-nodes
-              va/validate-agg-selects)))
-    (is (nil?
-         ;; Taken from select-agg-3.edn
-         (->> '{:select   [?g [(avg ?p) ?avg] [(/ (+ (min ?p) (max ?p)) 2) ?c]]
-                :where    [[?g "<http://my-pred.com>" ?p]]
-                :group-by [?g]}
-              (s/conform qs/query-spec)
-              v/collect-nodes
-              va/validate-agg-selects)))
+    (testing "- custom fns in SELECT queries are treated as aggregates"
+      (is (nil?
+           (->> '{:select [[("<http://custom.agg>" ?x) ?sum]]
+                  :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects))))
+    (testing "- GROUP BY works with non-SELECT queries"
+      (is (nil?
+           (->> '{:construct [[?x ?y ?z]]
+                  :where     [[?x ?y ?z]]
+                  :group-by  [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects)))
+      (is (nil?
+           (->> '{:describe  [?y]
+                  :where     [[?x ?y ?z]]
+                  :group-by  [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects)))
+      (is (nil?
+           (->> '{:ask      []
+                  :where    [[?x ?y ?z]]
+                  :group-by [?x]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects))))
+    (testing "- ORDER BY and HAVING clauses are ignored"
+      (is (nil?
+           (->> '{:select [[(sum ?x) ?sum]]
+                  :where  [[?x ?y ?z]]
+                  :order-by [(sum ?x) ?y]
+                  :having   [(sum ?x) (+ ?y ?y)]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects))))
+    (testing "- select-agg-3.edn example"
+      (is (nil?
+           (->> '{:select   [?g [(avg ?p) ?avg] [(/ (+ (min ?p) (max ?p)) 2) ?c]]
+                  :where    [[?g "<http://my-pred.com>" ?p]]
+                  :group-by [?g]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects))))
     (is (= [{:kind ::va/invalid-aggregate-var
              :variables ['?z]}]
            (->> '{:select [[(sum ?x) ?sum] [(str ?z) ?str]]

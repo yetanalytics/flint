@@ -26,6 +26,6 @@
 
 ;; single-branch `s/or`s are used to conform values
 
-(s/def ::limit (s/or :ax/num-lit int?))
+(s/def ::limit (s/or :ax/num-lit nat-int?))
 
 (s/def ::offset (s/or :ax/num-lit int?))

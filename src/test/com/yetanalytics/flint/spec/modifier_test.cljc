@@ -31,5 +31,13 @@
            (s/conform ::ms/having '[1 2 3])))
     (is (= [:ax/num-lit 10]
            (s/conform ::ms/limit 10)))
+    (is (= [:ax/num-lit 0]
+           (s/conform ::ms/limit 0)))
+    (is (s/invalid?
+         (s/conform ::ms/limit -10)))
     (is (= [:ax/num-lit 2]
-           (s/conform ::ms/offset 2)))))
+           (s/conform ::ms/offset 2)))
+    (is (= [:ax/num-lit 0]
+           (s/conform ::ms/offset 0)))
+    (is (= [:ax/num-lit -2]
+           (s/conform ::ms/offset -2)))))

@@ -54,13 +54,17 @@
                               set)
                          #{})
         [sel-k sel-v]  select-cls]
-    (if (= :ax/wildcard sel-k)
+    (case sel-k
+      :ax/wildcard
       {:kind ::wildcard-group-by
        :path (->> loc zip/path (mapv first))}
+      :select/var-or-exprs
       (when-some [bad-vars (validate-agg-select-clause group-by-vs sel-v)]
         {:kind      ::invalid-aggregate-var
          :variables bad-vars
-         :path      (->> loc zip/path (mapv first))}))))
+         :path      (->> loc zip/path (mapv first))})
+      ;; else - perhaps it is a CONSTRUCT, DESCRIBE, or ASK query instead
+      nil)))
 
 (defn validate-agg-selects
   "Validate, given `node-m` that contains a map from `SELECT` AST nodes to
