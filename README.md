@@ -1,8 +1,8 @@
 # flint
 
 [![CI](https://github.com/yetanalytics/flint/actions/workflows/test.yml/badge.svg)](https://github.com/yetanalytics/flint/actions/workflows/test.yml)
+[![Clojars Project](https://img.shields.io/clojars/v/com.yetanalytics/flint.svg)](https://clojars.org/com.yetanalytics/flint)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-5e0b73.svg)](CODE_OF_CONDUCT.md)
-
 
 A Clojure(Script) DSL for creating SPARQL Query and Update strings.
 
