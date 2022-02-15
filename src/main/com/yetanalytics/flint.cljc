@@ -13,6 +13,8 @@
             [com.yetanalytics.flint.validate.scope     :as vs]))
 
 (def xsd-iri-prefix
+  "The XMLSchema IRI prefix used for datatype annotation of literals,
+   including dateTime timestamps."
   "<http://www.w3.org/2001/XMLSchema#>")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -60,9 +62,9 @@
          (throw (ex-info err-msg err-map)))
        ast))))
 
-(def conform-query
+(def ^:private conform-query
   (partial conform-sparql ::invalid-query qs/query-spec))
-(def conform-update
+(def ^:private conform-update
   (partial conform-sparql ::invalid-update us/update-spec))
 
 (defn- assert-prefixes-err-map
