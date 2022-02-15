@@ -21,15 +21,16 @@ See Clojars for installation using Leiningen, Boot, etc; do not forget to adapt 
 ## Outline
 
 - Queries and Updates
-  - [SPARQL Queries](doc/query.md)
-  - [SPARQL Updates](doc/update.md)
+  - [Queries](doc/query.md)
+  - [Updates](doc/update.md)
 - Clauses and Subforms
   - [Graph IRIs](doc/graph.md)
   - [Graph Patterns](doc/where.md)
   - [Modifiers](doc/modifier.md)
+  - [Prologue](doc/prologue.md)
 - [Expressions](doc/expr.md)
 - [Triples](doc/triple.md)
-- [RDF Terms and Literals](doc/axiom.md)
+- [RDF Terms](doc/axiom.md)
 
 ## API
 

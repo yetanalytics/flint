@@ -1,0 +1,11 @@
+{:cljdoc.doc/tree [["Queries and Updates"
+                    ["Queries" {:file "doc/query.md"}]
+                    ["Updates" {:file "doc/update.md"}]]
+                   ["Clauses and Subforms"
+                    ["Graph IRIs" {:file "doc/graph.md"}]
+                    ["Graph Patterns" {:file "doc/where.md"}]
+                    ["Modifiers" {:file "doc/modifier.md"}]
+                    ["Prologue" {:file "doc/prologue.md"}]]
+                   ["Expressions" {:file "doc/expr.md"}]
+                   ["Triples" {:file "doc/triple.md"}]
+                   ["RDF Terms" {:file "doc/axiom.md"}]]}
