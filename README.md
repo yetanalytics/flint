@@ -46,6 +46,7 @@ Each function takes in the following keyword arguments:
 | --- | --- |
 | `:pretty?` | If `true`, adds line breaks and indentation to the resulting SPARQL string. Default `false`.
 | `:validate?` | If `true`, validates that prefixed IRIs are expandable and that certain restrictions on variables and blank nodes are met. Default `true`.
+| `:spec-ed?` | If `true`, let the exception data map be the spec error data map (i.e. with `::s/problems`) upon conformance failure, instead of Flint's default error map. Spec error data maps can get quite large, hence this is default `false`.
 
 ## Examples
 

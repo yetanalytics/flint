@@ -1,6 +1,8 @@
 (ns com.yetanalytics.flint.error
+  "Namespace for formatting error messages and other error utils."
   (:require [clojure.spec.alpha :as s]
             [clojure.string     :as cstr]
+            [com.yetanalytics.flint.spec               :as flint-spec]
             [com.yetanalytics.flint.validate.aggregate :as va]
             [com.yetanalytics.flint.validate.bnode     :as vb]
             [com.yetanalytics.flint.validate.scope     :as vs]
@@ -65,42 +67,52 @@
 ;; Spec errors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn spec-error-keywords
+  "Return a vector of keywords describing each failing clause."
+  [spec-ed]
+  (let [spec-paths (->> spec-ed
+                        ::s/problems
+                        (map :path))]
+    (if (every? #(= 1 (count %)) spec-paths)
+      [::flint-spec/top-level]
+      (->> spec-paths
+           (map #(some top-level-keywords %))
+           (filter some?)
+           distinct
+           (mapv #(keyword "com.yetanalytics.flint.spec" (name %)))))))
+
 (defn- spec-clause-strs
-  [spec-paths]
-  (->> spec-paths
-       (map #(some top-level-keywords %))
-       (filter some?)
-       distinct
+  [spec-err-kws]
+  (->> spec-err-kws
        (map name)
        (map #(cstr/replace-first % #"-" " "))
        (map cstr/upper-case)))
 
 (defn- spec-error-msg*
-  [spec-ed index-str]
-  (let [spec-paths  (->> spec-ed ::s/problems (map :path))]
-    (if (every? #(= 1 (count %)) spec-paths)
-      ;; Every spec path is of the form `[:query/select]`, `[:query/ask]`,
-      ;; etc. This is indicative that spec cannot traverse inside clauses
-      ;; due to errors at the top level.
-      (fmt "Syntax errors exist%s due to invalid map, or invalid or extra clauses!"
-           index-str)
-      ;; Here, "missing clause" errors will not show up in the error msg.
-      ;; But they will re-emerge once the user fixes the other errors.
-      (let [clause-strs (spec-clause-strs spec-paths)
-            num-clauses (count clause-strs)]
-        (cond
-          (= 1 num-clauses)
-          (fmt "Syntax errors exist%s in the %s clause!"
-               index-str
-               (first clause-strs))
-          (< 1 num-clauses)
-          (fmt "Syntax errors exist%s in the %s and %s clauses!"
-               index-str
-               (cstr/join ", " (butlast clause-strs))
-               (last clause-strs))
-          :else
-          (fmt "Syntax errors exist%s in an unknown clause!"
-               index-str))))))
+  [spec-err-kws index-str]
+  (if (= [::flint-spec/top-level] spec-err-kws)
+    ;; Every spec path is of the form `[:query/select]`, `[:query/ask]`,
+    ;; etc. This is indicative that spec cannot traverse inside clauses
+    ;; due to errors at the top level.
+    (fmt "Syntax errors exist%s due to invalid map, or invalid or extra clauses!"
+         index-str)
+    ;; Here, "missing clause" errors will not show up in the error msg.
+    ;; But they will re-emerge once the user fixes the other errors.
+    (let [clause-strs (spec-clause-strs spec-err-kws)
+          num-clauses (count clause-strs)]
+      (cond
+        (= 1 num-clauses)
+        (fmt "Syntax errors exist%s in the %s clause!"
+             index-str
+             (first clause-strs))
+        (< 1 num-clauses)
+        (fmt "Syntax errors exist%s in the %s and %s clauses!"
+             index-str
+             (cstr/join ", " (butlast clause-strs))
+             (last clause-strs))
+        :else
+        (fmt "Syntax errors exist%s in an unknown clause!"
+             index-str)))))
 
 (defn spec-error-msg
   "Return an error message specifying the invalid clauses and, if

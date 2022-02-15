@@ -93,7 +93,7 @@
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-prefixes
            (try (format-query '{:select [?x]
-                                :where [[:foo/bar :a ?y]]})
+                                :where  [[:foo/bar :a ?y]]})
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
@@ -105,29 +105,29 @@
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-scoped-vars
            (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
-                                :select [[2 ?x]]
-                                :where [[?x :foo/bar ?y]]})
+                                :select   [[2 ?x]]
+                                :where    [[?x :foo/bar ?y]]})
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-aggregates
            (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
-                                :select *
-                                :where [[?x ?y ?z]]
+                                :select   *
+                                :where    [[?x ?y ?z]]
                                 :group-by [?x]})
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-bnodes-bgp
            (try (format-query '{:prefixes {:foo "<http://foo.org/>"}
-                                :select [?x]
-                                :where [[?x :foo/bar _1]
-                                        [:optional [[?y :foo/baz _1]]]]})
+                                :select   [?x]
+                                :where    [[?x :foo/bar _1]
+                                           [:optional [[?y :foo/baz _1]]]]})
                 (catch #?(:clj clojure.lang.ExceptionInfo
                           :cljs js/Error) e
                   (-> e ex-data :kind)))))
     (is (= ::flint/invalid-bnodes-update
-           (try (format-updates '[{:prefixes {:foo "<http://foo.org/>"}
+           (try (format-updates '[{:prefixes    {:foo "<http://foo.org/>"}
                                    :insert-data [[:foo/bar :foo/baz _1]]}
                                   {:insert-data [[:foo/bar :foo/baz _1]]}])
                 (catch #?(:clj clojure.lang.ExceptionInfo
@@ -139,4 +139,35 @@
                                    '{:copy :baz :to :qux}])
                   (catch #?(:clj clojure.lang.ExceptionInfo
                             :cljs js/Error) e
-                    (-> e ex-data :index))))))))
+                    (-> e ex-data :index))))))
+    (testing "- keywords"
+      (is (= [:com.yetanalytics.flint.spec/top-level]
+             (try (format-query {})
+                  (catch #?(:clj clojure.lang.ExceptionInfo
+                            :cljs js/Error) e
+                    (-> e ex-data :clauses)))))
+      (is (= #?(:clj #{:clojure.spec.alpha/problems
+                       :clojure.spec.alpha/spec
+                       :clojure.spec.alpha/value}
+                :cljs #{:cljs.spec.alpha/problems
+                        :cljs.spec.alpha/spec
+                        :cljs.spec.alpha/value})
+             (try (format-query {} :spec-ed? true)
+                  (catch #?(:clj clojure.lang.ExceptionInfo
+                            :cljs js/Error) e
+                    (-> e ex-data keys set)))))
+      (is (= #?(:clj #{:clojure.spec.alpha/problems
+                       :clojure.spec.alpha/spec
+                       :clojure.spec.alpha/value
+                       ::flint/index}
+                :cljs #{:cljs.spec.alpha/problems
+                        :cljs.spec.alpha/spec
+                        :cljs.spec.alpha/value
+                        ::flint/index})
+             (try (format-updates [{} {}] :spec-ed? true)
+                  (catch #?(:clj clojure.lang.ExceptionInfo
+                            :cljs js/Error) e
+                    (-> e ex-data keys set)))))
+      (is (string? (format-query '{:select [?x]
+                                   :where [[:foo/bar :a ?y]]}
+                                 :validate? false))))))
