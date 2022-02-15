@@ -1,5 +1,22 @@
 # flint
-Flint is a Clojure(Script) DSL for creating SPARQL Query and Update strings.
+
+[![CI](https://github.com/yetanalytics/flint/actions/workflows/test.yml/badge.svg)](https://github.com/yetanalytics/flint/actions/workflows/test.yml)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-5e0b73.svg)](CODE_OF_CONDUCT.md)
+
+
+A Clojure(Script) DSL for creating SPARQL Query and Update strings.
+
+## Installation
+
+Add the following to your `deps.edn` map.
+
+```clojure
+com.yetanalytics/flint {:mvn/version "0.1.0"
+                        :exclusions [org.clojure/clojure
+                                     org.clojure/clojurescript]}
+```
+
+See Clojars for installation using Leiningen, Boot, etc; do not forget to adapt `:exclusions` to your method.
 
 ## Outline
 
