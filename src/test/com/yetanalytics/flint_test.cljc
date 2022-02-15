@@ -146,17 +146,24 @@
                   (catch #?(:clj clojure.lang.ExceptionInfo
                             :cljs js/Error) e
                     (-> e ex-data :clauses)))))
-      (is (= #{:clojure.spec.alpha/problems
-               :clojure.spec.alpha/spec
-               :clojure.spec.alpha/value}
+      (is (= #?(:clj #{:clojure.spec.alpha/problems
+                       :clojure.spec.alpha/spec
+                       :clojure.spec.alpha/value}
+                :cljs #{:cljs.spec.alpha/problems
+                        :cljs.spec.alpha/spec
+                        :cljs.spec.alpha/value})
              (try (format-query {} :spec-ed? true)
                   (catch #?(:clj clojure.lang.ExceptionInfo
                             :cljs js/Error) e
                     (-> e ex-data keys set)))))
-      (is (= #{:clojure.spec.alpha/problems
-               :clojure.spec.alpha/spec
-               :clojure.spec.alpha/value
-               ::flint/index}
+      (is (= #?(:clj #{:clojure.spec.alpha/problems
+                       :clojure.spec.alpha/spec
+                       :clojure.spec.alpha/value
+                       ::flint/index}
+                :cljs #{:cljs.spec.alpha/problems
+                        :cljs.spec.alpha/spec
+                        :cljs.spec.alpha/value
+                        ::flint/index})
              (try (format-updates [{} {}] :spec-ed? true)
                   (catch #?(:clj clojure.lang.ExceptionInfo
                             :cljs js/Error) e
