@@ -46,7 +46,7 @@ A value can be one of the following:
 
 **NOTE:** In the first format, the number of variables must be equal to the number of value vectors. In addition, in both format the length of each value vector (including `nil` entries) must be the same.
 
-The The example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age],
