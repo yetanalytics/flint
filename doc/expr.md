@@ -198,7 +198,7 @@ SUM(DISTINCT ?x)
 ```
 which becomes
 ```sparql
-GROUP_CONCAT(DISTINCT ?y SEPARATOR = ";")
+GROUP_CONCAT(DISTINCT ?y; SEPARATOR = ";")
 ```
 
 **NOTE:** Using aggregates in an invalid clause, e.g. a `FILTER` clause, will cause a spec error.
