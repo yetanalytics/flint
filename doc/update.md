@@ -57,8 +57,8 @@ becomes:
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 INSERT DATA {
     GRAPH <http://census.marley/data> {
-        <http://census.marley/entry#11402> foaf:givenName "Gabi" .
-        <http://census.marley/entry#11402> foaf:familyName "Braun" .
+        <http://census.marley/entry#211402> foaf:givenName "Reiner" .
+        <http://census.marley/entry#211402> foaf:familyName "Braun" .
     }
 }
 ```
@@ -83,8 +83,8 @@ becomes:
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 DELETE DATA {
     GRAPH <http://census.marley/data> {
-        <http://census.marley/entry#11397> foaf:givenName "Bertlot" .
-        <http://census.marley/entry#11397> foaf:familyName "Hoover" .
+        <http://census.marley/entry#211397> foaf:givenName "Bertlot" .
+        <http://census.marley/entry#211397> foaf:familyName "Hoover" .
     }
 }
 ```
