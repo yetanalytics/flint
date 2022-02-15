@@ -4,6 +4,9 @@
 [![Clojars Project](https://img.shields.io/clojars/v/com.yetanalytics/flint.svg)](https://clojars.org/com.yetanalytics/flint)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-5e0b73.svg)](CODE_OF_CONDUCT.md)
 
+_The fire i' the flint shows not till it be struck_
+\- William Shakespeare, _Timon of Athens_, Act I, Scene 1
+
 A Clojure(Script) DSL for creating SPARQL Query and Update strings.
 
 ## Installation
