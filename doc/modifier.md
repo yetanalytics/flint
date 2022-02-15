@@ -53,7 +53,7 @@ The The example:
  :where    [{?x {:foaf/name  #{?name}
                  :foaf/title #{?title}
                  :foaf/age   #{?age}}}]
- :values   {[?name ?title] [["Levi Ackerman" nil]
+ :values   {[?name ?title] [["Levi Ackerman" "Captain"]
                             ["Erwin Smith" "Commander"]]}}
 ```
 which can also be written as:
@@ -64,7 +64,7 @@ which can also be written as:
                  :foaf/title #{?title}
                  :foaf/age   #{?age}}}]
  :values   {?name  ["Levi Ackerman" "Erwin Smith"]
-            ?title [nil "Commander"]}}
+            ?title ["Captain" "Commander"]}}
 ```
 becomes:
 ```sparql
@@ -76,7 +76,7 @@ WHERE {
        foaf:age ?age .
 }
 VALUES (?name ?title) {
-    ("Levi Ackerman" UNDEF)
+    ("Levi Ackerman" "Captain")
     ("Erwin Smith" "Commander")
 }
 ```
