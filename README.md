@@ -96,7 +96,7 @@ The following is a more comprehensive example - a query that looks for the publi
                        :dc/date      #{?date}}}
                [:filter (<= #inst "2010-01-01T00:00:00Z" ?date)]]})
 ```
-which demonstrates several additional features, such as a alternate triple syntax based on maps instead of vectors, blank nodes, language tags, and the `:union`, `:filter` and `:from` clauses. When passed to `format-query`, it is translated to:
+which demonstrates several additional features, such as an alternate triple syntax using maps instead of vectors, blank nodes, language tags, and the `:union`, `:filter` and `:from` clauses. When passed to `format-query`, it is translated to:
 ```sparql
 PREFIX dc:  <http://purl.org/dc/elements/1.1/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
