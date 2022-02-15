@@ -29,27 +29,34 @@
              prefixes))
 
 (defn- conform-sparql-err-map
-  [error-kw spec-ed sparql]
-  {:kind  error-kw
-   :error spec-ed
-   :input sparql})
+  [error-kw error-loc-kws sparql]
+  {:kind    error-kw
+   :input   sparql
+   :clauses error-loc-kws})
 
 (defn- conform-sparql
-  ([error-kw spec sparql]
+  ([error-kw spec spec-err? sparql]
    (let [ast (s/conform spec sparql)]
      (if (= ::s/invalid ast)
        (let [spec-ed (s/explain-data spec sparql)
-             err-msg (err/spec-error-msg spec-ed)
-             err-map (conform-sparql-err-map error-kw spec-ed sparql)]
+             err-kws (err/spec-error-keywords spec-ed)
+             err-msg (err/spec-error-msg err-kws)
+             err-map (if spec-err?
+                       spec-ed
+                       (conform-sparql-err-map error-kw err-kws sparql))]
          (throw (ex-info err-msg err-map)))
        ast)))
-  ([error-kw spec sparql index]
+  ([error-kw spec spec-err? sparql index]
    (let [ast (s/conform spec sparql)]
      (if (= ::s/invalid ast)
        (let [spec-ed (s/explain-data spec sparql)
-             err-msg (err/spec-error-msg spec-ed index)
-             err-map (assoc (conform-sparql-err-map error-kw spec-ed sparql)
-                            :index index)]
+             err-kws (err/spec-error-keywords spec-ed)
+             err-msg (err/spec-error-msg err-kws index)
+             err-map (if spec-err?
+                       (assoc spec-ed
+                              ::index index)
+                       (assoc (conform-sparql-err-map error-kw err-kws sparql)
+                              :index index))]
          (throw (ex-info err-msg err-map)))
        ast))))
 
@@ -161,9 +168,10 @@
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
    does not conform to spec or if its prefixed IRIs cannot be expanded."
-  [query & {:keys [pretty? validate?] :or {pretty?   false
-                                           validate? true}}]
-  (let [ast      (conform-query query)
+  [query & {:keys [pretty? validate? spec-ed?] :or {pretty?     false
+                                                       validate?   true
+                                                       spec-ed? false}}]
+  (let [ast      (conform-query spec-ed? query)
         prefix-m (:prefixes query)
         _        (when validate?
                    (let [nodes-m (v/collect-nodes ast)]
@@ -183,9 +191,10 @@
 (defn format-update
   "Format `update` into a SPARQL Update string. Throws an exception if `update`
    does not conform to spec or if its prefixed IRIs cannot be expanded."
-  [update & {:keys [pretty? validate?] :or {pretty?   false
-                                            validate? true}}]
-  (let [ast      (conform-update update)
+  [update & {:keys [pretty? validate? spec-ed?] :or {pretty?     false
+                                                     validate?   true
+                                                     spec-ed? false}}]
+  (let [ast      (conform-update spec-ed? update)
         prefix-m (:prefixes update)
         _        (when validate?
                    (let [nodes-m (v/collect-nodes ast)]
@@ -202,26 +211,27 @@
   "Format the coll `updates` into a SPARQL Update Request string. Throws
    an exception if any update does not conform to spec or has a prefixed
    IRI that cannot be expanded."
-  [updates & {:keys [pretty? validate?] :or {pretty?   false
-                                             validate? true}}]
-  (let [idxs         (-> updates count range)
-        asts         (map conform-update updates idxs)
-        prefix-ms    (reduce (fn [pm-coll {pm :prefixes :as _update}]
-                               (let [last-pm (last pm-coll)
-                                     new-pm  (merge last-pm pm)]
-                                 (conj pm-coll new-pm)))
-                             []
-                             updates)
-        _            (when validate?
-                       (let [nodes-m-coll (map v/collect-nodes asts)]
-                         (dorun (map assert-prefixes updates asts nodes-m-coll prefix-ms idxs))
-                         (dorun (map assert-scoped-vars updates asts nodes-m-coll idxs))
-                         (dorun (map assert-aggregates updates asts nodes-m-coll idxs))
-                         (assert-bnodes-coll updates asts nodes-m-coll)))
-        xsd-prefixes (map get-xsd-prefix prefix-ms)
-        opt-maps     (map (fn [?xsd-pre]
-                            (cond-> {:pretty? pretty?}
-                              ?xsd-pre (assoc :xsd-prefix ?xsd-pre)))
-                          xsd-prefixes)]
+  [updates & {:keys [pretty? validate? spec-ed?] :or {pretty?     false
+                                                      validate?   true
+                                                      spec-ed? false}}]
+  (let [idxs     (-> updates count range)
+        asts     (map (partial conform-update spec-ed?) updates idxs)
+        pre-maps (reduce (fn [pm-coll {pm :prefixes :as _update}]
+                           (let [last-pm (last pm-coll)
+                                 new-pm  (merge last-pm pm)]
+                             (conj pm-coll new-pm)))
+                         []
+                         updates)
+        _        (when validate?
+                   (let [nodes-m-coll (map v/collect-nodes asts)]
+                     (dorun (map assert-prefixes updates asts nodes-m-coll pre-maps idxs))
+                     (dorun (map assert-scoped-vars updates asts nodes-m-coll idxs))
+                     (dorun (map assert-aggregates updates asts nodes-m-coll idxs))
+                     (assert-bnodes-coll updates asts nodes-m-coll)))
+        xsd-pres (map get-xsd-prefix pre-maps)
+        opt-maps (map (fn [?xsd-pre]
+                        (cond-> {:pretty? pretty?}
+                          ?xsd-pre (assoc :xsd-prefix ?xsd-pre)))
+                      xsd-pres)]
     (-> (map f/format-ast asts opt-maps)
         (uf/join-updates pretty?))))
