@@ -25,7 +25,7 @@ WHERE {
 
 ### `:prefixes`
 
-The :prefixes` map associates prefix keywords to IRI prefixes. In the following example:
+The `:prefixes` map associates prefix keywords to IRI prefixes. In the following example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"
             :$    "<http://foo.org/>"}

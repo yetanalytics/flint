@@ -48,17 +48,17 @@ The `:insert-data` clause inserts triples in an RDF graph. Syntactically, it con
 The example:
 ```clojure
 {:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :insert-data [[:graph "<http://census.marley/districts/liberio>"
-                       [["<http://census.marley/entry#11402>" :foaf/givenName "Gabi"]
-                        ["<http://census.marley/entry/11402>" :foaf/familyName "Braun"]]]]}
+ :insert-data [[:graph "<http://census.marley/data>"
+                       [["<http://census.marley/entry#211402>" :foaf/givenName "Reiner"]
+                        ["<http://census.marley/entry/211402>" :foaf/familyName "Braun"]]]]}
 ```
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 INSERT DATA {
-    GRAPH <http://census.marley/districts/liberio> {
-        <http://census.marley/entry#11402> foaf:givenName "Gabi" .
-        <http://census.marley/entry#11402> foaf:familyName "Braun" .
+    GRAPH <http://census.marley/data> {
+        <http://census.marley/entry#211402> foaf:givenName "Reiner" .
+        <http://census.marley/entry#211402> foaf:familyName "Braun" .
     }
 }
 ```
@@ -74,17 +74,17 @@ The `:delete-data` clause deletes triples in an RDF graph. Syntactically, it con
 The example:
 ```clojure
 {:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :delete-data [[:graph "<http://census.marley/districts/liberio>"
-                       [["<http://census.marley/entry#11397>" :foaf/givenName "Bertolt"]
-                        ["<http://census.marley/entry#11397>" :foaf/familyName "Hoover"]]]]}
+ :delete-data [[:graph "<http://census.marley/data>"
+                       [["<http://census.marley/entry#211397>" :foaf/givenName "Bertolt"]
+                        ["<http://census.marley/entry#211397>" :foaf/familyName "Hoover"]]]]}
 ```
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 DELETE DATA {
-    GRAPH <http://census.marley/districts/liberio> {
-        <http://census.marley/entry#11397> foaf:givenName "Bertlot" .
-        <http://census.marley/entry#11397> foaf:familyName "Hoover" .
+    GRAPH <http://census.marley/data> {
+        <http://census.marley/entry#211397> foaf:givenName "Bertlot" .
+        <http://census.marley/entry#211397> foaf:familyName "Hoover" .
     }
 }
 ```
@@ -100,28 +100,28 @@ A `:delete` or `:insert` clause deletes or inserts triples, respectively, in an 
 The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :delete   [[:graph "<http://census.marley/districts/liberio>"
+ :delete   [[:graph "<http://census.marley/data>"
                     [[?x :foaf/familyName "Brown"]]]]
- :insert   [[:graph "<http://census.marley/districts/liberio>"
+ :insert   [[:graph "<http://census.marley/data>"
                     [[?x :foaf/familyName "Braun"]]]]
- :where    [[:graph "<http://census.marley/districts/liberio>"
+ :where    [[:graph "<http://census.marley/data>"
                     [[?x :foaf/familyName "Brown"]]]]}
 ```
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 DELETE {
-    GRAPH <http://census.marley/districts/liberio> {
+    GRAPH <http://census.marley/data> {
         ?x foaf:familyName "Brown" .
     }
 }
 INSERT {
-    GRAPH <http://census.marley/districts/liberio> {
+    GRAPH <http://census.marley/data> {
         ?x foaf:familyName "Braun" .
     }
 }
 WHERE {
-    GRAPH <http://census.marley/districts/liberio> {
+    GRAPH <http://census.marley/data> {
         ?x foaf:familyName "Brown" .
     }
 }
@@ -140,7 +140,7 @@ The `:delete-where` clause is a shorthand for the combination `:delete` and `:wh
 The example:
 ```clojure
 {:prefixes     {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :delete-where [[:graph "<http://census.marley/districts/liberio>"
+ :delete-where [[:graph "<http://census.marley/data>"
                        [[?x :foaf/givenName "Annie"]
                         [?x :foaf/familyName "Leonhart"]]]]}
 ```
@@ -148,7 +148,7 @@ becomes
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 DELETE WHERE {
-    GRAPH <http://census.marley/districts/liberio> {
+    GRAPH <http://census.marley/data> {
         ?x foaf:givenName "Annie" .
         ?x foaf:familyName "Leonhart" .
     }
@@ -165,24 +165,24 @@ The `:load` update loads triples from a source specified by an IRI. The `:load` 
 
 The example:
 ```clojure
-{:load "<file:census/data/liberio.rdf>"
- :into "<http://census.marley/districts/liberio>"}
+{:load "<file:marleycensus/data.rdf>"
+ :into "<http://census.marley/data>"}
 ```
 becomes:
 ```sparql
-LOAD <file:census/data/liberio.rdf>
-INTO <http://census.marley/districts/liberio>
+LOAD <file:marleycensus/data.rdf>
+INTO <http://census.marley/data>
 ```
 
 Example of silent mode:
 ```clojure
-{:load-silent "<file:census/data/liberio.rdf>"
- :into        "<http://census.marley/districts/liberio>"}
+{:load-silent "<file:marleycensus/data.rdf>"
+ :into        "<http://census.marley/data>"}
 ```
 becomes:
 ```sparql
-LOAD SILENT <file:census/data/liberio.rdf>
-INTO <http://census.marley/districts/liberio>
+LOAD SILENT <file:marleycensus/data.rdf>
+INTO <http://census.marley/data>
 ```
 
 ### `:clear`/`:clear-silent`
@@ -208,13 +208,13 @@ The `:create` update creates a new empty graph in an RDF store. The `:create` cl
 
 The example:
 ```clojure
-{:prefixes {:dist "<http://census.marley/districts/>"
- :create   :dist/liberio}}
+{:prefixes {:census "<http://census.marley/>"
+ :create   :census/data}}
 ```
 becomes:
 ```sparql
-PREFIX myld: <http://census.marley/districts/>
-CREATE dist:liberio
+PREFIX census: <http://census.marley/>
+CREATE census:data
 ```
 
 ### `:drop`/`:drop-silent`
@@ -240,12 +240,12 @@ The `:copy` update transfers data from a source to a target graph, overwriting t
 
 The example:
 ```clojure
-{:copy "<http://census.marley/districts/liberio>"
+{:copy "<http://census.marley/data>"
  :to   :default}
 ```
 becomes:
 ```sparql
-COPY <http://census.marley/districts/liberio>
+COPY <http://census.marley/data>
 TO DEFAULT
 ```
 
@@ -257,12 +257,12 @@ The `:move` update moves data from a source to a target graph, deleting the form
 
 The example:
 ```clojure
-{:move "<http://census.marley/districts/liberio>"
+{:move "<http://census.marley/data>"
  :to   :default}
 ```
 becomes:
 ```sparql
-MOVE <http://census.marley/districts/liberio>
+MOVE <http://census.marley/data>
 TO DEFAULT
 ```
 
@@ -274,12 +274,12 @@ The `:add` update appends data from a source to a target graph. Both the `:add` 
 
 The example:
 ```clojure
-{:add "<http://census.marley/districts/liberio>"
+{:add "<http://census.marley/data>"
  :to  :default}
 ```
 becomes:
 ```sparql
-ADD <http://census.marley/districts/liberio>
+ADD <http://census.marley/data>
 TO DEFAULT
 ```
 
@@ -290,22 +290,22 @@ Unlike SPARQL queries, SPARQL update requests can be chained together into seque
 The example:
 ```clojure
 [{:prefixes    {:foaf "<http://xmlns.com/foaf/0.1/>"}
-  :delete-data [[:graph "<http://census.marley/districts/liberio>"
-                        [["<http://census.marley/entry#11325>" :foaf/familyName "Brown"]]]]}
- {:insert-data [[:graph "<http://census.marley/districts/liberio>"
-                        [["<http://census.marley/entry#11325>" :foaf/familyName "Braun"]]]]}]
+  :delete-data [[:graph "<http://census.marley/data>"
+                        [["<http://census.marley/entry#221325>" :foaf/familyName "Brown"]]]]}
+ {:insert-data [[:graph "<http://census.marley/data>"
+                        [["<http://census.marley/entry#221325>" :foaf/familyName "Braun"]]]]}]
 ```
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 DELETE DATA {
-    GRAPH <http://census.marley/districts/liberio> {
-        <http://census.marley/entry#11325> foaf:familyName "Brown" .
+    GRAPH <http://census.marley/data> {
+        <http://census.marley/entry#212325> foaf:familyName "Brown" .
     }
 };
 INSERT DATA {
-    GRAPH <http://census.marley/districts/liberio> {
-        <http://census.marley/entry#11325> foaf:familyName "Braun" .
+    GRAPH <http://census.marley/data> {
+        <http://census.marley/entry#212325> foaf:familyName "Braun" .
     }
 }
 ```

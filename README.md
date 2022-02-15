@@ -1,18 +1,41 @@
 # flint
-Flint is a Clojure(Script) DSL for creating SPARQL Query and Update strings.
+
+[![CI](https://github.com/yetanalytics/flint/actions/workflows/test.yml/badge.svg)](https://github.com/yetanalytics/flint/actions/workflows/test.yml)
+[![Clojars Project](https://img.shields.io/clojars/v/com.yetanalytics/flint.svg)](https://clojars.org/com.yetanalytics/flint)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-5e0b73.svg)](CODE_OF_CONDUCT.md)
+
+_The fire i' the flint shows not till it be struck_
+\- William Shakespeare, _Timon of Athens_, Act I, Scene 1
+
+A Clojure(Script) DSL for creating SPARQL Query and Update strings.
+
+## Installation
+
+Add the following to your `deps.edn` map.
+
+```clojure
+com.yetanalytics/flint {:mvn/version "0.1.0"
+                        :exclusions [org.clojure/clojure
+                                     org.clojure/clojurescript]}
+```
+
+See [Clojars](https://clojars.org/com.yetanalytics/flint) for installation using Leiningen, Boot, etc; do not forget to adapt `:exclusions` to your method.
 
 ## Outline
 
+Documentation is also available on [cljdoc](https://cljdoc.org/d/com.yetanalytics/flint).
+
 - Queries and Updates
-  - [SPARQL Queries](doc/query.md)
-  - [SPARQL Updates](doc/update.md)
+  - [Queries](doc/query.md)
+  - [Updates](doc/update.md)
 - Clauses and Subforms
   - [Graph IRIs](doc/graph.md)
   - [Graph Patterns](doc/where.md)
   - [Modifiers](doc/modifier.md)
+  - [Prologue](doc/prologue.md)
 - [Expressions](doc/expr.md)
 - [Triples](doc/triple.md)
-- [RDF Terms and Literals](doc/axiom.md)
+- [RDF Terms](doc/axiom.md)
 
 ## API
 
@@ -24,6 +47,7 @@ Three functions exist in the Flint API:
 The first two functions format a single SPARQL Query or Update, respectively, while the third formats a collection of SPARQL Updates into a single Update Request.
 
 Each function takes in the following keyword arguments:
+
 | Argument | Description |
 | --- | --- |
 | `:pretty?` | If `true`, adds line breaks and indentation to the resulting SPARQL string. Default `false`.
@@ -73,7 +97,7 @@ The following is a more comprehensive example - a query that looks for the publi
                        :dc/date      #{?date}}}
                [:filter (<= #inst "2010-01-01T00:00:00Z" ?date)]]})
 ```
-which demonstrates several additional features, such as a alternate triple syntax based on maps instead of vectors, blank nodes, language tags, and the `:union`, `:filter` and `:from` clauses. When passed to `format-query`, it is translated to:
+which demonstrates several additional features, such as an alternate triple syntax using maps instead of vectors, blank nodes, language tags, and the `:union`, `:filter` and `:from` clauses. When passed to `format-query`, it is translated to:
 ```sparql
 PREFIX dc:  <http://purl.org/dc/elements/1.1/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>

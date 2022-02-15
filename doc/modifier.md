@@ -46,14 +46,14 @@ A value can be one of the following:
 
 **NOTE:** In the first format, the number of variables must be equal to the number of value vectors. In addition, in both format the length of each value vector (including `nil` entries) must be the same.
 
-The The example:
+The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age],
  :where    [{?x {:foaf/name  #{?name}
                  :foaf/title #{?title}
                  :foaf/age   #{?age}}}]
- :values   {[?name ?title] [["Levi Ackerman" nil]
+ :values   {[?name ?title] [["Levi Ackerman" "Captain"]
                             ["Erwin Smith" "Commander"]]}}
 ```
 which can also be written as:
@@ -64,7 +64,7 @@ which can also be written as:
                  :foaf/title #{?title}
                  :foaf/age   #{?age}}}]
  :values   {?name  ["Levi Ackerman" "Erwin Smith"]
-            ?title [nil "Commander"]}}
+            ?title ["Captain" "Commander"]}}
 ```
 becomes:
 ```sparql
@@ -76,7 +76,7 @@ WHERE {
        foaf:age ?age .
 }
 VALUES (?name ?title) {
-    ("Levi Ackerman" UNDEF)
+    ("Levi Ackerman" "Captain")
     ("Erwin Smith" "Commander")
 }
 ```

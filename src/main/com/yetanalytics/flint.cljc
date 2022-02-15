@@ -13,6 +13,8 @@
             [com.yetanalytics.flint.validate.scope     :as vs]))
 
 (def xsd-iri-prefix
+  "The XMLSchema IRI prefix used for datatype annotation of literals,
+   including dateTime timestamps."
   "<http://www.w3.org/2001/XMLSchema#>")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -60,9 +62,9 @@
          (throw (ex-info err-msg err-map)))
        ast))))
 
-(def conform-query
+(def ^:private conform-query
   (partial conform-sparql ::invalid-query qs/query-spec))
-(def conform-update
+(def ^:private conform-update
   (partial conform-sparql ::invalid-update us/update-spec))
 
 (defn- assert-prefixes-err-map
@@ -167,10 +169,10 @@
 
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
-   does not conform to spec or if its prefixed IRIs cannot be expanded."
+   does not conform to spec or otherwise fails validation."
   [query & {:keys [pretty? validate? spec-ed?] :or {pretty?     false
-                                                       validate?   true
-                                                       spec-ed? false}}]
+                                                    validate?   true
+                                                    spec-ed? false}}]
   (let [ast      (conform-query spec-ed? query)
         prefix-m (:prefixes query)
         _        (when validate?
@@ -190,7 +192,7 @@
 
 (defn format-update
   "Format `update` into a SPARQL Update string. Throws an exception if `update`
-   does not conform to spec or if its prefixed IRIs cannot be expanded."
+   does not conform to spec or otherwise fails validation."
   [update & {:keys [pretty? validate? spec-ed?] :or {pretty?     false
                                                      validate?   true
                                                      spec-ed? false}}]
@@ -209,8 +211,8 @@
 
 (defn format-updates
   "Format the coll `updates` into a SPARQL Update Request string. Throws
-   an exception if any update does not conform to spec or has a prefixed
-   IRI that cannot be expanded."
+   an exception if any update does not conform to spec or otherwise
+   fails validation."
   [updates & {:keys [pretty? validate? spec-ed?] :or {pretty?     false
                                                       validate?   true
                                                       spec-ed? false}}]
