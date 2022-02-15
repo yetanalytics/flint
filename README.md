@@ -19,9 +19,11 @@ com.yetanalytics/flint {:mvn/version "0.1.0"
                                      org.clojure/clojurescript]}
 ```
 
-See Clojars for installation using Leiningen, Boot, etc; do not forget to adapt `:exclusions` to your method.
+See [Clojars](https://clojars.org/com.yetanalytics/flint) for installation using Leiningen, Boot, etc; do not forget to adapt `:exclusions` to your method.
 
 ## Outline
+
+Documentation is also available on [cljdoc](https://cljdoc.org/d/com.yetanalytics/flint).
 
 - Queries and Updates
   - [Queries](doc/query.md)
