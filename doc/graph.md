@@ -70,27 +70,27 @@ Used only in `:delete`/`:insert` updates, `:using` specifies the graph used in t
 The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :delete   [[:graph "<http://census.marley/districts/liberio>"
+ :delete   [[:graph "<http://census.marley/data>"
                   [[?x :foaf/familyName "Brown"]]]]
- :insert   [[:graph "<http://census.marley/districts/liberio>"
+ :insert   [[:graph "<http://census.marley/data>"
                   [[?x :foaf/familyName "Braun"]]]]
- :using    "<http://census.marley/districts/liberio>"
+ :using    "<http://census.marley/data>"
  :where    [[?x :foaf/familyName "Brown"]]}
 ```
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 DELETE {
-    GRAPH <http://census.marley/districts/liberio> {
+    GRAPH <http://census.marley/data> {
         ?x foaf:familyName "Brown" .
     }
 }
 INSERT {
-    GRAPH <http://census.marley/districts/liberio> {
+    GRAPH <http://census.marley/data> {
         ?x foaf:familyName "Braun" .
     }
 }
-USING <http://census.marley/districts/liberio>
+USING <http://census.marley/data>
 WHERE {
     ?x foaf:familyName "Brown" .
 }
@@ -103,7 +103,7 @@ Used only in `:delete`/`:insert` updates, `:with` specifies the graph for the qu
 The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
- :with     "<http://census.marley/districts/liberio>"
+ :with     "<http://census.marley/data>"
  :delete   [[?x :foaf/familyName "Brown"]]
  :insert   [[?x :foaf/familyName "Braun"]]
  :where    [[?x :foaf/familyName "Brown"]]}
@@ -111,7 +111,7 @@ The example:
 becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-WITH <http://census.marley/districts/liberio>
+WITH <http://census.marley/data>
 DELETE {
     ?x foaf:familyName "Brown" .
 }
