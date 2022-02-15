@@ -47,6 +47,7 @@ Three functions exist in the Flint API:
 The first two functions format a single SPARQL Query or Update, respectively, while the third formats a collection of SPARQL Updates into a single Update Request.
 
 Each function takes in the following keyword arguments:
+
 | Argument | Description |
 | --- | --- |
 | `:pretty?` | If `true`, adds line breaks and indentation to the resulting SPARQL string. Default `false`.
