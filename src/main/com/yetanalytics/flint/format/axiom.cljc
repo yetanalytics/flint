@@ -35,10 +35,24 @@
 (defmethod f/format-ast-node :ax/bool-lit [_ [_ bool-value]]
   (str bool-value))
 
+#?(:clj
+   (defn- inst->str
+     [inst]
+     (cond
+       ;; java.time.Instant - the recommended approach
+       (instance? java.time.Instant inst)
+       (.toString inst)
+       ;; java.util.Date and its subclasses
+       (or (instance? java.sql.Date inst)
+           (instance? java.sql.Time inst))
+       (.toString (.toInstant (java.sql.Timestamp. (.getTime inst))))
+       (instance? java.util.Date inst)
+       (.toString (.toInstant inst)))))
+
 (defmethod f/format-ast-node :ax/dt-lit [{:keys [xsd-prefix]} [_ dt-value]]
   (let [xsd-suffix  (if xsd-prefix
                       (str xsd-prefix ":dateTime")
                       "<http://www.w3.org/2001/XMLSchema#dateTime>")
-        inst-string #?(:clj (str (.toInstant dt-value))
+        inst-string #?(:clj (inst->str dt-value)
                        :cljs (.toISOString dt-value))]
     (str "\"" inst-string "\"^^" xsd-suffix)))
