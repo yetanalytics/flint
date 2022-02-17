@@ -10,11 +10,11 @@
                                           [:ax/str-lit "Title"]]]]]]
            (s/conform us/insert-data-update-spec
                       '{:insert-data [[:foo/x :dc/title "Title"]]})))
-    (is (= '[[:delete-data [[:triple/quads [:graph
-                                            [:ax/iri "<http://example.org>"]
-                                            [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                                           [:ax/prefix-iri :dc/title]
-                                                           [:ax/str-lit "Title"]]]]]]]]]
+    (is (= '[[:delete-data [[:triple/quads [[:ax/iri "<http://example.org>"]
+                                            [:triple/quad-triples
+                                             [[:triple/vec [[:ax/prefix-iri :foo/x]
+                                                            [:ax/prefix-iri :dc/title]
+                                                            [:ax/str-lit "Title"]]]]]]]]]]
            (s/conform us/delete-data-update-spec
                       '{:delete-data [[:graph
                                        "<http://example.org>"

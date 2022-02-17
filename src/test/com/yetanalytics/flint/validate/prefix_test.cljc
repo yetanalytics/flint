@@ -3,7 +3,8 @@
             [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.validate :as v]
             [com.yetanalytics.flint.validate.prefix :as vp]
-            [com.yetanalytics.flint.spec.query :as qs]))
+            [com.yetanalytics.flint.spec.query :as qs]
+            [com.yetanalytics.flint.spec.update :as us]))
 
 (def query '{:prefixes {:foo "<http://foo.org/>"}
              :select [?x]
@@ -45,4 +46,20 @@
            (->> query
                 (s/conform qs/query-spec)
                 v/collect-nodes
-                (vp/validate-prefixes (:prefixes query)))))))
+                (vp/validate-prefixes (:prefixes query)))))
+    (is (= [{:iri :baz/Qux
+             :prefix :baz
+             :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
+             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple/nform :triple/spo :triple/po :triple/o :ax/prefix-iri]}
+            {:iri :baz/Quu
+             :prefix :baz
+             :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
+             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple/vec :ax/prefix-iri]}]
+           (->>
+            {:prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
+             :insert-data [[:graph "<http://foo.org>"
+                            [{"<http://bar.org>" {:rdf/type #{:baz/Qux}}}
+                             ["<http://bar.org>" :rdf/type :baz/Quu]]]]}
+            (s/conform us/update-spec)
+            v/collect-nodes
+            (vp/validate-prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}))))))

@@ -86,24 +86,28 @@
              :kind vector?))
 
 (def quad-spec
-  (s/tuple #{:graph}
-           ax/var-or-iri-spec
-           triples-spec))
+  (s/and (s/tuple #{:graph}
+                  ax/var-or-iri-spec
+                  (s/or :triple/quad-triples triples-spec))
+         (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def quad-novar-spec
-  (s/tuple #{:graph}
-           ax/var-or-iri-spec
-           triples-novar-spec))
+  (s/and (s/tuple #{:graph}
+                  ax/var-or-iri-spec
+                  (s/or :triple/quad-triples triples-novar-spec))
+         (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def quad-noblank-spec
-  (s/tuple #{:graph}
-           ax/var-or-iri-spec
-           triples-noblank-spec))
+  (s/and (s/tuple #{:graph}
+                  ax/var-or-iri-spec
+                  (s/or :triple/quad-triples triples-noblank-spec))
+         (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def quad-novar-noblank-spec
-  (s/tuple #{:graph}
-           ax/var-or-iri-spec
-           triples-novar-noblank-spec))
+  (s/and (s/tuple #{:graph}
+                  ax/var-or-iri-spec
+                  (s/or :triple/quad-triples triples-novar-noblank-spec))
+         (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def triple-or-quads-spec
   (s/coll-of (s/or :triple/vec  ts/triple-vec-nopath-spec
