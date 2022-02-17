@@ -61,7 +61,8 @@
 
 (def pred-novar-spec
   (s/or :ax/iri ax/iri?
-        :ax/prefix-iri ax/prefix-iri?))
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/rdf-type ax/rdf-type?))
 
 ;; Objects
 

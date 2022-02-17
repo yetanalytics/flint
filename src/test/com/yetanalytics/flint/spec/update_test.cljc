@@ -7,18 +7,27 @@
   (testing "Conforming updates"
     (is (= '[[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
                                           [:ax/prefix-iri :dc/title]
-                                          [:ax/str-lit "Title"]]]]]]
+                                          [:ax/str-lit "Title"]]]
+                            [:triple/vec [[:ax/prefix-iri :foo/y]
+                                          [:ax/rdf-type :a]
+                                          [:ax/str-lit "MyType"]]]]]]
            (s/conform us/insert-data-update-spec
-                      '{:insert-data [[:foo/x :dc/title "Title"]]})))
-    (is (= '[[:delete-data [[:triple/quads [[:ax/iri "<http://example.org>"]
-                                            [:triple/quad-triples
-                                             [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                                            [:ax/prefix-iri :dc/title]
-                                                            [:ax/str-lit "Title"]]]]]]]]]]
+                      '{:insert-data [[:foo/x :dc/title "Title"]
+                                      [:foo/y :a "MyType"]]})))
+    (is (= '[[:delete-data [[:triple/quads
+                             [[:ax/iri "<http://example.org>"]
+                              [:triple/quad-triples
+                               [[:triple/vec [[:ax/prefix-iri :foo/x]
+                                              [:ax/prefix-iri :dc/title]
+                                              [:ax/str-lit "Title"]]]
+                                [:triple/vec [[:ax/prefix-iri :foo/y]
+                                              [:ax/rdf-type :a]
+                                              [:ax/str-lit "MyType"]]]]]]]]]]
            (s/conform us/delete-data-update-spec
                       '{:delete-data [[:graph
                                        "<http://example.org>"
-                                       [[:foo/x :dc/title "Title"]]]]})))
+                                       [[:foo/x :dc/title "Title"]
+                                        [:foo/y :a "MyType"]]]]})))
     (is (= '[[:move [:update/default-graph :default]]
              [:to [:update/named-graph [:ax/iri "<http://example.org>"]]]]
            (s/conform us/move-update-spec
