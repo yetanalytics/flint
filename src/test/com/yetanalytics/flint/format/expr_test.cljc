@@ -27,6 +27,10 @@
                                 [:expr/args [[:expr/branch [[:expr/op not]
                                                             [:expr/args [[:expr/terminal [:ax/bool-lit false]]]]]]]]]]
                 format-ast)))
+    (is (= "!(-2)"
+           (->> '[:expr/branch [[:expr/op not]
+                                [:expr/args [[:expr/terminal [:ax/num-lit -2]]]]]]
+                format-ast)))
     (is (= "(1 IN (1, 2, 3))"
            (->> '[:expr/branch [[:expr/op in]
                                 [:expr/args [[:expr/terminal [:ax/num-lit 1]]
