@@ -150,7 +150,7 @@ WHERE {
 }
 ```
 
-If the `:construct` clause is an empty collection or `nil`, then Flint will the query as the `CONSTRUCT WHERE` shorthand in SPARQL.
+If the `:construct` clause is an empty collection or `nil`, then Flint will interpret the query as using the `CONSTRUCT WHERE` shorthand in SPARQL.
 
 The example:
 ```clojure
