@@ -150,9 +150,26 @@ WHERE {
 }
 ```
 
-A `:construct` clause may contain zero triples, resulting in an empty RDF graph being returned.
+If the `:construct` clause is an empty collection or `nil`, then Flint will the query as the `CONSTRUCT WHERE` shorthand in SPARQL.
 
-**NOTE:** The `CONSTRUCT WHERE` shorthand is _not_ supported in Flint.
+The example:
+```clojure
+{:prefixes  {:foaf "<http://xmlns.com/foaf/0.1/>"}
+ :construct []
+ :where     [[?x :foaf/familyName "Jaeger"]
+             {?y {:foaf/familyName #{"Ackerman"}}}]}
+```
+becomes:
+```
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+CONSTRUCT
+WHERE {
+    ?x foaf:familyName "Jaeger" .
+    ?y foaf:familyName "Ackerman" .
+}
+```
+
+**NOTE:** Because of the above, it is not possible to use `:construct` queries to construct an empty model in Flint, even though it is valid in SPARQL.
 
 **NOTE:** Property paths are not allowed in the `:construct` clause (though they are still allowed in the `:where` clause).
 
