@@ -1,6 +1,6 @@
 # Graph Patterns
 
-SPARQL/Flint `:where` clauses are written as _graph patterns_, which describe a selection of RDF triples. The simplest graph pattern, known as a _basic graph pattern_ (or BGP) consists of a series of RDF triples.* However, there are a number of clauses that can be used to create more advanced graph patterns:
+SPARQL/Flint `:where` clauses are written as _graph patterns_, which describe a selection of RDF triples. The simplest graph pattern, known as a _basic graph pattern_ (BGP) consists of a series of RDF triples.* However, there are a number of clauses that can be used to create more advanced graph patterns:
 - [`:where`](where.md#where)
 - [`:optional`](where.md#optional)
 - [`:union`](where.md#union)
@@ -23,7 +23,7 @@ A `:where` clause in Flint is one of two things:
 - A sub-query, which is written as a `:select` query map.
 - A vector of graph patterns.
 
-Each graph pattern is written as either a [triple](triple.md) (either as a vector or IGraph normal form map), or as a vector of the form `[:keyword & args]`.
+Each `:where` graph pattern is written as either a [triple](triple.md) (either as a vector or IGraph normal form map), or as a vector of the form `[:keyword & args]`. `:where` patterns can be nested within each other.
 
 Example of a `:where` clause containing a subquery in a nested `:where`:
 ```clojure
@@ -56,11 +56,13 @@ WHERE {
 }
 ```
 
+**NOTE:** Unlike their top-level counterparts, sub-`:select` queries cannot accept prologue, `:from` or `:from-named` clauses.
+
 ### `:optional`
 
 Reference: [6. Including Optional Values](https://www.w3.org/TR/sparql11-query/#optionals)
 
-The `:optional` keyword specifies patterns that do not need to exist in the solution. In Flint, an `:optional` graph pattern has the form `[:optional sub-where]`.
+The `:optional` keyword specifies graph patterns that do not need to be matched in order to form a query solution. In Flint, an `:optional` graph pattern has the form `[:optional sub-where]`.
 
 The example:
 ```clojure
@@ -85,7 +87,7 @@ WHERE {
 
 Reference: [7. Matching Alternatives](https://www.w3.org/TR/sparql11-query/#alternatives)
 
-The `:union` keyword takes the union of the results of multiple graph patterns. In Flint, a `:union` graph pattern has the form `[:union sub-where & sub-wheres]`.
+The `:union` keyword specifies taking the union of the results of multiple graph patterns. In Flint, a `:union` graph pattern has the form `[:union sub-where & sub-wheres]`.
 
 The example:
 ```clojure
@@ -248,7 +250,7 @@ WHERE {
 
 Reference: [SPARQL 1.1 Federated Query](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/)
 
-The `:service` keyword is used for federated queries, i.e. queries across networks. The `:service-silent` variant is used for queries to fail silently. In Flint, the `:service` graph pattern has the form `[:service iri-or-var sub-where]`.
+The `:service` keyword is used for federated queries, i.e. queries across networks. The `:service-silent` variant is used in order to fail silently. In Flint, the `:service` graph pattern has the form `[:service iri-or-var sub-where]`.
 
 The example:
 ```clojure

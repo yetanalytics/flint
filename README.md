@@ -7,7 +7,7 @@
 _The fire i' the flint shows not till it be struck_
 \- William Shakespeare, _Timon of Athens_, Act I, Scene 1
 
-A Clojure(Script) DSL for creating SPARQL Query and Update strings.
+A Clojure(Script) DSL for creating SPARQL query and update strings.
 
 ## Installation
 
@@ -44,7 +44,7 @@ Three functions exist in the Flint API:
 - `format-update`
 - `format-updates`
 
-The first two functions format a single SPARQL Query or Update, respectively, while the third formats a collection of SPARQL Updates into a single Update Request.
+The first two functions format a single SPARQL query or update, respectively, while the third formats a collection of SPARQL updates into a single update string.
 
 Each function takes in the following keyword arguments:
 
@@ -123,7 +123,7 @@ WHERE {
 ## Prior Art
 - Flint is based off of the grammar of [SPARQL 1.1](https://www.w3.org/TR/sparql11-query/).
 - The idea of a SPARQL DSL was inspired by [HoneySQL](https://github.com/seancorfield/honeysql), a DSL for creating SQL queries.
-- Flint borrows certain syntactic conventions from the [Datalog grammar](https://docs.datomic.com/on-prem/query/query.html), including for terms, expressions, and variable binding.
+- Flint borrows certain syntactic conventions from the [Datomic](https://docs.datomic.com/on-prem/query/query.html) and [Asami](https://github.com/threatgrid/asami) query and update languages.
 - The map-based triples syntax is based on the normal form used in the [IGraph protocol](https://github.com/ont-app/igraph).
 
 ## License

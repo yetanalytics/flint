@@ -1,7 +1,7 @@
 # SPARQL Queries
 
 A SPARQL query is used to find or test for values in an RDF graph database. There are four types of SPARQL queries:
-- [`:select`](query.md#select) (incl. [`:select-distinct`](query.md#select-distinct) and [`:select-reduced`](query.md#select-reduced))
+- [`:select`](query.md#select) (including [`:select-distinct`](query.md#select-distinct) and [`:select-reduced`](query.md#select-reduced))
 - [`:construct`](query.md#construct)
 - [`:ask`](query.md#ask)
 - [`:describe`](query.md#describe)
@@ -35,7 +35,7 @@ A `:select` query is used to select and return specific variables in a query. It
 - A wildcard: `*` or `:*`
 - A collection of variables or `[expr var]` forms.
 
-Example of a wildcard `:select`:
+This example of a wildcard `:select`:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   *
@@ -50,7 +50,7 @@ WHERE {
 }
 ```
 
-Example of a `:select` with variables and `[expr var]` forms:
+This example of a `:select` with variables and `[expr var]` forms:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?fullName [(<= 18 ?age) ?isAdult]]

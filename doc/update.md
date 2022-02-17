@@ -33,7 +33,7 @@ Each SPARQL update in Flint is a map that includes one of the aforementioned cla
 - `:add`, `:move`, and `:copy`-specific clauses:
   - `:to`
 
-The triple insertion and deletion clauses accept both [triples](triple.md) and _quads_, which have the form `[:graph iri triples]`. This is similar to the `:graph` clause in [graph patterns](where.md), except that variables cannot be substituted in the graph IRI position.
+Insertion and deletion clauses accept both [triples](triple.md) and _quads_, which have the form `[:graph iri triples]`. This is similar to the `:graph` clause in [graph patterns](where.md), except that variables cannot be substituted in the graph IRI position.
 
 **NOTE:** Any key other than the above keywords is not allowed in a SPARQL update map.
 
@@ -95,7 +95,7 @@ DELETE DATA {
 
 Reference: [3.1.3 DELETE/INSERT](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#delete)
 
-A `:delete` or `:insert` clause deletes or inserts triples, respectively, in an RDF graph with variables specified by a `:where` clause. Syntactically, both clauses consists of triples or quads. An update may contain either a `:delete` clause, an `:insert` clause, or both.
+A `:delete` or `:insert` clause deletes or inserts triples, respectively, in an RDF graph with variables specified by a `:where` clause. Syntactically, both clauses consist of triples or quads. An update may contain either a `:delete` clause, an `:insert` clause, or both.
 
 The example:
 ```clojure
@@ -189,7 +189,7 @@ INTO <http://census.marley/data>
 
 Reference: [3.1.5 CLEAR](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#clear)
 
-The `:clear` update is used to clear all data from one or more RDF graphs. Syntactically, the `:clear` clause consists of either an explicit IRI or prefixed IRI, `:default`, `:named`, or `:all`.
+The `:clear` update is used to clear all data from one or more RDF graphs. Syntactically, the `:clear` clause consists of either an IRI, prefixed IRI, `:default`, `:named`, or `:all`.
 
 The example:
 ```clojure
@@ -204,7 +204,7 @@ CLEAR DEFAULT
 
 Reference: [3.2.1 CREATE](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#create)
 
-The `:create` update creates a new empty graph in an RDF store. The `:create` clause consists of the IRI or prefixed of the new graph.
+The `:create` update creates a new empty graph in an RDF store. The `:create` clause consists of the IRI or prefixed IRI of the new graph.
 
 The example:
 ```clojure
@@ -221,7 +221,7 @@ CREATE census:data
 
 Reference: [3.2.2 DROP](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#drop)
 
-The `:drop` update deletes one or more graphs in an RDF store. The `:drop` clause consists of either an explicit IRI or prefixed IRI, `:default`, `:named`, or `:all`.
+The `:drop` update deletes one or more graphs in an RDF store. The `:drop` clause consists of either an IRI, prefixed IRI, `:default`, `:named`, or `:all`.
 
 The example:
 ```clojure
@@ -236,7 +236,7 @@ DROP DEFAULT
 
 Reference: [3.2.3 COPY](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#copy)
 
-The `:copy` update transfers data from a source to a target graph, overwriting the latter in the process. Both the `:copy` and `:to` clauses consist of either an IRI or prefixed IRI or the `:default` keyword.
+The `:copy` update transfers data from a source to a target graph, overwriting the latter in the process. Both the `:copy` and `:to` clauses consist of either an IRI, prefixed IRI or the `:default` keyword.
 
 The example:
 ```clojure
@@ -253,7 +253,7 @@ TO DEFAULT
 
 Reference: [3.2.4 MOVE](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#move)
 
-The `:move` update moves data from a source to a target graph, deleting the former and overwriting the latter. Both the `:move` and `:to` clauses consist of either an IRI or prefixed IRI or the `:default` keyword.
+The `:move` update moves data from a source to a target graph, deleting the former and overwriting the latter. Both the `:move` and `:to` clauses consist of either an IRI, prefixed IRI or the `:default` keyword.
 
 The example:
 ```clojure
@@ -270,7 +270,7 @@ TO DEFAULT
 
 Reference: [3.2.5 ADD](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#add)
 
-The `:add` update appends data from a source to a target graph. Both the `:add` and `:to` clauses consist of either an IRI or prefixed IRI or the `:default` keyword.
+The `:add` update appends data from a source to a target graph. Both the `:add` and `:to` clauses consist of either an IRI, prefixed IRI or the `:default` keyword.
 
 The example:
 ```clojure

@@ -6,7 +6,7 @@ SPARQL contains a number of clauses that can be used to specify default and name
 
 ### `:from`
 
-Used in queries, `:from` denotes the _default_ graph that the query operates on. Syntactically, the `:from` clause can be an IRI or prefixed, or a vector of **one** such IRI.
+Used in queries, `:from` denotes the _default_ graph that the query operates on. Syntactically, the `:from` clause can be an IRI or prefixed IRI, or a vector of **one** such IRI.
 
 The example:
 ```clojure
@@ -15,7 +15,7 @@ The example:
  :from     ["<http://my-default-graph.org/>"]
  :where    [[?x :foaf/name "Armin Arlet"]]}
 ```
-which becomes:
+becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 SELECT ?x
@@ -27,7 +27,7 @@ WHERE {
 
 ### `:from-named`
 
-Used in updates, `:from-named` denotes the _named_ graphs that the query can operate on. Syntactically, the `:from-named` clause is a vector of one or more IRIs or prefixed IRIs.
+Used in queries, `:from-named` denotes the _named_ graphs that the query can operate on. Syntactically, the `:from-named` clause is a vector of one or more IRIs or prefixed IRIs.
 
 The example:
 ```clojure
@@ -40,7 +40,7 @@ The example:
                       [[:graph "<http://my-named-graph.org/v2>"
                                [[?x :foaf/name "Armin Arlet"]]]]]]}
 ```
-which becomes:
+becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 SELECT ?x
@@ -98,7 +98,7 @@ WHERE {
 
 ### `:with`
 
-Used only in `:delete`/`:insert` updates, `:with` specifies the graph for the query. Syntactically, it consists an IRI or prefixed IRI that specifies the graph.
+Used only in `:delete`/`:insert` updates, `:with` specifies the graph being mutated by the update; it is similar to `:from` for queries. Syntactically, it consists an IRI or prefixed IRI that specifies the graph.
 
 The example:
 ```clojure

@@ -21,7 +21,7 @@ WHERE {
 }
 ```
 
-The other way to write a triple block in Flint is as a [normal form map](https://github.com/ont-app/igraph#normal-form) of the [IGraph protocol](https://github.com/ont-app/igraph). Each normal form map associates subjects with predicate-object maps, and each predicate-object map associates predicates with object sets. The example:
+The other way to write a triple block in Flint is the [normal form](https://github.com/ont-app/igraph#normal-form) of the [IGraph protocol](https://github.com/ont-app/igraph). Each normal form map associates subjects with predicate-object maps, and each predicate-object map associates predicates with object sets. The example:
 ```clojure
 {:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"}
  :select   [?name ?age]
@@ -126,7 +126,7 @@ Property paths act as syntactic sugar for predicate sequences in RDF graphs. A p
 | `?` | `(path)?` | `[path]`
 | `*` | `(path)*` | `[path]`
 | `+` | `(path)+` | `[path]`
-| `not` | `!neg-path` | `[neg-path]`
+| `not` | `!(neg-path)` | `[neg-path]`
 
 A `neg-path` is a subset of paths that can only include `alt` operations or IRIs. No other operations are allowed, even as args to `alt` ops.
 
@@ -137,7 +137,7 @@ An example of a query with a simple property path:
  :where    [{?x {:foaf/name #{"Eren Jaeger"}
                 (cat (* :foaf/knows) :foaf/name) #{?friendName}}}]}
 ```
-which becomes:
+becomes:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 SELECT ?friendName
