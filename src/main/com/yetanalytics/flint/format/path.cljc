@@ -11,7 +11,15 @@
   "Super-basic precedence comparison to wrap parens if there's an inner
    unary regex op, since paths like `a?*+` are illegal."
   [arg]
-  (if (re-matches #".*(\?|\*|\+)" arg)
+  (if (or (re-matches #".*(\?|\*|\+)" arg)
+          (re-matches #"\!.*" arg))
+    (str "(" arg ")")
+    arg))
+
+(defn- parens-if-nests-neg
+  "Similar to `parens-if-nests` but speficially for `!`."
+  [arg]
+  (if (re-matches #"\!.*" arg)
     (str "(" arg ")")
     arg))
 
@@ -23,7 +31,7 @@
     :?   (-> paths first parens-if-nests (str "?"))
     :*   (-> paths first parens-if-nests (str "*"))
     :+   (-> paths first parens-if-nests (str "+"))
-    :not (str "!" (cstr/join " | " paths))))
+    :not (->> paths first parens-if-nests-neg (str "!"))))
 
 (defmethod f/format-ast-node :path/terminal [_ [_ value]]
   value)
