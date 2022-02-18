@@ -61,7 +61,7 @@
        (map group-by-projected-vars)
        (filter some?)))
 
-(defmethod group-by-projected-vars :mod/expr [_] nil)
+(defmethod group-by-projected-vars :mod/group-expr [_] nil)
 
 (defmethod group-by-projected-vars :ax/var [[_ v]] v)
 

@@ -8,32 +8,45 @@
 
 (deftest format-modifier-test
   (testing "Formatting ORDER BY clauses"
+    (is (= "ORDER BY (?foo)"
+           (->> '[:order-by [[:mod/order-expr
+                              [:expr/terminal [:ax/var ?foo]]]]]
+                format-ast)))
     (is (= "ORDER BY (?foo + ?bar)"
-           (->> '[:order-by [[:mod/expr [:expr/branch
-                                         [[:expr/op +]
-                                          [:expr/args [[:expr/terminal [:ax/var ?foo]]
-                                                       [:expr/terminal [:ax/var ?bar]]]]]]]]]
+           (->> '[:order-by [[:mod/order-expr
+                              [:expr/branch
+                               [[:expr/op +]
+                                [:expr/args [[:expr/terminal [:ax/var ?foo]]
+                                             [:expr/terminal [:ax/var ?bar]]]]]]]]]
                 format-ast)))
     (is (= "ORDER BY ASC(?bar)"
            (->> '[:order-by [[:mod/asc-desc [[:mod/op asc]
-                                             [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]]
+                                             [:mod/asc-desc-expr [:expr/terminal [:ax/var ?bar]]]]]]]
+                format-ast)))
+    (is (= "ORDER BY ASC(?x + ?y)"
+           (->> '[:order-by [[:mod/asc-desc [[:mod/op asc]
+                                             [:mod/asc-desc-expr
+                                              [:expr/branch [[:expr/op +]
+                                                             [:expr/args [[:expr/terminal [:ax/var ?x]]
+                                                                          [:expr/terminal [:ax/var ?y]]]]]]]]]]]
                 format-ast)))
     (is (= "ORDER BY DESC(?bar)"
            (->> '[:order-by [[:mod/asc-desc [[:mod/op desc]
-                                             [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]]
+                                             [:mod/asc-desc-expr [:expr/terminal [:ax/var ?bar]]]]]]]
                 format-ast)))
     (is (= "ORDER BY (?a + ?b) ASC(?bar)"
-           (->> '[:order-by [[:mod/expr [:expr/branch
-                                         [[:expr/op +]
-                                          [:expr/args [[:expr/terminal [:ax/var ?a]]
-                                                       [:expr/terminal [:ax/var ?b]]]]]]]
+           (->> '[:order-by [[:mod/order-expr
+                              [:expr/branch
+                               [[:expr/op +]
+                                [:expr/args [[:expr/terminal [:ax/var ?a]]
+                                             [:expr/terminal [:ax/var ?b]]]]]]]
                              [:mod/asc-desc [[:mod/op asc]
-                                             [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]]
+                                             [:mod/asc-desc-expr [:expr/terminal [:ax/var ?bar]]]]]]]
                 format-ast)))
     (is (= "ORDER BY ?foo ASC(?bar)"
            (->> '[:order-by [[:ax/var ?foo]
                              [:mod/asc-desc [[:mod/op asc]
-                                             [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]]
+                                             [:mod/asc-desc-expr [:expr/terminal [:ax/var ?bar]]]]]]]
                 format-ast))))
   (testing "Formatting GROUP BY clauses"
     (is (= "GROUP BY ?foo"
@@ -43,20 +56,24 @@
            (->> '[:group-by [[:ax/var ?foo]
                              [:ax/var ?bar]]]
                 format-ast)))
+    ;; This is technically invalid since (?a + ?b) is not a fn call
     (is (= "GROUP BY (?a + ?b) (1 AS ?foo) ?bar"
-           (->> '[:group-by [[:mod/expr [:expr/branch
-                                         [[:expr/op +]
-                                          [:expr/args [[:expr/terminal [:ax/var ?a]]
-                                                       [:expr/terminal [:ax/var ?b]]]]]]]
+           (->> '[:group-by [[:mod/order-expr
+                              [:expr/branch
+                               [[:expr/op +]
+                                [:expr/args [[:expr/terminal [:ax/var ?a]]
+                                             [:expr/terminal [:ax/var ?b]]]]]]]
                              [:mod/expr-as-var [:expr/as-var [[:expr/terminal [:ax/num-lit 1]]
                                                               [:ax/var ?foo]]]]
                              [:ax/var ?bar]]]
                 format-ast))))
   (testing "Formatting HAVING clauses"
-    (is (= "HAVING 1 2 3"
+    (is (= "HAVING (1) (!true)"
            (->> '[:having [[:expr/terminal [:ax/num-lit 1]]
-                           [:expr/terminal [:ax/num-lit 2]]
-                           [:expr/terminal [:ax/num-lit 3]]]]
+                           [:expr/branch
+                            [[:expr/op not]
+                             [:expr/args [[:expr/terminal [:ax/bool-lit true]]]]]]
+                           ]]
                 format-ast))))
   (testing "Formatting LIMIT clauses"
     (is (= "LIMIT 10"

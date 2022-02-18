@@ -43,6 +43,7 @@
                             "        ?s10 ?p10 ?o10 ."
                             "    }"
                             "    BIND ((2 + 2) AS ?foo)"
+                            "    FILTER (!false)"
                             "    FILTER (2 = ?bar)"
                             "    FILTER ns:myfn(2, ?baz)"
                             "    VALUES (?x ?y) {"
@@ -92,6 +93,11 @@
                         ([:expr/terminal [:ax/num-lit 2]]
                          [:expr/terminal [:ax/num-lit 2]])]]]
                      [:ax/var ?foo]]]]
+                  [:where/filter
+                   [:expr/branch
+                    [[:expr/op not]
+                     [:expr/args
+                      ([:expr/terminal [:ax/bool-lit false]])]]]]
                   [:where/filter
                    [:expr/branch
                     [[:expr/op =]

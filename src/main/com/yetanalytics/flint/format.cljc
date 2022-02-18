@@ -7,6 +7,21 @@
 ;; Helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn bracketted-expr-str?
+  [s]
+  (boolean (re-matches #"\(.*\)" s)))
+
+(defn bracketted-or-fn-expr-str?
+  "Determine if a expression string represents a bracketted expression or
+   a function call."
+  [s]
+  (boolean (or (re-matches #"\(.*\)" s)
+               ;; Built-ins, IRI, and prefixed IRI functions
+               (re-matches #"[\<\w\-].*\(.*\)" s)
+               ;; (NOT) EXISTS doesn't use parens
+               (cstr/starts-with? s "EXISTS")
+               (cstr/starts-with? s "NOT EXISTS"))))
+
 (defn indent-str
   "Add 4 spaces after each line break (including at the beginning)."
   [s]

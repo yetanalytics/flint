@@ -18,12 +18,12 @@
            (s/conform ::ms/order-by '[?foo])))
     (is (= '[[:mod/asc-desc
               [[:mod/op asc]
-               [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]
+               [:mod/asc-desc-expr [:expr/terminal [:ax/var ?bar]]]]]]
            (s/conform ::ms/order-by '[(asc ?bar)])))
     (is (= '[[:ax/var ?foo]
              [:mod/asc-desc
               [[:mod/op asc]
-               [:mod/expr [:expr/terminal [:ax/var ?bar]]]]]]
+               [:mod/asc-desc-expr [:expr/terminal [:ax/var ?bar]]]]]]
            (s/conform ::ms/order-by '[?foo (asc ?bar)])))
     (is (= '[[:expr/terminal [:ax/num-lit 1]]
              [:expr/terminal [:ax/num-lit 2]]

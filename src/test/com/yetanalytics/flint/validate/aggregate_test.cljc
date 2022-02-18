@@ -12,7 +12,7 @@
       (is (= []
              (vv/group-by-projected-vars
               '[:group-by
-                [[:mod/expr [:expr/terminal [:ax/var ?x]]]]])))
+                [[:mod/group-expr [:expr/terminal [:ax/var ?x]]]]])))
       (is (= '[?x ?y ?z]
              (vv/group-by-projected-vars
               '[:group-by
