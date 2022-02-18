@@ -163,7 +163,7 @@ String-specific predicates are listed under [Strings and Language Maps](expr.md#
 | `md5` | `MD5` | `[expr]` | [17.4.6.1](https://www.w3.org/TR/sparql11-query/#func-md5)
 | `sha1` | `SHA1` | `[expr]` | [17.4.6.2](https://www.w3.org/TR/sparql11-query/#func-sha1)
 | `sha256` | `SHA256` | `[expr]` | [17.4.6.3](https://www.w3.org/TR/sparql11-query/#func-sha256)
-| `SHA384` | `SHA384` | `[expr]` | [17.4.6.4](https://www.w3.org/TR/sparql11-query/#func-sha384)
+| `sha384` | `SHA384` | `[expr]` | [17.4.6.4](https://www.w3.org/TR/sparql11-query/#func-sha384)
 | `sha512` | `SHA512` | `[expr]` | [17.4.6.5](https://www.w3.org/TR/sparql11-query/#func-sha512)
 
 ## Aggregate Expressions
