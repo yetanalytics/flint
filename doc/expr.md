@@ -39,7 +39,7 @@ The `in` and `not-in` operations are special boolean operations that are equival
 | `<` | `(expr < expr)` | `[expr expr]`
 | `>` | `(expr > expr)` | `[expr expr]`
 | `<=` | `(expr <= expr)` | `[expr expr]`
-| `?=` | `(expr >= expr)` | `[expr expr]`
+| `>=` | `(expr >= expr)` | `[expr expr]`
 | `+` | `(expr + expr + ...)` | `[expr & exprs]`
 | `-` | `(expr - expr - ...)` | `[expr & exprs]`
 | `*` | `(expr * expr * ...)` | `[expr & exprs]`
