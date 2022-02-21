@@ -11,6 +11,10 @@
       (is (s/valid? ::es/expr "bar"))
       (is (s/valid? ::es/expr 2))
       (is (s/valid? ::es/expr false))
+      (is (= [:expr/terminal [:ax/iri "<http://foo.org>"]]
+             (s/conform ::es/expr "<http://foo.org>")))
+      (is (= [:expr/terminal [:ax/prefix-iri :foo/bar]]
+             (s/conform ::es/expr :foo/bar)))
       (is (= [:expr/terminal [:ax/var '?foo]]
              (s/conform ::es/expr '?foo)))
       (is (= [:expr/terminal [:ax/dt-lit #inst "2022-01-19T22:20:49Z"]]

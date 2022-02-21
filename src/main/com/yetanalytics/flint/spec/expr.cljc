@@ -10,12 +10,14 @@
 (def expr-terminal-spec
   (s/and
    (comp not list?)
-   (s/or :ax/var      ax/variable?
-         :ax/num-lit  number?
-         :ax/bool-lit boolean?
-         :ax/str-lit  ax/valid-string?
-         :ax/lmap-lit ax/lang-map?
-         :ax/dt-lit   inst?)))
+   (s/or :ax/iri        ax/iri?
+         :ax/prefix-iri ax/prefix-iri?
+         :ax/var        ax/variable?
+         :ax/num-lit    number?
+         :ax/bool-lit   boolean?
+         :ax/str-lit    ax/valid-string?
+         :ax/lmap-lit   ax/lang-map?
+         :ax/dt-lit     inst?)))
 
 (def var-terminal-spec
   (s/or :expr/terminal

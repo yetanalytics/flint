@@ -8,7 +8,7 @@ SPARQL supports expressions, which can be used to compute values and filter quer
 - As part of a [`:group-by`](modifier.md#group-by) clause, either as a freestanding expression or in an `[expr var]` form.
 - To aggregate or compute values in a [`:select`](query.md#select), [`:order-by`](modifier.md#order-by) or [`:having`](modifier.md#having) clause.
 
-In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or a terminal, which can be a [variable](axiom.md#variables) or [literal](axiom.md#literals).
+In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or a terminal, which can be a [variable](axiom.md#variables), an [IRI](axiom.md#iris) or a [literal](axiom.md#literals).
 
 Other than certain exceptions, like `exists` and `not-exists`, non-terminal expressions only accept other expressions as arguments.
 
