@@ -29,8 +29,13 @@
 (defmethod f/format-ast-node :update/named-graph [_ [_ iri]]
   iri)
 
-(defmethod f/format-ast-node :triple/quads [{:keys [pretty?]} [_ [_ var-or-iri triples]]]
-  (str "GRAPH " var-or-iri " " (format-quads triples pretty?)))
+(defmethod f/format-ast-node :triple/quads
+  [_ [_ [var-or-iri triples-str]]]
+  (str "GRAPH " var-or-iri " " triples-str))
+
+(defmethod f/format-ast-node :triple/quad-triples
+  [{:keys [pretty?]} [_ triples]]
+  (format-quads triples pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs

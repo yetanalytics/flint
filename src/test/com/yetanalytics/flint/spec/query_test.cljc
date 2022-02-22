@@ -23,7 +23,7 @@
                                                        [:ax/var ?z]]]]]]
               [:order-by [[:mod/asc-desc
                            [[:mod/op asc]
-                            [:mod/expr [:expr/terminal [:ax/var ?y]]]]]]]
+                            [:mod/asc-desc-expr [:expr/terminal [:ax/var ?y]]]]]]]
               [:values [:values/map
                         [[[:ax/var ?z]]
                          [[[:ax/num-lit 1]]]]]]]]

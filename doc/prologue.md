@@ -21,7 +21,7 @@ WHERE {
 }
 ```
 
-**NOTE:** The SPARQL spec allows for multiple base IRIs to be defined, but this is not allowed in Flint. Having multiple base IRIs means that each set of IRIs after a base will use a different base IRI. Since this is mainly useful for defining different bases for IRI prefixes, which clashes with Flint's approach of one `:prefixes` map per query or update.
+**NOTE:** The SPARQL spec allows for multiple base IRIs to be defined, but this is not allowed in Flint. Having multiple base IRIs means that each set of IRIs after a base will use a different base IRI. This is mainly useful for defining different bases for IRI prefixes, which clashes with Flint's approach of one `:prefixes` map per query or update.
 
 ### `:prefixes`
 
@@ -33,7 +33,7 @@ The `:prefixes` map associates prefix keywords to IRI prefixes. In the following
  :where    [[?x :foaf/name "Dr. X"]
             [?y :bar ?z]]}
 ```
-both `:foaf/name` and `:bar` are prefixed IRIs that are resolvable thanks to their prefixes having been defined in the `:prefixes` map. Note the special prefix `:$`, which represents the "null" prefix; this allows for prefixed IRIs like `:bar` to be written without a namespace, while ensuring that it is still expandable to a full IRI. The above query translates to:
+both `:foaf/name` and `:bar` are prefixed IRIs that are resolvable thanks to prefixes defined in the `:prefixes` map. Note the special prefix `:$`, which represents the "null" prefix; `:$` allows for prefixed IRIs like `:bar` to be written without a namespace, while ensuring that they are still expandable. The above query translates to:
 ```sparql
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX :     <http://foo.org/>
@@ -43,4 +43,4 @@ WHERE {
     ?y :bar ?z
 }
 ```
-While in SPARQL each prefix-IRI pair is preceded by `PREFIX`, the `:prefixes` map approach is more idiomatic to Clojure.
+While in SPARQL each prefix-IRI pair is separately preceded by `PREFIX`, the `:prefixes` map approach is more idiomatic to Clojure.

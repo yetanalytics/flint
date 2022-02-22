@@ -3,15 +3,14 @@
 Reference: [17. Expressions and Testing Values](https://www.w3.org/TR/sparql11-query/#expressions)
 
 SPARQL supports expressions, which can be used to compute values and filter query results. In particular, expressions can be used in the following circumstances:
-
 - As part of a [`:filter`](where.md#filter) clause.
 - As part of a [`:bind`](where.md#bind) clause, in an `[expr var]` form.
 - As part of a [`:group-by`](modifier.md#group-by) clause, either as a freestanding expression or in an `[expr var]` form.
 - To aggregate or compute values in a [`:select`](query.md#select), [`:order-by`](modifier.md#order-by) or [`:having`](modifier.md#having) clause.
 
-In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or either a [variable](axiom.md#variables) or [literal](axiom.md#literals) terminal.
+In Flint, an expression is either a list of the form `(op expr...)`, similar to Clojure functions, or a terminal, which can be a [variable](axiom.md#variables), an [IRI](axiom.md#iris) or a [literal](axiom.md#literals).
 
-With certain exceptions, like `exists` and `not-exists`, expressions only accept other expressions as arguments.
+Other than certain exceptions, like `exists` and `not-exists`, non-terminal expressions only accept other expressions as arguments.
 
 The following is an example of an expression in Flint:
 ```clojure
@@ -22,11 +21,11 @@ which is translated into SPARQL as:
 IF((?x < ?y), STR(?x), (2 * (3 + 4)))
 ```
 
-**NOTE:** Due to the complexity of SPARQL type semantics, Flint does not make any attempt to typecheck or validate expression arguments or return values. However, Flint does restrict the use of certain expressions (namely aggregators) to particular clauses, as explained later.
+**NOTE:** Due to the complexity of SPARQL type semantics, Flint does not make any attempt to typecheck or validate expression arguments or return values.
 
 ## Boolean and Arithmetic Expressions
 
-SPARQL supports boolean and arithmetic operations, with accept one or more expressions and return boolean or numeric values. Like all expressions, boolean and arithmetic ops are written in Clojure's prefix order in Flint, but are translated to SPARQL's infix order. (The exceptions are the unary `not` operator, as well as SPARQL's unary `+` and `-`, which are not supported in Flint.)
+SPARQL supports boolean and arithmetic operations, with accept one or more expression arguments and return boolean or numeric values. Like all expressions, boolean and arithmetic operations are written in Clojure's prefix order in Flint, but are translated to SPARQL's infix order. (The exceptions are the unary `not` operator, as well as SPARQL's unary `+` and `-` that are not supported in Flint.)
 
 The `in` and `not-in` operations are special boolean operations that are equivalent to `(or (= expr expr1) (= expr expr2) ...)` and `(and (not= expr expr1) (not= expr expr2) ...)`, respectively.
 
@@ -40,7 +39,7 @@ The `in` and `not-in` operations are special boolean operations that are equival
 | `<` | `(expr < expr)` | `[expr expr]`
 | `>` | `(expr > expr)` | `[expr expr]`
 | `<=` | `(expr <= expr)` | `[expr expr]`
-| `?=` | `(expr >= expr)` | `[expr expr]`
+| `>=` | `(expr >= expr)` | `[expr expr]`
 | `+` | `(expr + expr + ...)` | `[expr & exprs]`
 | `-` | `(expr - expr - ...)` | `[expr & exprs]`
 | `*` | `(expr * expr * ...)` | `[expr & exprs]`
@@ -164,7 +163,7 @@ String-specific predicates are listed under [Strings and Language Maps](expr.md#
 | `md5` | `MD5` | `[expr]` | [17.4.6.1](https://www.w3.org/TR/sparql11-query/#func-md5)
 | `sha1` | `SHA1` | `[expr]` | [17.4.6.2](https://www.w3.org/TR/sparql11-query/#func-sha1)
 | `sha256` | `SHA256` | `[expr]` | [17.4.6.3](https://www.w3.org/TR/sparql11-query/#func-sha256)
-| `SHA384` | `SHA384` | `[expr]` | [17.4.6.4](https://www.w3.org/TR/sparql11-query/#func-sha384)
+| `sha384` | `SHA384` | `[expr]` | [17.4.6.4](https://www.w3.org/TR/sparql11-query/#func-sha384)
 | `sha512` | `SHA512` | `[expr]` | [17.4.6.5](https://www.w3.org/TR/sparql11-query/#func-sha512)
 
 ## Aggregate Expressions
@@ -181,7 +180,7 @@ Aggregates are special expressions that can only be used in `SELECT` (and its `D
 | `count` | `COUNT` | `[expr-or-wildcard & {:keys [distinct?]}]`
 | `group-concat` | `GROUP_CONCAT` | `[expr & {:keys [distinct? separator]}]`
 
-The `count` aggregate can accept either a normal expression or a wildcard, so both (for example) `(count ?x)` and `(count *)` are valid.
+The `count` aggregate can accept either an expression or a wildcard, e.g. both `(count ?x)` and `(count *)` are valid.
 
 Unlike other expressions, aggregates in Flint support keyword arguments. Every aggregate function supports the `:distinct?` keyword arg, which accepts a boolean value. If `:distinct?` is `true`, then `DISTINCT` is added to the arg list in SPARQL. The example,
 ```clojure
@@ -192,7 +191,7 @@ becomes
 SUM(DISTINCT ?x)
 ```
 
-`group-concat` also accepts the `:separator` keyword arg that takes a separator string. Both `:distinct?` and `:separator` can be supported in the same expression, so:
+`group-concat` also accepts the `:separator` keyword arg whose value is a separator string. Both `:distinct?` and `:separator` can be supported in the same expression, as so:
 ```clojure
 (group-concat ?y :distinct? true :separator ";")
 ```

@@ -61,7 +61,8 @@
 
 (def pred-novar-spec
   (s/or :ax/iri ax/iri?
-        :ax/prefix-iri ax/prefix-iri?))
+        :ax/prefix-iri ax/prefix-iri?
+        :ax/rdf-type ax/rdf-type?))
 
 ;; Objects
 
@@ -158,7 +159,7 @@
   (make-pred-objs-spec pred-nopath-spec obj-set-noblank-spec))
 
 (def pred-objs-novar-noblank-spec
-  (make-pred-objs-spec pred-nopath-spec obj-set-novar-noblank-spec))
+  (make-pred-objs-spec pred-novar-spec obj-set-novar-noblank-spec))
 
 ;; Subject Predicate Object
 
@@ -199,4 +200,4 @@
   (s/tuple subj-noblank-spec pred-nopath-spec obj-noblank-spec))
 
 (def triple-vec-novar-noblank-spec
-  (s/tuple subj-novar-noblank-spec pred-nopath-spec obj-novar-noblank-spec))
+  (s/tuple subj-novar-noblank-spec pred-novar-spec obj-novar-noblank-spec))

@@ -45,7 +45,9 @@
   (str "SERVICE SILENT " iri " " pattern))
 
 (defmethod f/format-ast-node :where/filter [_ [_ expr]]
-  (str "FILTER " expr))
+  (if (f/bracketted-or-fn-expr-str? expr)
+    (str "FILTER " expr)
+    (str "FILTER (" expr ")")))
 
 (defmethod f/format-ast-node :where/bind [_ [_ expr-as-var]]
   (str "BIND (" expr-as-var ")"))

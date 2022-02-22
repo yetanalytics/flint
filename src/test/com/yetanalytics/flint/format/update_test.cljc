@@ -25,11 +25,12 @@
                             "}"])
            (->> '[:update/delete-data
                   [[:delete-data
-                    [[:triple/quads [:graph
-                                     [:ax/iri "<http://example.org>"]
-                                     [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                                    [:ax/prefix-iri :dc/title]
-                                                    [:ax/str-lit "Title"]]]]]]]]]]
+                    [[:triple/quads
+                      [[:ax/iri "<http://example.org>"]
+                       [:triple/quad-triples
+                        [[:triple/vec [[:ax/prefix-iri :foo/x]
+                                       [:ax/prefix-iri :dc/title]
+                                       [:ax/str-lit "Title"]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE WHERE clauses"
     (is (= (cstr/join "\n" ["DELETE WHERE {"
@@ -61,9 +62,9 @@
                                      [:triple/po [[[:ax/var ?p]
                                                    [:triple/o [[:ax/var ?o]]]]]]]]]]
                      [:triple/quads
-                      [:graph
-                       [:ax/iri "<http://example.org>"]
-                       [[:triple/vec [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]
+                      [[:ax/iri "<http://example.org>"]
+                       [:triple/quad-triples
+                        [[:triple/vec [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE...INSERT clauses"
     (is (= (cstr/join "\n" ["INSERT {"

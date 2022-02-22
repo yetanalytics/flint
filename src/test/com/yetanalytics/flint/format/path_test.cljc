@@ -64,6 +64,31 @@
                                    [:path/paths [[:path/branch
                                                   [[:path/op ?]
                                                    [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
+                format-ast)))
+    (is (= "(!a)*"
+           (->> '[:path/branch
+                  [[:path/op *]
+                   [:path/paths [[:path/branch
+                                  [[:path/op not]
+                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]
+                format-ast)))
+    (is (= "((!a)*)?"
+           (->> '[:path/branch
+                  [[:path/op ?]
+                   [:path/paths [[:path/branch
+                                  [[:path/op *]
+                                   [:path/paths [[:path/branch
+                                                  [[:path/op not]
+                                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
+                format-ast)))
+    (is (= "!(!(!a))"
+           (->> '[:path/branch
+                  [[:path/op not]
+                   [:path/paths [[:path/branch
+                                  [[:path/op not]
+                                   [:path/paths [[:path/branch
+                                                  [[:path/op not]
+                                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
                 format-ast)))))
 
 (deftest format-invalid-test

@@ -2,7 +2,7 @@
 
 The following clauses are used at the top level of SPARQL query maps and are used to modify the solution or introduce new values. These modifiers include:
 
-- Inline values
+- Inlining values
   - [`:values`](modifier.md#values)
 - Grouping
   - [`:group-by`](modifier.md#group-by)
@@ -23,7 +23,7 @@ The `:values` clause associates values to variables in an inline fashion; it can
 - A literal value (number, string, etc.)
 - `nil`, which then becomes `UNDEF` during SPARQL translation.
 
-In Flint, the clause can be written in two ways. The first format follows how they are written in SPARQL, as a mapping of a variable vector to a collection of value vectors. For The example:
+In Flint, the clause can be written in two ways. The first format follows how they are written in SPARQL, as a mapping of a single variable vector to a collection of value vectors. For The example:
 ```clojure
 {:values {[?x ?y] [[:uri1 1] [:uri2 nil]]}}
 ```
@@ -36,15 +36,13 @@ VALUES (?x ?y) {
 ```
 which closely matches the original Clojure.
 
-However, there is a second format that is more idiomatic to Clojure - instead of having a singleton map between colls, each variable is a key to its own collection of values. In this way, the equivalent `:values` clause is:
+However, there is a second format that is more idiomatic to Clojure, where each variable is a key to its own collection of values. In this format, the equivalent `:values` clause is:
 ```clojure
 {:values {?x [:uri1 :uri2] ?y [1 nil]}}
 ```
-which then gets translated into the same SPARQL string.
+which is then translated into the same SPARQL string.
 
-A value can be one of the following:
-
-**NOTE:** In the first format, the number of variables must be equal to the number of value vectors. In addition, in both format the length of each value vector (including `nil` entries) must be the same.
+**NOTE:** In the first format, the number of variables must be equal to the number of value vectors. In addition, in both formats the length of each value vector (including `nil` entries) must be the same.
 
 The example:
 ```clojure
@@ -144,7 +142,7 @@ HAVING CONTAINS(STR(?org), "survey-corps")
 
 Reference: [15.1 ORDER BY](https://www.w3.org/TR/sparql11-query/#modOrderBy)
 
-An `:order-by` clause orders the result set. Syntactically, it consists of a vector of one or more of the following:
+An `:order-by` clause orders the results. Syntactically, it consists of a vector of one or more of the following:
 - Variables
 - Expressions (including aggregates)
 - `(asc expr)` or `(desc expr)` forms.
@@ -172,7 +170,7 @@ ORDER BY ASC(?age)
 
 Reference: [15.4 OFFSET](https://www.w3.org/TR/sparql11-query/#modOffset)
 
-The `:offset` clause adds a pagination offset to the result set. Syntactically, it must be an integer.
+The `:offset` clause adds a pagination offset to the results. Syntactically, it must be an integer.
 
 The example:
 ```clojure
@@ -195,7 +193,7 @@ OFFSET 2
 
 Reference: [15.5 LIMIT](https://www.w3.org/TR/sparql11-query/#modResultLimit)
 
-The `:limit` clause limits the size of the result set. Syntactically, it must be a non-negative integer.
+The `:limit` clause limits the number of results returned. Syntactically, it must be a non-negative integer.
 
 The example:
 ```clojure
