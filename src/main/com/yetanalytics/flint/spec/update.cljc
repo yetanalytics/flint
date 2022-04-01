@@ -46,24 +46,8 @@
     (- n1 n2)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Helper specs
+;; Quad specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def graph-or-default-spec
-  (s/or :update/default-graph #{:default}
-        :update/named-graph ax/iri-spec))
-
-(s/def ::to graph-or-default-spec)
-
-(s/def ::into ax/iri-spec)
-
-(s/def ::with ax/iri-spec)
-
-(s/def ::using
-  (s/or :update/iri ax/iri-spec
-        :update/named-iri (s/tuple #{:named} ax/iri-spec)))
-
-;; Quads
 
 (def triples-spec
   (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
@@ -137,7 +121,26 @@
 ;; Graph Management specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Techically LOAD and CLEAR are graph update, not graph management, updates,
+;; but we include them here since they look similar.
+
 ;; Cannot use `s/merge` since conformance does not work properly with it
+
+(def graph-spec
+  ;; `s/or` used for conforming into AST node
+  (s/or :update/graph (s/tuple #{:graph} ax/iri-spec)))
+
+(def graph-or-keyword-spec
+  ;; Need to put keywords first or else Flint will think they're
+  ;; prefixed IRIs
+  (s/or :update/default #{:default}
+        :update/named   #{:named}
+        :update/all     #{:all}
+        :update/graph   (s/tuple #{:graph} ax/iri-spec)))
+
+;; LOAD
+
+(s/def ::into graph-spec)
 
 (s/def ::load ax/iri-spec)
 (s/def ::load-silent ::load)
@@ -147,10 +150,9 @@
                :opt-un [::ps/base ::ps/prefixes ::into]
                :key-comp-fn key-comp))
 
-(s/def ::clear
-  (s/or :ax/iri    ax/iri-spec
-        :update/kw #{:default :named :all}))
+;; CLEAR
 
+(s/def ::clear graph-or-keyword-spec)
 (s/def ::clear-silent ::clear)
 
 (def clear-update-spec
@@ -158,18 +160,9 @@
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
-(s/def ::drop
-  (s/or :ax/iri    ax/iri-spec
-        :update/kw #{:default :named :all}))
+;; CREATE
 
-(s/def ::drop-silent ::drop)
-
-(def drop-update-spec
-  (sparql-keys :req-un [(or ::drop ::drop-silent)]
-               :opt-un [::ps/base ::ps/prefixes]
-               :key-comp-fn key-comp))
-
-(s/def ::create ax/iri-spec)
+(s/def ::create graph-spec)
 (s/def ::create-silent ::create)
 
 (def create-update-spec
@@ -177,11 +170,32 @@
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
-(s/def ::add graph-or-default-spec)
-(s/def ::add-silent ::add)
+;; DROP
 
-(def add-update-spec
-  (sparql-keys :req-un [(or ::add ::add-silent) ::to]
+(s/def ::drop graph-or-keyword-spec)
+(s/def ::drop-silent ::drop)
+
+(def drop-update-spec
+  (sparql-keys :req-un [(or ::drop ::drop-silent)]
+               :opt-un [::ps/base ::ps/prefixes]
+               :key-comp-fn key-comp))
+
+;; COPY, MOVE, and ADD
+
+(def graph-or-default-spec
+  ;; Need to put :default first or else Flint will think it's a
+  ;; prefixed IRI
+  (s/or :update/default     #{:default}
+        :update/graph-notag ax/iri-spec ; GRAPH keyword not required here
+        :update/graph       (s/tuple #{:graph} ax/iri-spec)))
+
+(s/def ::to graph-or-default-spec)
+
+(s/def ::copy graph-or-default-spec)
+(s/def ::copy-silent ::copy)
+
+(def copy-update-spec
+  (sparql-keys :req-un [(or ::copy ::copy-silent) ::to]
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
@@ -193,17 +207,19 @@
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
-(s/def ::copy graph-or-default-spec)
-(s/def ::copy-silent ::copy)
+(s/def ::add graph-or-default-spec)
+(s/def ::add-silent ::add)
 
-(def copy-update-spec
-  (sparql-keys :req-un [(or ::copy ::copy-silent) ::to]
+(def add-update-spec
+  (sparql-keys :req-un [(or ::add ::add-silent) ::to]
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Update specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; INSERT DATA
 
 (s/def ::insert-data triple-or-quads-novar-spec)
 
@@ -212,6 +228,8 @@
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
+;; DELETE DATA
+
 (s/def ::delete-data triple-or-quads-novar-noblank-spec)
 
 (def delete-data-update-spec
@@ -219,12 +237,22 @@
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
 
+;; DELETE WHERE
+
 (s/def ::delete-where triple-or-quads-noblank-spec)
 
 (def delete-where-update-spec
   (sparql-keys :req-un [::delete-where]
                :opt-un [::ps/base ::ps/prefixes]
                :key-comp-fn key-comp))
+
+;; DELETE/INSERT
+
+(s/def ::with ax/iri-spec)
+
+(s/def ::using
+  (s/or :update/iri ax/iri-spec
+        :update/named-iri (s/tuple #{:named} ax/iri-spec)))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-noblank-spec)
@@ -245,13 +273,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def update-spec
-  (s/or :update/load   load-update-spec
-        :update/clear  clear-update-spec
-        :update/drop   drop-update-spec
-        :update/create create-update-spec
-        :update/add    add-update-spec
-        :update/move   move-update-spec
-        :update/copy   copy-update-spec
+  (s/or :update/load         load-update-spec
+        :update/clear        clear-update-spec
+        :update/drop         drop-update-spec
+        :update/create       create-update-spec
+        :update/add          add-update-spec
+        :update/move         move-update-spec
+        :update/copy         copy-update-spec
         :update/insert-data  insert-data-update-spec
         :update/delete-data  delete-data-update-spec
         :update/delete-where delete-where-update-spec

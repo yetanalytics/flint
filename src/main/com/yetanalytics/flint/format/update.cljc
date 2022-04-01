@@ -6,28 +6,14 @@
             [com.yetanalytics.flint.format.triple]
             [com.yetanalytics.flint.format.where]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Quads
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn- format-quads [quads pretty?]
   (-> quads
       (f/join-clauses pretty?)
       (f/wrap-in-braces pretty?)))
-
-(defmethod f/format-ast-node :update/kw [_ [_ kw]]
-  (case kw
-    :default "DEFAULT"
-    :named   "NAMED"
-    :all     "ALL"))
-
-(defmethod f/format-ast-node :update/iri [_ [_ iri]]
-  iri)
-
-(defmethod f/format-ast-node :update/named-iri [_ [_ [_ iri]]]
-  (str "NAMED " iri))
-
-(defmethod f/format-ast-node :update/default-graph [_ _]
-  "DEFAULT")
-
-(defmethod f/format-ast-node :update/named-graph [_ [_ iri]]
-  iri)
 
 (defmethod f/format-ast-node :triple/quads
   [_ [_ [var-or-iri triples-str]]]
@@ -38,8 +24,27 @@
   (format-quads triples pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Graph Management specs
+;; Graph Management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; This always exists as part of `:update/graph`
+(defmethod f/format-ast-node :graph [_ [_ graph-iri]]
+  graph-iri)
+
+(defmethod f/format-ast-node :update/graph [_ [_ graph]]
+  (str "GRAPH " graph))
+
+(defmethod f/format-ast-node :update/graph-notag [_ [_ graph-iri]]
+  graph-iri)
+
+(defmethod f/format-ast-node :update/default [_ _]
+  "DEFAULT")
+
+(defmethod f/format-ast-node :update/named [_ _]
+  "NAMED")
+
+(defmethod f/format-ast-node :update/all [_ _]
+  "ALL")
 
 (defmethod f/format-ast-node :into [_ [_ in]]
   (str "INTO " in))
@@ -111,8 +116,14 @@
   (f/join-clauses copy-update pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Graph Management specs
+;; Graph Update
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod f/format-ast-node :update/iri [_ [_ iri]]
+  iri)
+
+(defmethod f/format-ast-node :update/named-iri [_ [_ [_ iri]]]
+  (str "NAMED " iri))
 
 (defmethod f/format-ast-node :using [_ [_ using]]
   (str "USING " using))
