@@ -161,17 +161,17 @@ DELETE WHERE {
 
 Reference: [3.1.4 LOAD](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#load)
 
-The `:load` update loads triples from a source specified by an IRI. The `:load` clause is followed by an optional `:into` clause (if the latter is omitted the data is loaded into the default graph). Syntactically, both the `:load` and `:into` clauses consist of an IRI or prefixed IRI.
+The `:load` update loads triples from a source specified by an IRI. The `:load` clause is followed by an optional `:into` clause (if the latter is omitted the data is loaded into the default graph). Syntactically, the `:load` clause consists of an IRI, while the `:into` clause consists of a `[:graph iri]` pair.
 
 The example:
 ```clojure
 {:load "<file:marleycensus/data.rdf>"
- :into "<http://census.marley/data>"}
+ :into [:graph "<http://census.marley/data>"]}
 ```
 becomes:
 ```sparql
 LOAD <file:marleycensus/data.rdf>
-INTO <http://census.marley/data>
+INTO GRAPH <http://census.marley/data>
 ```
 
 Example of silent mode:
@@ -189,56 +189,79 @@ INTO <http://census.marley/data>
 
 Reference: [3.1.5 CLEAR](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#clear)
 
-The `:clear` update is used to clear all data from one or more RDF graphs. Syntactically, the `:clear` clause consists of either an IRI, prefixed IRI, `:default`, `:named`, or `:all`.
+The `:clear` update is used to clear all data from one or more RDF graphs. Syntactically, the `:clear` clause consists of either a `[:graph iri]` pair, `:default`, `:named`, or `:all`.
 
-The example:
+The example sequence of `:clear` updates:
 ```clojure
-{:clear :default}
+[{:clear [:graph "<http://census.marley/data>"]}
+ {:clear :default}
+ {:clear :named}
+ {:clear :all}]
 ```
 becomes:
 ```sparql
-CLEAR DEFAULT
+CLEAR GRAPH <http://census.marley/data>;
+CLEAR DEFAULT;
+CLEAR NAMED;
+CLEAR ALL
 ```
 
 ### `:create`/`:create-silent`
 
 Reference: [3.2.1 CREATE](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#create)
 
-The `:create` update creates a new empty graph in an RDF store. The `:create` clause consists of the IRI or prefixed IRI of the new graph.
+The `:create` update creates a new empty graph in an RDF store. The `:create` clause consists of a `[:graph iri]`.
 
 The example:
 ```clojure
 {:prefixes {:census "<http://census.marley/>"
- :create   :census/data}}
+ :create   [:graph :census/data]}}
 ```
 becomes:
 ```sparql
 PREFIX census: <http://census.marley/>
-CREATE census:data
+CREATE GRAPH census:data
 ```
 
 ### `:drop`/`:drop-silent`
 
 Reference: [3.2.2 DROP](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#drop)
 
-The `:drop` update deletes one or more graphs in an RDF store. The `:drop` clause consists of either an IRI, prefixed IRI, `:default`, `:named`, or `:all`.
+The `:drop` update deletes one or more graphs in an RDF store. The `:drop` clause consists of either a `[:graph iri]` pair, `:default`, `:named`, or `:all`.
 
-The example:
+The example sequence of `:drop` updates:
 ```clojure
-{:drop :default}
+[{:drop [:graph "<http://census.marley/data>"]}
+ {:drop :default}
+ {:drop :named}
+ {:drop :all}]
 ```
 becomes:
 ```sparql
-DROP DEFAULT
+DROP GRAPH <http://census.marley/data>;
+DROP DEFAULT;
+DROP NAMED;
+DROP ALL
 ```
 
 ### `:copy`/`:copy-silent` and `:to`
 
 Reference: [3.2.3 COPY](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#copy)
 
-The `:copy` update transfers data from a source to a target graph, overwriting the latter in the process. Both the `:copy` and `:to` clauses consist of either an IRI, prefixed IRI or the `:default` keyword.
+The `:copy` update transfers data from a source to a target graph, overwriting the latter in the process. Both the `:copy` and `:to` clauses consist of either an IRI or the `:default` keyword.
 
 The example:
+```clojure
+{:copy [:graph "<http://census.marley/data>"]
+ :to   :default}
+```
+becomes:
+```sparql
+COPY GRAPH <http://census.marley/data>
+TO DEFAULT
+```
+
+Note that the `:graph` keyword is optional. The example:
 ```clojure
 {:copy "<http://census.marley/data>"
  :to   :default}
@@ -253,9 +276,20 @@ TO DEFAULT
 
 Reference: [3.2.4 MOVE](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#move)
 
-The `:move` update moves data from a source to a target graph, deleting the former and overwriting the latter. Both the `:move` and `:to` clauses consist of either an IRI, prefixed IRI or the `:default` keyword.
+The `:move` update moves data from a source to a target graph, deleting the former and overwriting the latter. Both the `:move` and `:to` clauses consist of either an IRI or the `:default` keyword.
 
 The example:
+```clojure
+{:move [:graph "<http://census.marley/data>"]
+ :to   :default}
+```
+becomes:
+```sparql
+MOVE GRAPH <http://census.marley/data>
+TO DEFAULT
+```
+
+Note that the `:graph` keyword is optional. The example:
 ```clojure
 {:move "<http://census.marley/data>"
  :to   :default}
@@ -270,9 +304,20 @@ TO DEFAULT
 
 Reference: [3.2.5 ADD](https://www.w3.org/TR/2013/REC-sparql11-update-20130321/#add)
 
-The `:add` update appends data from a source to a target graph. Both the `:add` and `:to` clauses consist of either an IRI, prefixed IRI or the `:default` keyword.
+The `:add` update appends data from a source to a target graph. Both the `:add` and `:to` clauses consist of either an IRI or the `:default` keyword.
 
 The example:
+```clojure
+{:move [:graph "<http://census.marley/data>"]
+ :to   :default}
+```
+becomes:
+```sparql
+MOVE GRAPH <http://census.marley/data>
+TO DEFAULT
+```
+
+Note that the `:graph` keyword is optional. The example:
 ```clojure
 {:add "<http://census.marley/data>"
  :to  :default}
