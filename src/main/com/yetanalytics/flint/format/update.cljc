@@ -27,15 +27,11 @@
 ;; Graph Management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; This always exists as part of `:update/graph`
-(defmethod f/format-ast-node :graph [_ [_ graph-iri]]
-  graph-iri)
-
 (defmethod f/format-ast-node :update/graph [_ [_ graph]]
   (str "GRAPH " graph))
 
-(defmethod f/format-ast-node :update/graph-notag [_ [_ graph-iri]]
-  graph-iri)
+(defmethod f/format-ast-node :update/graph-notag [_ [_ graph]]
+  graph)
 
 (defmethod f/format-ast-node :update/default [_ _]
   "DEFAULT")
