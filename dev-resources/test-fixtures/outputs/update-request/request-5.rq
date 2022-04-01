@@ -1,0 +1,29 @@
+CREATE SILENT GRAPH <http://graphs.com/1>;
+LOAD SILENT <http://src.org>
+INTO GRAPH <http://graphs.com/2>;
+COPY SILENT <http://graphs.com/1>
+TO <http://graphs.com/2>;
+COPY SILENT DEFAULT
+TO GRAPH <http://graphs.com/2>;
+COPY SILENT GRAPH <http://graphs.com/1>
+TO DEFAULT;
+ADD SILENT GRAPH <http://graphs.com/1>
+TO GRAPH <http://graphs.com/2>;
+ADD SILENT DEFAULT
+TO <http://graphs.com/2>;
+ADD SILENT GRAPH <http://graphs.com/1>
+TO DEFAULT;
+MOVE SILENT GRAPH <http://graphs.com/1>
+TO GRAPH <http://graphs.com/2>;
+MOVE SILENT DEFAULT
+TO GRAPH <http://graphs.com/2>;
+MOVE SILENT <http://graphs.com/1>
+TO DEFAULT;
+CLEAR SILENT GRAPH <http://graphs.com/2>;
+CLEAR SILENT DEFAULT;
+CLEAR SILENT NAMED;
+CLEAR SILENT ALL;
+DROP SILENT GRAPH <http://graphs.com/1>;
+DROP SILENT DEFAULT;
+DROP SILENT NAMED;
+DROP SILENT ALL
