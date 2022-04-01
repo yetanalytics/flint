@@ -27,11 +27,11 @@
 ;; Graph Management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod f/format-ast-node :update/graph [_ [_ graph]]
-  (str "GRAPH " graph))
+(defmethod f/format-ast-node :update/graph [_ [_ [_graph-kw graph-iri]]]
+  (str "GRAPH " graph-iri))
 
-(defmethod f/format-ast-node :update/graph-notag [_ [_ graph]]
-  graph)
+(defmethod f/format-ast-node :update/graph-notag [_ [_ graph-iri]]
+  graph-iri)
 
 (defmethod f/format-ast-node :update/default [_ _]
   "DEFAULT")
@@ -118,7 +118,7 @@
 (defmethod f/format-ast-node :update/iri [_ [_ iri]]
   iri)
 
-(defmethod f/format-ast-node :update/named-iri [_ [_ [_ iri]]]
+(defmethod f/format-ast-node :update/named-iri [_ [_ [_named-kw iri]]]
   (str "NAMED " iri))
 
 (defmethod f/format-ast-node :using [_ [_ using]]
