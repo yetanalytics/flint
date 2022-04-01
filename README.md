@@ -14,7 +14,7 @@ A Clojure(Script) DSL for creating SPARQL query and update strings.
 Add the following to your `deps.edn` map.
 
 ```clojure
-com.yetanalytics/flint {:mvn/version "0.1.1"
+com.yetanalytics/flint {:mvn/version "0.1.2"
                         :exclusions [org.clojure/clojure
                                      org.clojure/clojurescript]}
 ```
