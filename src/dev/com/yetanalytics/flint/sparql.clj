@@ -119,8 +119,9 @@
     ADD DEFAULT TO GRAPH <http://graphs.com/2>;
     ADD GRAPH <http://graphs.com/1> TO DEFAULT;
     MOVE GRAPH <http://graphs.com/2> TO DEFAULT;
+    MOVE DEFAULT TO GRAPH <http://graphs.com/2>;
     MOVE GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
-    CLEAR GRAPH  <http://graphs.com/2>;
+    CLEAR GRAPH <http://graphs.com/2>;
     CLEAR DEFAULT;
     CLEAR NAMED;
     CLEAR ALL;
