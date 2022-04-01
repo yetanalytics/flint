@@ -30,4 +30,4 @@
 
 (deftest update-request-tests
   (make-tests (s/coll-of us/update-spec)
-              "dev-resources/test-fixtures/inputs/update-request/"))
+              "dev-resources/test-fixtures/inputs/update-seq/"))

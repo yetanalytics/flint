@@ -70,9 +70,9 @@
 
 (deftest update-request-tests
   (make-format-tests format-updates
-                     "dev-resources/test-fixtures/inputs/update-request/")
+                     "dev-resources/test-fixtures/inputs/update-seq/")
   (make-format-pretty-tests (fn [ups] (format-updates ups :pretty? true))
-                            "dev-resources/test-fixtures/inputs/update-request/"))
+                            "dev-resources/test-fixtures/inputs/update-seq/"))
 
 (deftest exception-tests
   (testing "API functions throwing exceptions"
