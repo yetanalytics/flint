@@ -56,16 +56,28 @@
     (is (not (ax/bnode? '_你好))))
   (testing "strings"
     (is (ax/valid-string? "foo bar"))
-    (testing "- unsanitary input rejected"
-      (is (not (ax/valid-string? "\"foo\"")))
-      (is (not (ax/valid-string? "foo\\bar")))
-      (is (not (ax/valid-string? "foo\nbar")))
-      (is (not (ax/valid-string? "foo\rbar"))))
-    (testing "- escaped input ok"
-      (is (ax/valid-string? "\\\"foo\\\""))
-      (is (ax/valid-string? "foo\\\\bar"))
-      (is (ax/valid-string? "foo\\\nbar"))
-      (is (ax/valid-string? "foo\\\rbar"))))
+    (testing "- double quotes"
+      (is (not (ax/valid-string? "\"")))
+      (is (ax/valid-string? "\\\"")))
+    (testing "- back slashes"
+      (is (not (ax/valid-string? "\\")))
+      (is (ax/valid-string? "\\\\")))
+    (testing "- line breaks"
+      (is (not (ax/valid-string? "\n")))
+      (is (not (ax/valid-string? "\\\n")))
+      (is (ax/valid-string? "\\n"))
+      (is (ax/valid-string? "\\\\n")))
+    (testing "- carriage returns"
+      (is (not (ax/valid-string? "\r")))
+      (is (not (ax/valid-string? "\\\r")))
+      (is (ax/valid-string? "\\r"))
+      (is (ax/valid-string? "\\\\r")))
+    (testing "- other escape input"
+      (is (ax/valid-string? "\\t"))
+      (is (ax/valid-string? "\\b"))
+      (is (ax/valid-string? "\\f"))
+      (is (not (ax/valid-string? "\\a")))
+      (is (not (ax/valid-string? "\\2")))))
   (testing "lang maps"
     (is (ax/lang-map? {:en "foo"}))
     (is (ax/lang-map? {:not-a-real-ltag "bar"}))

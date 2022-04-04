@@ -25,6 +25,8 @@
            (f/format-ast-node {} [:ax/rdf-type :a])))
     (is (= "\"My String\""
            (f/format-ast-node {} [:ax/str-lit "My String"])))
+    (is (= "\"foo\\nbar\\rbaz\""
+           (f/format-ast-node {} [:ax/str-lit "foo\\nbar\\rbaz"])))
     (is (= "\"My String\"@en"
            (f/format-ast-node {} [:ax/lmap-lit {:en "My String"}])))
     (is (= "123"

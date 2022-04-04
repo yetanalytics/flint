@@ -1,0 +1,4 @@
+SELECT ?v
+WHERE {
+    ?v ?p "\"foo\"\n\'bar\'\r" .
+}
