@@ -69,23 +69,6 @@
   (boolean (and (string? x)
                 (re-matches valid-str-regex x))))
 
-(comment
-  (println "\n")
-  (println "\\n")
-  (println "\\\n")
-  (println "\\\\n")
-
-  #?(:clj
-     (seq (char-array "\n"))
-     (seq (char-array "\\n"))
-     (seq (char-array "\\\n"))
-     (seq (char-array "\\\\n")))
-  (valid-string? "\n")
-  (valid-string? "\\n")
-  (valid-string? "\\\n")
-  (valid-string? "\\\\n")
-  )
-
 (defn lang-map?
   "Is `x` a singleton map between a language tag and valid string?"
   [x]
