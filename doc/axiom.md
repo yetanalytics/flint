@@ -92,9 +92,9 @@ Booleans are not transformed during SPARQL translation beyond stringification.
 
 ### Simple strings
 
-Examples: `"Hello World!"`, `"你好世界"`, `"cat: \"meow\""`
+Examples: `"Hello World!"`, `"你好世界"`, `"cat: \\\"meow\\\""`, `"foo\\nbar"`
 
-In Flint, string literals can contain any characters **except** unescaped line breaks, carriage returns, backslashes, or double quotes; this is in order to prevent SPARQL injection attacks. Strings are not transformed during SPARQL translation.
+In Flint, string literals can contain any characters **except** unescaped line breaks, carriage returns, backslashes, or double quotes; this is in order to prevent SPARQL injection attacks. (Therefore strings like `"cat: \"meow\"` and `"foo\nbar"` are not allowed.) Strings are not transformed during SPARQL translation.
 
 ### Language-tagged strings
 
