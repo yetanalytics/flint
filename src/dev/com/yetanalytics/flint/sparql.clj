@@ -107,3 +107,45 @@
     
     BASE <http://baz.org/>
     DELETE WHERE { ?x <qux> ?y }"))
+
+(comment
+  (UpdateFactory/create
+   "CREATE GRAPH <http://graphs.com/1>;
+    LOAD <http://foo.org> INTO GRAPH <http://graphs.com/2>;
+    COPY GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
+    COPY DEFAULT TO GRAPH <http://graphs.com/2>;
+    COPY GRAPH <http://graphs.com/1> TO DEFAULT;
+    ADD GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
+    ADD DEFAULT TO GRAPH <http://graphs.com/2>;
+    ADD GRAPH <http://graphs.com/1> TO DEFAULT;
+    MOVE GRAPH <http://graphs.com/2> TO DEFAULT;
+    MOVE DEFAULT TO GRAPH <http://graphs.com/2>;
+    MOVE GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
+    CLEAR GRAPH <http://graphs.com/2>;
+    CLEAR DEFAULT;
+    CLEAR NAMED;
+    CLEAR ALL;
+    DROP GRAPH  <http://graphs.com/2>;
+    DROP DEFAULT;
+    DROP NAMED;
+    DROP ALL;")
+  
+  (UpdateFactory/create
+   "CREATE SILENT GRAPH <http://graphs.com/1>;
+    LOAD SILENT <http://foo.org> INTO GRAPH <http://graphs.com/2>;
+    COPY SILENT GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
+    COPY SILENT DEFAULT TO GRAPH <http://graphs.com/2>;
+    COPY SILENT GRAPH <http://graphs.com/1> TO DEFAULT;
+    ADD SILENT GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
+    ADD SILENT DEFAULT TO GRAPH <http://graphs.com/2>;
+    ADD SILENT GRAPH <http://graphs.com/1> TO DEFAULT;
+    MOVE SILENT GRAPH <http://graphs.com/2> TO DEFAULT;
+    MOVE SILENT GRAPH <http://graphs.com/1> TO GRAPH <http://graphs.com/2>;
+    CLEAR SILENT GRAPH  <http://graphs.com/2>;
+    CLEAR SILENT DEFAULT;
+    CLEAR SILENT NAMED;
+    CLEAR SILENT ALL;
+    DROP SILENT GRAPH  <http://graphs.com/2>;
+    DROP SILENT DEFAULT;
+    DROP SILENT NAMED;
+    DROP SILENT ALL;"))

@@ -1,0 +1,30 @@
+;; All the graph management updates, silent mode
+[{:create-silent [:graph "<http://graphs.com/1>"]}
+ {:load-silent "<http://src.org>"
+  :into        [:graph "<http://graphs.com/2>"]}
+ {:copy-silent "<http://graphs.com/1>"
+  :to          "<http://graphs.com/2>"}
+ {:copy-silent :default
+  :to          [:graph "<http://graphs.com/2>"]}
+ {:copy-silent [:graph "<http://graphs.com/1>"]
+  :to          :default}
+ {:add-silent [:graph "<http://graphs.com/1>"]
+  :to         [:graph "<http://graphs.com/2>"]}
+ {:add-silent :default
+  :to         "<http://graphs.com/2>"}
+ {:add-silent [:graph "<http://graphs.com/1>"]
+  :to         :default}
+ {:move-silent [:graph "<http://graphs.com/1>"]
+  :to          [:graph "<http://graphs.com/2>"]}
+ {:move-silent :default
+  :to          [:graph "<http://graphs.com/2>"]}
+ {:move-silent "<http://graphs.com/1>"
+  :to          :default}
+ {:clear-silent [:graph "<http://graphs.com/2>"]}
+ {:clear-silent :default}
+ {:clear-silent :named}
+ {:clear-silent :all}
+ {:drop-silent [:graph "<http://graphs.com/1>"]}
+ {:drop-silent :default}
+ {:drop-silent :named}
+ {:drop-silent :all}]

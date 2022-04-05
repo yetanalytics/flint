@@ -1,0 +1,30 @@
+;; All the graph management updates
+[{:create [:graph "<http://graphs.com/1>"]}
+ {:load "<http://src.org>"
+  :into [:graph "<http://graphs.com/2>"]}
+ {:copy "<http://graphs.com/1>"
+  :to   "<http://graphs.com/2>"}
+ {:copy :default
+  :to   [:graph "<http://graphs.com/2>"]}
+ {:copy [:graph "<http://graphs.com/1>"]
+  :to   :default}
+ {:add [:graph "<http://graphs.com/1>"]
+  :to  [:graph "<http://graphs.com/2>"]}
+ {:add :default
+  :to  "<http://graphs.com/2>"}
+ {:add [:graph "<http://graphs.com/1>"]
+  :to  :default}
+ {:move [:graph "<http://graphs.com/1>"]
+  :to   [:graph "<http://graphs.com/2>"]}
+ {:move :default
+  :to   [:graph "<http://graphs.com/2>"]}
+ {:move "<http://graphs.com/1>"
+  :to   :default}
+ {:clear [:graph "<http://graphs.com/2>"]}
+ {:clear :default}
+ {:clear :named}
+ {:clear :all}
+ {:drop [:graph "<http://graphs.com/1>"]}
+ {:drop :default}
+ {:drop :named}
+ {:drop :all}]

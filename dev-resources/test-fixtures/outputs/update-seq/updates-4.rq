@@ -1,0 +1,29 @@
+CREATE GRAPH <http://graphs.com/1>;
+LOAD <http://src.org>
+INTO GRAPH <http://graphs.com/2>;
+COPY <http://graphs.com/1>
+TO <http://graphs.com/2>;
+COPY DEFAULT
+TO GRAPH <http://graphs.com/2>;
+COPY GRAPH <http://graphs.com/1>
+TO DEFAULT;
+ADD GRAPH <http://graphs.com/1>
+TO GRAPH <http://graphs.com/2>;
+ADD DEFAULT
+TO <http://graphs.com/2>;
+ADD GRAPH <http://graphs.com/1>
+TO DEFAULT;
+MOVE GRAPH <http://graphs.com/1>
+TO GRAPH <http://graphs.com/2>;
+MOVE DEFAULT
+TO GRAPH <http://graphs.com/2>;
+MOVE <http://graphs.com/1>
+TO DEFAULT;
+CLEAR GRAPH <http://graphs.com/2>;
+CLEAR DEFAULT;
+CLEAR NAMED;
+CLEAR ALL;
+DROP GRAPH <http://graphs.com/1>;
+DROP DEFAULT;
+DROP NAMED;
+DROP ALL

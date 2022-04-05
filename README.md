@@ -14,7 +14,7 @@ A Clojure(Script) DSL for creating SPARQL query and update strings.
 Add the following to your `deps.edn` map.
 
 ```clojure
-com.yetanalytics/flint {:mvn/version "0.1.1"
+com.yetanalytics/flint {:mvn/version "0.1.2"
                         :exclusions [org.clojure/clojure
                                      org.clojure/clojurescript]}
 ```
@@ -123,6 +123,7 @@ WHERE {
 ## Prior Art
 - Flint is based off of the grammar of [SPARQL 1.1](https://www.w3.org/TR/sparql11-query/).
 - The idea of a SPARQL DSL was inspired by [HoneySQL](https://github.com/seancorfield/honeysql), a DSL for creating SQL queries.
+- [Matsu](https://github.com/boutros/matsu) is a previous SPARQL DSL implementation that uses an expression-based approach to query construction.
 - Flint borrows certain syntactic conventions from the [Datomic](https://docs.datomic.com/on-prem/query/query.html) and [Asami](https://github.com/threatgrid/asami) query and update languages.
 - The map-based triples syntax is based on the normal form used in the [IGraph protocol](https://github.com/ont-app/igraph).
 

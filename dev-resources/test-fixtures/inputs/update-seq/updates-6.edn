@@ -1,0 +1,32 @@
+;; All the graph management updates, as prefixes
+[{:prefixes {:graphs "<http://graphs.com/>"
+             :src    "<http://src.org/>"}
+  :create   [:graph :graphs/one]}
+ {:load :src/source
+  :into [:graph :graphs/two]}
+ {:copy :graphs/one
+  :to   :graphs/two}
+ {:copy :default
+  :to   [:graph :graphs/two]}
+ {:copy [:graph :graphs/one]
+  :to   :default}
+ {:add [:graph :graphs/one]
+  :to  [:graph :graphs/two]}
+ {:add :default
+  :to  :graphs/two}
+ {:add [:graph :graphs/one]
+  :to  :default}
+ {:move [:graph :graphs/one]
+  :to   [:graph :graphs/two]}
+ {:move :default
+  :to   [:graph :graphs/two]}
+ {:move :graphs/one
+  :to   :default}
+ {:clear [:graph :graphs/two]}
+ {:clear :default}
+ {:clear :named}
+ {:clear :all}
+ {:drop [:graph :graphs/one]}
+ {:drop :default}
+ {:drop :named}
+ {:drop :all}]

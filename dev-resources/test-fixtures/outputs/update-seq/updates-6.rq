@@ -1,0 +1,31 @@
+PREFIX graphs: <http://graphs.com/>
+PREFIX src:    <http://src.org/>
+CREATE GRAPH graphs:one;
+LOAD src:source
+INTO GRAPH graphs:two;
+COPY graphs:one
+TO graphs:two;
+COPY DEFAULT
+TO GRAPH graphs:two;
+COPY GRAPH graphs:one
+TO DEFAULT;
+ADD GRAPH graphs:one
+TO GRAPH graphs:two;
+ADD DEFAULT
+TO graphs:two;
+ADD GRAPH graphs:one
+TO DEFAULT;
+MOVE GRAPH graphs:one
+TO GRAPH graphs:two;
+MOVE DEFAULT
+TO GRAPH graphs:two;
+MOVE graphs:one
+TO DEFAULT;
+CLEAR GRAPH graphs:two;
+CLEAR DEFAULT;
+CLEAR NAMED;
+CLEAR ALL;
+DROP GRAPH graphs:one;
+DROP DEFAULT;
+DROP NAMED;
+DROP ALL

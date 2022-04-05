@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.2
+
+- Fix a bug where certain SPARQL Update clauses - `LOAD`, `CLEAR`, `CREATE`, and `DROP` - were not being correctly formatted.
+  - The form `[:graph iri]` is now mandatory for the aforementioned Update clauses and optional for others (`ADD`, `MOVE`, AND `COPY`).
+- Fix validation of strings containing escaped char sequences such as `\\n` or `\\r`.
+  - Special thanks to [@quoll](https://github.com/quoll) for their assistance with this bugfix.
+
 ## v0.1.1
 
 Fix a number of bugs discovered in v0.1.0 (see [Pull Request #20](https://github.com/yetanalytics/flint/pull/20)):
