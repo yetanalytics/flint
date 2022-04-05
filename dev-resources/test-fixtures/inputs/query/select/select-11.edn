@@ -1,0 +1,3 @@
+;; SELECT with all the escaped chars
+{:select [?v]
+ :where  [[?v ?p "\\\"foo\\\"\\n\\'bar\\'\\r"]]}

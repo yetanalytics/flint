@@ -19,8 +19,10 @@
 (def bnode-regex
   #"_(\w([\w\.]*\w)?)?")
 
+;; Note in the second part that we need to match the letters `n`, `r`, etc.,
+;; not the newline char `\n` nor the return char `\r`.
 (def valid-str-regex
-  #"([^\"\r\n\\]|(?:\\(?:\n|\r|\"|\\)))*")
+  #"([^\"\r\n\\]|(?:\\(?:t|b|n|r|f|\\|\"|')))*")
 
 (defn iri?
   "Is `x` a wrapped (i.e. starts with `<` and ends with `>`) IRI?
