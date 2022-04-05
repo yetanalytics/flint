@@ -3,7 +3,8 @@
 ## v0.1.2
 
 - Fix a bug where certain SPARQL Update clauses - `LOAD`, `CLEAR`, `CREATE`, and `DROP` - were not being correctly formatted.
-- The form `[:graph iri]` is now mandatory for the aforementioned Update clauses and optional for others (`ADD`, `MOVE`, AND `COPY`).
+  - The form `[:graph iri]` is now mandatory for the aforementioned Update clauses and optional for others (`ADD`, `MOVE`, AND `COPY`).
+- Fix validation of strings containing escaped char sequences such as `\\n` or `\\r`.
 
 ## v0.1.1
 
