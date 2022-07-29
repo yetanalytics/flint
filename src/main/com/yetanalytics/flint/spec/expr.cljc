@@ -5,7 +5,9 @@
   #?(:cljs (:require-macros
             [com.yetanalytics.flint.spec.expr :refer [keyword-args]])))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Terminals
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def expr-terminal-spec
   (s/and
@@ -27,7 +29,9 @@
   (s/or :expr/terminal
         (s/or :ax/wildcard ax/wildcard?)))
 
-;; Keyword arguments
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Keyword Argument Specs and Helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::distinct? boolean?)
 (s/def ::separator ax/valid-string?)
@@ -45,7 +49,9 @@
         #(every? ~(->> kspecs (map (comp keyword name)) set) (keys %))
         (s/conformer #(into [] %))))
 
-;; Op symbols
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Operation Symbols
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def nilary-ops
   #{'rand 'now 'uuid 'struuid 'bnode})
@@ -109,15 +115,8 @@
 (def varardic-ops
   #{'concat 'coalesce})
 
-(def four-ary-ops
-  #{'replace})
-
-;; Branches
-
-;; BEGIN NEW ;;;;;
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Specs
+;; Branch Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Built-in Expressions
@@ -130,7 +129,7 @@
          :expr/arg-1 (s/? expr-spec)))
 
 (def nilary-or-unary-spec (nilary-or-unary-spec* ::expr))
-(def nilary-or-unary-agg-spec (nilary-or-unary-spec* ::ag--expr))
+(def nilary-or-unary-agg-spec (nilary-or-unary-spec* ::agg-expr))
 
 (defn- unary-spec* [expr-spec]
   (s/cat :expr/op symbol?
@@ -148,17 +147,21 @@
          ;; Fully qualify ns to avoid mutually recursive require
          :expr/arg-1 :com.yetanalytics.flint.spec.where/where))
 
-(def binary-spec
-  (s/cat :expr/op symbol? :expr/arg-1 ::expr :expr/arg-2 ::expr))
+(defn- binary-spec* [expr-spec]
+  (s/cat :expr/op symbol?
+         :expr/arg-1 expr-spec
+         :expr/arg-2 expr-spec))
 
-(def binary-agg-spec
-  (s/cat :expr/op symbol? :expr/arg-1 ::agg-expr :expr/arg-2 ::agg-expr))
+(def binary-spec (binary-spec* ::expr))
+(def binary-agg-spec (binary-spec* ::agg-expr))
 
-(def binary-plus-spec
-  (s/cat :expr/op symbol? :expr/arg-1 ::expr :expr/vargs (s/+ ::expr)))
+(defn- binary-plus-spec* [expr-spec]
+  (s/cat :expr/op symbol?
+         :expr/arg-1 expr-spec
+         :expr/vargs (s/+ expr-spec)))
 
-(def binary-plus-agg-spec
-  (s/cat :expr/op symbol? :expr/arg-1 ::agg-expr :expr/vargs (s/+ ::agg-expr)))
+(def binary-plus-spec (binary-plus-spec* ::expr))
+(def binary-plus-agg-spec (binary-plus-spec* ::agg-expr))
 
 (defn- binary-or-ternary-spec* [expr-spec]
   (s/cat :expr/op symbol?
@@ -299,17 +302,9 @@
 (def agg-expr-multi-spec
   (s/multi-spec agg-expr-spec first))
 
-(comment
-  (macroexpand '(defexprspecs expr-spec unary-ops unary-spec))
-  (s/explain expr-multi-spec '(rand))
-  (s/explain expr-multi-spec '(rand 1 2 3))
-  (s/explain expr-multi-spec '())
-  (s/explain expr-multi-spec '(bamboozled))
-  
-  (s/explain agg-expr-multi-spec '(bamboozled))
-  )
-
-;; END NEW ;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Expression Specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- conform-expr
   [{op     :expr/op
@@ -329,87 +324,15 @@
                          true vec)]]
     kwargs (conj [:expr/kwargs kwargs])))
 
-(def agg-expr-branch-spec
-  (s/and
-   list?
-   (s/or
-    :expr/nilary        (s/cat :expr/op nilary-ops)
-    :expr/unary         (s/cat :expr/op unary-ops
-                               :expr/arg-1 ::agg-expr)
-    :expr/unary-agg     (s/cat :expr/op aggregate-ops
-                               :expr/arg-1 ::agg-expr
-                               :expr/kwargs (keyword-args ::distinct?))
-    :expr/unary-wild    (s/cat :expr/op aggregate-expr-or-wild-ops
-                               :expr/arg-1 wildcard-terminal-spec
-                               :expr/kwargs (keyword-args ::distinct?))
-    :expr/unary-agg-sep (s/cat :expr/op aggregate-expr-with-sep-ops
-                               :expr/arg-1 ::agg-expr
-                               :expr/kwargs (keyword-args ::distinct?
-                                                          ::separator))
-    :expr/unary-var     (s/cat :expr/op unary-var-ops
-                               :expr/arg-1 var-terminal-spec)
-    :expr/unary-where   (s/cat :expr/op unary-where-ops
-                               ;; Avoid mutually recursive `:require`
-                               :expr/arg-1 :com.yetanalytics.flint.spec.where/where)
-    :expr/binary        (s/cat :expr/op binary-ops
-                               :expr/arg-1 ::agg-expr
-                               :expr/arg-2 ::agg-expr)
-    :expr/binary-plus   (s/cat :expr/op binary-plus-ops
-                               :expr/arg-1 ::agg-expr
-                               :expr/vargs (s/+ ::agg-expr))
-    :expr/ternary       (s/cat :expr/op ternary-ops
-                               :expr/arg-1 ::agg-expr
-                               :expr/arg-2 ::agg-expr
-                               :expr/arg-3 ::agg-expr)
-    :expr/four-ary      (s/cat :expr/op four-ary-ops
-                               :expr/arg-1 ::agg-expr
-                               :expr/arg-2 ::agg-expr
-                               :expr/arg-3 ::agg-expr
-                               :expr/arg-4 ::agg-expr)
-    :expr/varardic      (s/cat :expr/op varardic-ops
-                               :expr/vargs (s/* ::agg-expr))
-    ;; Only custom functions that are aggregates use the DISTINCT keyword
-    :expr/custom        (s/cat :expr/op ax/iri-spec
-                               :expr/vargs (s/* ::agg-expr)
-                               :expr/kwargs (keyword-args ::distinct?)))
-   (s/conformer second)
-   (s/conformer conform-expr)))
-
 (def expr-branch-spec
-  (s/and
-   list?
-   (s/or
-    :expr/nilary        (s/cat :expr/op nilary-ops)
-    :expr/unary         (s/cat :expr/op unary-ops
-                               :expr/arg-1 ::expr)
-    :expr/unary-var     (s/cat :expr/op unary-var-ops
-                               :expr/arg-1 var-terminal-spec)
-    :expr/unary-where   (s/cat :expr/op unary-where-ops
-                               ;; Avoid mutually recursive `:require`
-                               :expr/arg-1 :com.yetanalytics.flint.spec.where/where)
-    :expr/binary        (s/cat :expr/op binary-ops
-                               :expr/arg-1 ::expr
-                               :expr/arg-2 ::expr)
-    :expr/binary-plus   (s/cat :expr/op binary-plus-ops
-                               :expr/arg-1 ::expr
-                               :expr/vargs (s/+ ::expr))
-    :expr/ternary       (s/cat :expr/op ternary-ops
-                               :expr/arg-1 ::expr
-                               :expr/arg-2 ::expr
-                               :expr/arg-3 ::expr)
-    :expr/four-ary      (s/cat :expr/op four-ary-ops
-                               :expr/arg-1 ::expr
-                               :expr/arg-2 ::expr
-                               :expr/arg-3 ::expr
-                               :expr/arg-4 ::expr)
-    :expr/varardic      (s/cat :expr/op varardic-ops
-                               :expr/vargs (s/* ::expr))
-    :expr/custom        (s/cat :expr/op ax/iri-spec
-                               :expr/vargs (s/* ::expr)))
-   (s/conformer second)
-   (s/conformer conform-expr)))
+  (s/and list?
+         expr-multi-spec
+         (s/conformer conform-expr)))
 
-;; Expr specs
+(def agg-expr-branch-spec
+  (s/and list?
+         agg-expr-multi-spec
+         (s/conformer conform-expr)))
 
 (s/def ::expr
   (s/or :expr/terminal expr-terminal-spec
@@ -419,7 +342,9 @@
   (s/or :expr/terminal expr-terminal-spec
         :expr/branch agg-expr-branch-spec))
 
-;; Expr AS var specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Expression AS Variable Specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::expr-as-var
   (s/or :expr/as-var (s/tuple ::expr (s/or :ax/var ax/variable?))))
