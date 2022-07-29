@@ -123,33 +123,33 @@
 ;; Built-in Expressions
 
 (def nilary-spec
-  (s/cat :expr/op symbol?))
+  (s/cat :expr/op nilary-ops))
 
 (defn- nilary-or-unary-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op nilary-or-unary-ops
          :expr/arg-1 (s/? expr-spec)))
 
 (def nilary-or-unary-spec (nilary-or-unary-spec* ::expr))
 (def nilary-or-unary-agg-spec (nilary-or-unary-spec* ::agg-expr))
 
 (defn- unary-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op unary-ops
          :expr/arg-1 expr-spec))
 
 (def unary-spec (unary-spec* ::expr))
 (def unary-agg-spec (unary-spec* ::agg-expr))
 
 (def unary-var-spec
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op unary-var-ops
          :expr/arg-1 var-terminal-spec))
 
 (def unary-where-spec
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op unary-where-ops
          ;; Fully qualify ns to avoid mutually recursive require
          :expr/arg-1 :com.yetanalytics.flint.spec.where/where))
 
 (defn- binary-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op binary-ops
          :expr/arg-1 expr-spec
          :expr/arg-2 expr-spec))
 
@@ -157,7 +157,7 @@
 (def binary-agg-spec (binary-spec* ::agg-expr))
 
 (defn- binary-plus-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op binary-plus-ops
          :expr/arg-1 expr-spec
          :expr/vargs (s/+ expr-spec)))
 
@@ -165,7 +165,7 @@
 (def binary-plus-agg-spec (binary-plus-spec* ::agg-expr))
 
 (defn- binary-or-ternary-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op binary-or-ternary-ops
          :expr/arg-1 expr-spec
          :expr/arg-2 expr-spec
          :expr/arg-3 (s/? expr-spec)))
@@ -174,7 +174,7 @@
 (def binary-or-ternary-agg-spec (binary-or-ternary-spec* ::agg-expr))
 
 (defn- ternary-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op ternary-ops
          :expr/arg-1 expr-spec
          :expr/arg-2 expr-spec
          :expr/arg-3 expr-spec))
@@ -183,7 +183,7 @@
 (def ternary-agg-spec (ternary-spec* ::agg-expr))
 
 (defn- ternary-or-fourary-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op ternary-or-fourary-ops
          :expr/arg-1 expr-spec
          :expr/arg-2 expr-spec
          :expr/arg-3 expr-spec
@@ -193,7 +193,7 @@
 (def ternary-or-fourary-agg-spec (ternary-or-fourary-spec* ::agg-expr))
 
 (defn- varardic-spec* [expr-spec]
-  (s/cat :expr/op symbol?
+  (s/cat :expr/op varardic-ops
          :expr/vargs (s/* expr-spec)))
 
 (def varardic-spec (varardic-spec* ::expr))
@@ -258,54 +258,50 @@
       (s/valid? ax/iri-spec op) :custom)))
 
 ;; No Aggregate Expressions
-(defmulti expr-spec expr-spec-dispatch)
+(defmulti expr-spec-mm expr-spec-dispatch)
 
-(defexprspecs expr-spec nilary-ops nilary-spec)
-(defexprspecs expr-spec nilary-or-unary-ops nilary-or-unary-spec)
-(defexprspecs expr-spec unary-ops unary-spec)
-(defexprspecs expr-spec unary-var-ops unary-var-spec)
-(defexprspecs expr-spec unary-where-ops unary-where-spec)
-(defexprspecs expr-spec binary-ops binary-spec)
-(defexprspecs expr-spec binary-plus-ops binary-plus-spec)
-(defexprspecs expr-spec binary-or-ternary-ops binary-or-ternary-spec)
-(defexprspecs expr-spec ternary-ops ternary-spec)
-(defexprspecs expr-spec ternary-or-fourary-ops ternary-or-fourary-spec)
-(defexprspecs expr-spec varardic-ops varardic-spec)
+(defexprspecs expr-spec-mm nilary-ops nilary-spec)
+(defexprspecs expr-spec-mm nilary-or-unary-ops nilary-or-unary-spec)
+(defexprspecs expr-spec-mm unary-ops unary-spec)
+(defexprspecs expr-spec-mm unary-var-ops unary-var-spec)
+(defexprspecs expr-spec-mm unary-where-ops unary-where-spec)
+(defexprspecs expr-spec-mm binary-ops binary-spec)
+(defexprspecs expr-spec-mm binary-plus-ops binary-plus-spec)
+(defexprspecs expr-spec-mm binary-or-ternary-ops binary-or-ternary-spec)
+(defexprspecs expr-spec-mm ternary-ops ternary-spec)
+(defexprspecs expr-spec-mm ternary-or-fourary-ops ternary-or-fourary-spec)
+(defexprspecs expr-spec-mm varardic-ops varardic-spec)
 
-(defmethod expr-spec :custom [_] custom-fn-spec)
+(defmethod expr-spec-mm :custom [_] custom-fn-spec)
 
 ;; We're not gentesting so retag is irrelevant
 (def expr-multi-spec
-  (s/multi-spec expr-spec first))
-
-(comment
-  (s/explain expr-multi-spec '(bnode))
-  (s/explain expr-multi-spec '(zoo-wee-mama)))
+  (s/multi-spec expr-spec-mm first))
 
 ;; Aggregate Expressions
 
-(defmulti agg-expr-spec expr-spec-dispatch)
+(defmulti agg-expr-spec-mm expr-spec-dispatch)
 
-(defexprspecs agg-expr-spec nilary-ops nilary-spec)
-(defexprspecs agg-expr-spec nilary-or-unary-ops nilary-or-unary-agg-spec)
-(defexprspecs agg-expr-spec unary-ops unary-agg-spec)
-(defexprspecs agg-expr-spec unary-var-ops unary-var-spec)
-(defexprspecs agg-expr-spec unary-where-ops unary-where-spec)
-(defexprspecs agg-expr-spec binary-ops binary-agg-spec)
-(defexprspecs agg-expr-spec binary-plus-ops binary-plus-agg-spec)
-(defexprspecs agg-expr-spec binary-or-ternary-ops binary-or-ternary-agg-spec)
-(defexprspecs agg-expr-spec ternary-ops ternary-agg-spec)
-(defexprspecs agg-expr-spec ternary-or-fourary-ops ternary-or-fourary-agg-spec)
-(defexprspecs agg-expr-spec varardic-ops varardic-agg-spec)
+(defexprspecs agg-expr-spec-mm nilary-ops nilary-spec)
+(defexprspecs agg-expr-spec-mm nilary-or-unary-ops nilary-or-unary-agg-spec)
+(defexprspecs agg-expr-spec-mm unary-ops unary-agg-spec)
+(defexprspecs agg-expr-spec-mm unary-var-ops unary-var-spec)
+(defexprspecs agg-expr-spec-mm unary-where-ops unary-where-spec)
+(defexprspecs agg-expr-spec-mm binary-ops binary-agg-spec)
+(defexprspecs agg-expr-spec-mm binary-plus-ops binary-plus-agg-spec)
+(defexprspecs agg-expr-spec-mm binary-or-ternary-ops binary-or-ternary-agg-spec)
+(defexprspecs agg-expr-spec-mm ternary-ops ternary-agg-spec)
+(defexprspecs agg-expr-spec-mm ternary-or-fourary-ops ternary-or-fourary-agg-spec)
+(defexprspecs agg-expr-spec-mm varardic-ops varardic-agg-spec)
 
-(defexprspecs agg-expr-spec aggregate-ops aggregate-spec)
-(defexprspecs agg-expr-spec aggregate-expr-or-wild-ops aggregate-wildcard-spec)
-(defexprspecs agg-expr-spec aggregate-expr-with-sep-ops aggregate-separator-spec)
+(defexprspecs agg-expr-spec-mm aggregate-ops aggregate-spec)
+(defexprspecs agg-expr-spec-mm aggregate-expr-or-wild-ops aggregate-wildcard-spec)
+(defexprspecs agg-expr-spec-mm aggregate-expr-with-sep-ops aggregate-separator-spec)
 
-(defmethod agg-expr-spec :custom [_] aggregate-custom-fn-spec)
+(defmethod agg-expr-spec-mm :custom [_] aggregate-custom-fn-spec)
 
 (def agg-expr-multi-spec
-  (s/multi-spec agg-expr-spec first))
+  (s/multi-spec agg-expr-spec-mm first))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expression Specs
