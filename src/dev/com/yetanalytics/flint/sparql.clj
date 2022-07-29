@@ -39,6 +39,10 @@
 
 (comment
   (QueryFactory/create
+   "SELECT ((AVG(MAX(?x)) + 1) AS ?avg)
+    WHERE { ?x ?y ?z . }")
+  
+  (QueryFactory/create
    "SELECT (SUM(?x + ?y) AS ?sum) (str(?sum) AS ?z2)
     WHERE {
       ?x ?y ?z .
