@@ -38,11 +38,11 @@
             {:iri      :fii/bar
              :prefix   :fii
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :where/union :where-sub/where :triple/vec :ax/prefix-iri]}
+             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :triple/vec :ax/prefix-iri]}
             {:iri      :fum/bar
              :prefix   :fum
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :where/union :where-sub/where :triple/vec :ax/prefix-iri]}]
+             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :triple/vec :ax/prefix-iri]}]
            (->> query
                 (s/conform qs/query-spec)
                 v/collect-nodes
