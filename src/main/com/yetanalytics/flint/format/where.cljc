@@ -55,5 +55,8 @@
 (defmethod f/format-ast-node :where/values [_ [_ values]]
   (str "VALUES " values))
 
+(defmethod f/format-ast-node :where/special [_ [_ where-form]]
+  where-form)
+
 (defmethod f/format-ast-node :where [_ [_ where]]
   (str "WHERE " where))
