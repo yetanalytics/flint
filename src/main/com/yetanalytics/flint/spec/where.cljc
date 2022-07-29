@@ -113,15 +113,16 @@
 (def where-special-form-spec
   "Specs for special WHERE forms/graph patterns, which should be
    of the form `[:keyword ...]`."
-  (s/multi-spec where-special-form-mm first))
+  ;; TODO: Should only allow vectors
+  (s/and coll? (s/multi-spec where-special-form-mm first)))
 
 (s/def ::where
   (s/or :where-sub/select
         ::select
         :where-sub/where
-        (s/coll-of (s/or :triple/vec    ts/triple-vec-spec
-                         :triple/nform  ts/normal-form-spec
-                         :where/special where-special-form-spec)
+        (s/coll-of (s/or :where/special where-special-form-spec
+                         :triple/vec    ts/triple-vec-spec
+                         :triple/nform  ts/normal-form-spec)
                    :min-count 1
                    :kind vector?)
         :where-sub/empty

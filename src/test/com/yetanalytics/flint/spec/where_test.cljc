@@ -88,7 +88,14 @@
                [:where/values
                 [:values/map [[[:ax/var ?bar] [:ax/var ?qux]]
                               [[[:ax/num-lit 1] [:ax/num-lit 2]]]]]]]]]
-           (s/conform ::ws/where [[:values '{?bar [1] ?qux [2]}]])))))
+           (s/conform ::ws/where [[:values '{?bar [1] ?qux [2]}]])))
+    ;; This is not a special form since it does not conform to the UNION
+    ;; spec (or any other special form spec really)
+    (is (= '[:where-sub/where
+             [[:triple/vec [[:ax/prefix-iri :union]
+                            [:ax/prefix-iri :foo/bar]
+                            [:ax/prefix-iri :baz/qux]]]]]
+           (s/conform ::ws/where '[[:union :foo/bar :baz/qux]])))))
 
 (deftest invalid-where-test
   (testing "invalid WHERE clauses"
