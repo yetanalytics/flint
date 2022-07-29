@@ -50,6 +50,9 @@
 (def nilary-ops
   #{'rand 'now 'uuid 'struuid 'bnode})
 
+(def nilary-or-unary-ops
+  #{'bnode})
+
 (def unary-ops
   #{'bnode
     'not
@@ -92,174 +95,176 @@
     '+ '- '* '/
     'in 'not-in})
 
-(def ternary-ops
-  #{'if
-    'regex 'substr 'replace})
+(def binary-or-ternary-ops
+  #{'regex 'substr})
 
-(def four-ary-ops
+(def ternary-ops
+  #{'if})
+
+(def ternary-or-fourary-ops
   #{'replace})
 
 (def varardic-ops
   #{'concat 'coalesce})
 
+(def four-ary-ops
+  #{'replace})
+
 ;; Branches
 
 ;; BEGIN NEW ;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def nilary-spec
   (s/cat :expr/op symbol?))
 
-(def unary-spec
+(defn- nilary-or-unary-spec* [expr-spec]
   (s/cat :expr/op symbol?
-         :expr/arg-1 ::expr))
+         :expr/arg-1 (s/? expr-spec)))
+
+(def nilary-or-unary-spec (nilary-or-unary-spec* ::expr))
+(def nilary-or-unary-agg-spec (nilary-or-unary-spec* ::ag--expr))
+
+(defn- unary-spec* [expr-spec]
+  (s/cat :expr/op symbol?
+         :expr/arg-1 expr-spec))
+
+(def unary-spec (unary-spec* ::expr))
+(def unary-agg-spec (unary-spec* ::agg-expr))
 
 (def unary-var-spec
   (s/cat :expr/op symbol?
          :expr/arg-1 var-terminal-spec))
 
 (def unary-where-spec
-  (s/cat :expr/op unary-where-ops
+  (s/cat :expr/op symbol?
          ;; Fully qualify ns to avoid mutually recursive require
          :expr/arg-1 :com.yetanalytics.flint.spec.where/where))
 
 (def binary-spec
-  (s/cat :expr/op symbol?
-         :expr/arg-1 ::expr
-         :expr/arg-2 ::expr))
+  (s/cat :expr/op symbol? :expr/arg-1 ::expr :expr/arg-2 ::expr))
+
+(def binary-agg-spec
+  (s/cat :expr/op symbol? :expr/arg-1 ::agg-expr :expr/arg-2 ::agg-expr))
 
 (def binary-plus-spec
-  (s/cat :expr/op symbol?
-         :expr/arg-1 ::expr
-         :expr/vargs (s/+ ::expr)))
+  (s/cat :expr/op symbol? :expr/arg-1 ::expr :expr/vargs (s/+ ::expr)))
 
-(def ternary-spec
-  (s/cat :expr/op symbol?
-         :expr/arg-1 ::expr
-         :expr/arg-2 ::expr
-         :expr/arg-3 ::expr))
+(def binary-plus-agg-spec
+  (s/cat :expr/op symbol? :expr/arg-1 ::agg-expr :expr/vargs (s/+ ::agg-expr)))
 
-(def four-ary-spec
+(defn- binary-or-ternary-spec* [expr-spec]
   (s/cat :expr/op symbol?
-         :expr/arg-1 ::expr
-         :expr/arg-2 ::expr
-         :expr/arg-3 ::expr
-         :expr/arg-4 ::expr))
+         :expr/arg-1 expr-spec
+         :expr/arg-2 expr-spec
+         :expr/arg-3 (s/? expr-spec)))
 
-(def varardic-spec
+(def binary-or-ternary-spec (binary-or-ternary-spec* ::expr))
+(def binary-or-ternary-agg-spec (binary-or-ternary-spec* ::agg-expr))
+
+(defn- ternary-spec* [expr-spec]
   (s/cat :expr/op symbol?
-         :expr/vargs (s/* ::expr)))
+         :expr/arg-1 expr-spec
+         :expr/arg-2 expr-spec
+         :expr/arg-3 expr-spec))
 
-(def custom-fn-spec
+(def ternary-spec (ternary-spec* ::expr))
+(def ternary-agg-spec (ternary-spec* ::agg-expr))
+
+(defn- ternary-or-fourary-spec* [expr-spec]
+  (s/cat :expr/op symbol?
+         :expr/arg-1 expr-spec
+         :expr/arg-2 expr-spec
+         :expr/arg-3 expr-spec
+         :expr/arg-4 (s/? expr-spec)))
+
+(def ternary-or-fourary-spec (ternary-or-fourary-spec* ::expr))
+(def ternary-or-fourary-agg-spec (ternary-or-fourary-spec* ::agg-expr))
+
+(defn- varardic-spec* [expr-spec]
+  (s/cat :expr/op symbol?
+         :expr/vargs (s/* expr-spec)))
+
+(def varardic-spec (varardic-spec* ::expr))
+(def varardic-agg-spec (varardic-spec* ::agg-expr))
+
+(defn- custom-fn-spec* [expr-spec]
   (s/cat :expr/op ax/iri-spec
-         :expr/vargs (s/* ::expr)))
+         :expr/vargs (s/* expr-spec)))
 
-(defmulti expr-spec
-  (fn [e]
-    (let [op (first e)]
-      (cond
-        (symbol? op) op
-        (s/valid? ax/iri-spec op) :custom))))
+(def custom-fn-spec (custom-fn-spec* ::expr))
+(def custom-fn-agg-spec (custom-fn-spec* ::agg-expr))
 
-(defmethod expr-spec 'rand [_] nilary-spec)
-(defmethod expr-spec 'now [_] nilary-spec)
-(defmethod expr-spec 'uuid [_] nilary-spec)
-(defmethod expr-spec 'struuid [_] nilary-spec)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mutli-specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod expr-spec 'bnode [_] (s/and (s/or :nilary nilary-spec
-                                             :unary unary-spec)
-                                       (s/conformer second)))
+(defmacro defexprspecs
+  "Macro to repeatedly define `(defmethod mm-name 'sym [_] expr-spec)`."
+  [mm-name syms expr-spec]
+  `(do ~@(map (fn [sym] `(defmethod ~mm-name (quote ~sym) [~'_] ~expr-spec))
+              (eval syms))))
 
-(defmethod expr-spec 'not [_] unary-spec)
+(defn- expr-spec-dispatch
+  [expr-list]
+  (let [op (first expr-list)]
+    (cond
+      (symbol? op) op
+      (s/valid? ax/iri-spec op) :custom)))
 
-(defmethod expr-spec 'str [_] unary-spec)
-(defmethod expr-spec 'strlen [_] unary-spec)
-(defmethod expr-spec 'ucase [_] unary-spec)
-(defmethod expr-spec 'lcase [_] unary-spec)
-(defmethod expr-spec 'lang [_] unary-spec)
-(defmethod expr-spec 'datatype [_] unary-spec)
+;; No Aggregate Expressions
+(defmulti expr-spec expr-spec-dispatch)
 
-(defmethod expr-spec 'blank? [_] unary-spec)
-(defmethod expr-spec 'literal? [_] unary-spec)
-(defmethod expr-spec 'numeric? [_] unary-spec)
-(defmethod expr-spec 'iri? [_] unary-spec)
-(defmethod expr-spec 'uri? [_] unary-spec)
-
-(defmethod expr-spec 'iri [_] unary-spec)
-(defmethod expr-spec 'uri [_] unary-spec)
-(defmethod expr-spec 'encode-for-uri [_] unary-spec)
-
-(defmethod expr-spec 'abs [_] unary-spec)
-(defmethod expr-spec 'ceil [_] unary-spec)
-(defmethod expr-spec 'floor [_] unary-spec)
-(defmethod expr-spec 'round [_] unary-spec)
-
-(defmethod expr-spec 'year [_] unary-spec)
-(defmethod expr-spec 'month [_] unary-spec)
-(defmethod expr-spec 'day [_] unary-spec)
-(defmethod expr-spec 'hours [_] unary-spec)
-(defmethod expr-spec 'minutes [_] unary-spec)
-(defmethod expr-spec 'seconds [_] unary-spec)
-(defmethod expr-spec 'timezone [_] unary-spec)
-(defmethod expr-spec 'tz [_] unary-spec)
-
-(defmethod expr-spec 'md5 [_] unary-spec)
-(defmethod expr-spec 'sha1 [_] unary-spec)
-(defmethod expr-spec 'sha256 [_] unary-spec)
-(defmethod expr-spec 'sha384 [_] unary-spec)
-(defmethod expr-spec 'sha512 [_] unary-spec)
-
-(defmethod expr-spec 'bound [_] unary-var-spec)
-
-(defmethod expr-spec 'exists [_] unary-where-spec)
-(defmethod expr-spec 'not-exists [_] unary-where-spec)
-
-(defmethod expr-spec 'lang-matches [_] binary-spec)
-(defmethod expr-spec 'contains [_] binary-spec)
-(defmethod expr-spec 'strlang [_] binary-spec)
-(defmethod expr-spec 'strdt [_] binary-spec)
-(defmethod expr-spec 'strstarts [_] binary-spec)
-(defmethod expr-spec 'strends [_] binary-spec)
-(defmethod expr-spec 'strbefore [_] binary-spec)
-(defmethod expr-spec 'strafter [_] binary-spec)
-(defmethod expr-spec 'sameterm [_] binary-spec)
-
-(defmethod expr-spec '= [_] binary-spec)
-(defmethod expr-spec 'not= [_] binary-spec)
-(defmethod expr-spec '< [_] binary-spec)
-(defmethod expr-spec '> [_] binary-spec)
-(defmethod expr-spec '<= [_] binary-spec)
-(defmethod expr-spec '>= [_] binary-spec)
-
-(defmethod expr-spec 'and [_] binary-plus-spec)
-(defmethod expr-spec 'or [_] binary-plus-spec)
-(defmethod expr-spec 'in [_] binary-plus-spec)
-(defmethod expr-spec 'not-in [_] binary-plus-spec)
-(defmethod expr-spec '+ [_] binary-plus-spec)
-(defmethod expr-spec '- [_] binary-plus-spec)
-(defmethod expr-spec '* [_] binary-plus-spec)
-(defmethod expr-spec '/ [_] binary-plus-spec)
-
-(defmethod expr-spec 'if [_] ternary-spec)
-
-(defmethod expr-spec 'regex [_] (s/and (s/or :binary binary-spec
-                                             :ternary ternary-spec)
-                                       (s/conformer second)))
-
-(defmethod expr-spec 'substr [_] (s/and (s/or :binary binary-spec
-                                              :ternary ternary-spec)
-                                        (s/conformer second)))
-
-(defmethod expr-spec 'replace [_] (s/and (s/or :ternary ternary-spec
-                                               :four-ary four-ary-spec)
-                                         (s/conformer second)))
-
-(defmethod expr-spec 'concat [_] varardic-spec)
-(defmethod expr-spec 'coalesce [_] varardic-spec)
+(defexprspecs expr-spec nilary-ops nilary-spec)
+(defexprspecs expr-spec nilary-or-unary-ops nilary-or-unary-spec)
+(defexprspecs expr-spec unary-ops unary-spec)
+(defexprspecs expr-spec unary-var-ops unary-var-spec)
+(defexprspecs expr-spec unary-where-ops unary-where-spec)
+(defexprspecs expr-spec binary-ops binary-spec)
+(defexprspecs expr-spec binary-plus-ops binary-plus-spec)
+(defexprspecs expr-spec binary-or-ternary-ops binary-or-ternary-spec)
+(defexprspecs expr-spec ternary-ops ternary-spec)
+(defexprspecs expr-spec ternary-or-fourary-ops ternary-or-fourary-spec)
+(defexprspecs expr-spec varardic-ops varardic-spec)
 
 (defmethod expr-spec :custom [_] custom-fn-spec)
 
 ;; We're not gentesting so retag is irrelevant
-(s/multi-spec expr-spec identity)
+(def expr-multi-spec
+  (s/multi-spec expr-spec first))
+
+;; Aggregate Expressions
+
+(defmulti agg-expr-spec expr-spec-dispatch)
+
+(defexprspecs agg-expr-spec nilary-ops nilary-spec)
+(defexprspecs agg-expr-spec nilary-or-unary-ops nilary-or-unary-agg-spec)
+(defexprspecs agg-expr-spec unary-ops unary-agg-spec)
+(defexprspecs agg-expr-spec unary-var-ops unary-var-spec)
+(defexprspecs agg-expr-spec unary-where-ops unary-where-spec)
+(defexprspecs agg-expr-spec binary-ops binary-agg-spec)
+(defexprspecs agg-expr-spec binary-plus-ops binary-plus-agg-spec)
+(defexprspecs agg-expr-spec binary-or-ternary-ops binary-or-ternary-agg-spec)
+(defexprspecs agg-expr-spec ternary-ops ternary-agg-spec)
+(defexprspecs agg-expr-spec ternary-or-fourary-ops ternary-or-fourary-agg-spec)
+(defexprspecs agg-expr-spec varardic-ops varardic-agg-spec)
+
+(defmethod expr-spec :custom [_] custom-fn-agg-spec)
+
+(def agg-expr-multi-spec
+  (s/multi-spec agg-expr-spec first))
+
+(comment
+  (macroexpand '(defexprspecs expr-spec unary-ops unary-spec))
+  (s/explain expr-multi-spec '(rand))
+  (s/explain expr-multi-spec '())
+  (s/explain expr-multi-spec '(bamboozled))
+  
+  (s/explain agg-expr-multi-spec '(bamboozled))
+  )
 
 ;; END NEW ;;;;;;;
 
