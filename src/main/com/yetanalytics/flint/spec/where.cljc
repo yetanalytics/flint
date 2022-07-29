@@ -113,8 +113,7 @@
 (def where-special-form-spec
   "Specs for special WHERE forms/graph patterns, which should be
    of the form `[:keyword ...]`."
-  ;; TODO: Should only allow vectors
-  (s/and coll? (s/multi-spec where-special-form-mm first)))
+  (s/and vector? (s/multi-spec where-special-form-mm first)))
 
 (s/def ::where
   (s/or :where-sub/select
