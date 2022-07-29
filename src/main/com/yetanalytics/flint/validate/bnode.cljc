@@ -28,7 +28,7 @@
 (defn- bgp-divider?
   [ast-node]
   (and (-> ast-node (get-in [0]) (= :where/special))
-       (-> ast-node (get-in [0 1]) (not= :where/filter))))
+       (-> ast-node (get-in [1 0]) (not= :where/filter))))
 
 (defn- get-bgp-index
   "The BGP path is the regular zip loc path appended with an index that
