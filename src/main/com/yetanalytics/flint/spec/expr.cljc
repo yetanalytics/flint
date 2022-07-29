@@ -43,6 +43,9 @@
           kvs))
 
 (defmacro keyword-args
+  "Given `kspecs` (e.g. `(keyword-args ::distinct? ::selector)`), return
+   a regex spec that can be used to spec a sequence of `:keyword value`
+   pairs (e.g. `(:distinct? true :selector \";\")`)."
   [& kspecs]
   `(s/& (s/* (s/cat :expr/k keyword? :expr/v any?))
         (s/conformer kvs->map)
@@ -113,6 +116,7 @@
   #{'group-concat})
 
 (def aggregate-ops
+  "A set of all operations used in aggregate expressions."
   (cset/union aggregate-expr-ops
               aggregate-expr-or-wild-ops
               aggregate-expr-with-sep-ops))
@@ -259,7 +263,9 @@
       (s/valid? ax/iri-spec op) :custom)))
 
 ;; No Aggregate Expressions
-(defmulti expr-spec-mm expr-spec-dispatch)
+(defmulti expr-spec-mm
+  "Given a Flint expr list, returns a spec determined by its first arg."
+  expr-spec-dispatch)
 
 (defexprspecs expr-spec-mm nilary-ops nilary-spec)
 (defexprspecs expr-spec-mm nilary-or-unary-ops nilary-or-unary-spec)
@@ -281,7 +287,9 @@
 
 ;; Aggregate Expressions
 
-(defmulti agg-expr-spec-mm expr-spec-dispatch)
+(defmulti agg-expr-spec-mm
+  "Like `expr-spec-mm`, but covers also covers aggregate expressions."
+  expr-spec-dispatch)
 
 (defexprspecs agg-expr-spec-mm nilary-ops nilary-spec)
 (defexprspecs agg-expr-spec-mm nilary-or-unary-ops nilary-or-unary-agg-spec)
@@ -309,6 +317,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- conform-expr
+  "Conforms the map arg into a
+   `[[:expr/op op] [:expr/args args] [:expr/kwargs kwargs]]` vector."
   [{op     :expr/op
     arg-1  :expr/arg-1
     arg-2  :expr/arg-2
