@@ -3,7 +3,8 @@
             [clojure.set :as cset]
             [com.yetanalytics.flint.spec.axiom :as ax])
   #?(:cljs (:require-macros
-            [com.yetanalytics.flint.spec.expr :refer [keyword-args]])))
+            [com.yetanalytics.flint.spec.expr :refer [defexprspecs
+                                                      keyword-args]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Terminals
