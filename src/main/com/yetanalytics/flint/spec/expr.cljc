@@ -54,14 +54,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def nilary-ops
-  #{'rand 'now 'uuid 'struuid 'bnode})
+  #{'rand 'now 'uuid 'struuid})
 
 (def nilary-or-unary-ops
   #{'bnode})
 
 (def unary-ops
-  #{'bnode
-    'not
+  #{'not
     'str 'strlen 'ucase 'lcase
     'lang 'datatype 'blank? 'literal? 'numeric?
     'iri 'uri 'iri? 'uri? 'encode-for-uri
@@ -70,20 +69,6 @@
     'hours 'minutes 'seconds
     'timezone 'tz
     'md5 'sha1 'sha256 'sha384 'sha512})
-
-(def aggregate-expr-ops
-  #{'sum 'min 'max 'avg 'sample})
-
-(def aggregate-expr-or-wild-ops
-  #{'count})
-
-(def aggregate-expr-with-sep-ops
-  #{'group-concat})
-
-(def aggregate-ops
-  (cset/union aggregate-expr-ops
-              aggregate-expr-or-wild-ops
-              aggregate-expr-with-sep-ops))
 
 (def unary-var-ops
   #{'bound})
@@ -114,6 +99,22 @@
 
 (def varardic-ops
   #{'concat 'coalesce})
+
+;; Aggregates
+
+(def aggregate-expr-ops
+  #{'sum 'min 'max 'avg 'sample})
+
+(def aggregate-expr-or-wild-ops
+  #{'count})
+
+(def aggregate-expr-with-sep-ops
+  #{'group-concat})
+
+(def aggregate-ops
+  (cset/union aggregate-expr-ops
+              aggregate-expr-or-wild-ops
+              aggregate-expr-with-sep-ops))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Branch Specs
@@ -277,6 +278,10 @@
 (def expr-multi-spec
   (s/multi-spec expr-spec first))
 
+(comment
+  (s/explain expr-multi-spec '(bnode))
+  (s/explain expr-multi-spec '(zoo-wee-mama)))
+
 ;; Aggregate Expressions
 
 (defmulti agg-expr-spec expr-spec-dispatch)
@@ -297,7 +302,7 @@
 (defexprspecs agg-expr-spec aggregate-expr-or-wild-ops aggregate-wildcard-spec)
 (defexprspecs agg-expr-spec aggregate-expr-with-sep-ops aggregate-separator-spec)
 
-(defmethod expr-spec :custom [_] aggregate-custom-fn-spec)
+(defmethod agg-expr-spec :custom [_] aggregate-custom-fn-spec)
 
 (def agg-expr-multi-spec
   (s/multi-spec agg-expr-spec first))
