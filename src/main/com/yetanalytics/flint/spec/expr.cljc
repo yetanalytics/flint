@@ -65,17 +65,19 @@
     'timezone 'tz
     'md5 'sha1 'sha256 'sha384 'sha512})
 
-(def unary-agg-ops
-  #{'sum 'min 'max 'avg 'sample 'count})
+(def aggregate-expr-ops
+  #{'sum 'min 'max 'avg 'sample})
 
-(def unary-agg-wild-ops
+(def aggregate-expr-or-wild-ops
   #{'count})
 
-(def unary-agg-sep-ops
+(def aggregate-expr-with-sep-ops
   #{'group-concat})
 
 (def aggregate-ops
-  (cset/union unary-agg-ops unary-agg-wild-ops unary-agg-sep-ops))
+  (cset/union aggregate-expr-ops
+              aggregate-expr-or-wild-ops
+              aggregate-expr-with-sep-ops))
 
 (def unary-var-ops
   #{'bound})
@@ -117,6 +119,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Built-in Expressions
 
 (def nilary-spec
   (s/cat :expr/op symbol?))
@@ -191,12 +195,46 @@
 (def varardic-spec (varardic-spec* ::expr))
 (def varardic-agg-spec (varardic-spec* ::agg-expr))
 
-(defn- custom-fn-spec* [expr-spec]
-  (s/cat :expr/op ax/iri-spec
-         :expr/vargs (s/* expr-spec)))
+;; Aggregate Expressions (as opposed to regular exprs with aggregates)
+;; NOTE: Aggregate expressions MUST NOT contain aggregate sub-expressions
+;; (even though regular exprs can contain aggregates).
 
-(def custom-fn-spec (custom-fn-spec* ::expr))
-(def custom-fn-agg-spec (custom-fn-spec* ::agg-expr))
+(def aggregate-spec
+  (s/cat :expr/op aggregate-ops
+         :expr/arg-1 ::expr
+         :expr/kwargs (keyword-args ::distinct?)))
+
+(def aggregate-wildcard-spec
+  (s/cat :expr/op aggregate-expr-or-wild-ops
+         :expr/arg-1 (s/& (s/alt :expr ::expr
+                                 :wildcard wildcard-terminal-spec)
+                          (s/conformer second))
+         :expr/kwargs (keyword-args ::distinct?)))
+
+(def aggregate-separator-spec
+  (s/cat :expr/op aggregate-expr-with-sep-ops
+         :expr/arg-1 ::expr
+         :expr/kwargs (keyword-args ::distinct?
+                                    ::separator)))
+
+;; Custom Expressions
+
+;; In non-aggregate expressions
+(def custom-fn-spec
+  (s/cat :expr/op ax/iri-spec
+         :expr/vargs (s/* ::expr)))
+
+;; In aggregate expressions
+;; Only custom functions that are aggregates use the DISTINCT keyword
+(def aggregate-custom-fn-spec
+  (s/and (s/or :non-aggregate
+               (s/cat :expr/op ax/iri-spec
+                      :expr/vargs (s/* ::agg-expr))
+               :aggregate
+               (s/cat :expr/op ax/iri-spec
+                      :expr/vargs (s/* ::expr)
+                      :expr/kwargs (keyword-args ::distinct?)))
+         (s/conformer second)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mutli-specs
@@ -252,7 +290,11 @@
 (defexprspecs agg-expr-spec ternary-or-fourary-ops ternary-or-fourary-agg-spec)
 (defexprspecs agg-expr-spec varardic-ops varardic-agg-spec)
 
-(defmethod expr-spec :custom [_] custom-fn-agg-spec)
+(defexprspecs agg-expr-spec aggregate-ops aggregate-spec)
+(defexprspecs agg-expr-spec aggregate-expr-or-wild-ops aggregate-wildcard-spec)
+(defexprspecs agg-expr-spec aggregate-expr-with-sep-ops aggregate-separator-spec)
+
+(defmethod expr-spec :custom [_] aggregate-custom-fn-spec)
 
 (def agg-expr-multi-spec
   (s/multi-spec agg-expr-spec first))
@@ -260,6 +302,7 @@
 (comment
   (macroexpand '(defexprspecs expr-spec unary-ops unary-spec))
   (s/explain expr-multi-spec '(rand))
+  (s/explain expr-multi-spec '(rand 1 2 3))
   (s/explain expr-multi-spec '())
   (s/explain expr-multi-spec '(bamboozled))
   
@@ -293,13 +336,13 @@
     :expr/nilary        (s/cat :expr/op nilary-ops)
     :expr/unary         (s/cat :expr/op unary-ops
                                :expr/arg-1 ::agg-expr)
-    :expr/unary-agg     (s/cat :expr/op unary-agg-ops
+    :expr/unary-agg     (s/cat :expr/op aggregate-ops
                                :expr/arg-1 ::agg-expr
                                :expr/kwargs (keyword-args ::distinct?))
-    :expr/unary-wild    (s/cat :expr/op unary-agg-wild-ops
+    :expr/unary-wild    (s/cat :expr/op aggregate-expr-or-wild-ops
                                :expr/arg-1 wildcard-terminal-spec
                                :expr/kwargs (keyword-args ::distinct?))
-    :expr/unary-agg-sep (s/cat :expr/op unary-agg-sep-ops
+    :expr/unary-agg-sep (s/cat :expr/op aggregate-expr-with-sep-ops
                                :expr/arg-1 ::agg-expr
                                :expr/kwargs (keyword-args ::distinct?
                                                           ::separator))
