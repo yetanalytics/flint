@@ -37,8 +37,8 @@
     (is (= [:expr/branch [[:expr/op 'bound]
                           [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
            (s/conform ::es/expr '(bound ?foo))))
-    ;; Don't forget to eval the where namespace here!
-    ;; (We can't require it due to circular dependencies)
+    ;; Don't forget to eval the com.yetanalytics.flint.spec.where-test ns!
+    ;; (We can't `require` it due to circular dependencies.)
     (is (= [:expr/branch [[:expr/op 'exists]
                           [:expr/args [[:where-sub/where
                                         [[:triple/vec '[[:ax/var ?s]
