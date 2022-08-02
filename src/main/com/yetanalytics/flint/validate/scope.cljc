@@ -22,10 +22,12 @@
    :path       (conj (->> zip-loc zip/path (mapv first)) k)})
 
 (defn- validate-bind
-  "Validate `BIND (expr AS var)`"
+  "Validate `BIND (expr AS var)` in WHERE clauses."
   [[_expr-as-var-k [_ v-kv]] loc]
   (let [[_ bind-var] v-kv
-        prev-elems   (zip/lefts loc)
+        prev-elems   (-> loc
+                         zip/up ; :where/special
+                         zip/lefts)
         scope        (set (mapcat vv/get-scope-vars prev-elems))]
     (when (contains? scope bind-var)
       (in-scope-err-map bind-var scope loc :where/bind))))

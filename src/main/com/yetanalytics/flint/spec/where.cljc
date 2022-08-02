@@ -51,49 +51,77 @@
 ;; WHERE clause
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defmulti where-special-form-mm
+  "Accepts a special WHERE form/graph pattern in the form `[:keyword ...]`
+   and returns the appropriate regex spec. The spec applies an additional
+   conformer in order to allow for identification during formatting."
+  first)
+
+(defmethod where-special-form-mm :where [_] ; recursion
+  (s/& (s/cat :k #{:where}
+              :v ::where)
+       (s/conformer (fn [{:keys [v]}] [:where/recurse v]))))
+
+(defmethod where-special-form-mm :union [_]
+  (s/& (s/cat :k #{:union}
+              :v (s/+ ::where))
+       (s/conformer (fn [{:keys [v]}] [:where/union v]))))
+
+(defmethod where-special-form-mm :optional [_]
+  (s/& (s/cat :k #{:optional}
+              :v ::where)
+       (s/conformer (fn [{:keys [v]}] [:where/optional v]))))
+
+(defmethod where-special-form-mm :minus [_]
+  (s/& (s/cat :k #{:minus}
+              :v ::where)
+       (s/conformer (fn [{:keys [v]}] [:where/minus v]))))
+
+(defmethod where-special-form-mm :graph [_]
+  (s/& (s/cat :k #{:graph}
+              :v1 ax/var-or-iri-spec
+              :v2 ::where)
+       (s/conformer (fn [{:keys [v1 v2]}] [:where/graph [v1 v2]]))))
+
+(defmethod where-special-form-mm :service [_]
+  (s/& (s/cat :k #{:service}
+              :v1 ax/var-or-iri-spec
+              :v2 ::where)
+       (s/conformer (fn [{:keys [v1 v2]}] [:where/service [v1 v2]]))))
+
+(defmethod where-special-form-mm :service-silent [_]
+  (s/& (s/cat :k #{:service-silent}
+              :v1 ax/var-or-iri-spec
+              :v2 ::where)
+       (s/conformer (fn [{:keys [v1 v2]}] [:where/service-silent [v1 v2]]))))
+
+(defmethod where-special-form-mm :filter [_]
+  (s/& (s/cat :k #{:filter}
+              :v ::es/expr)
+       (s/conformer (fn [{:keys [v]}] [:where/filter v]))))
+
+(defmethod where-special-form-mm :bind [_]
+  (s/& (s/cat :k #{:bind}
+              :v ::es/expr-as-var)
+       (s/conformer (fn [{:keys [v]}] [:where/bind v]))))
+
+(defmethod where-special-form-mm :values [_]
+  (s/& (s/cat :k #{:values}
+              :v ::vs/values)
+       (s/conformer (fn [{:keys [v]}] [:where/values v]))))
+
+(def where-special-form-spec
+  "Specs for special WHERE forms/graph patterns, which should be
+   of the form `[:keyword ...]`."
+  (s/and vector? (s/multi-spec where-special-form-mm first)))
+
 (s/def ::where
   (s/or :where-sub/select
         ::select
         :where-sub/where
-        (s/coll-of (s/or
-                    :triple/vec     ts/triple-vec-spec
-                    :triple/nform   ts/normal-form-spec
-                    :where/recurse  (s/& (s/cat :k #{:where}
-                                                :v ::where)
-                                         (s/conformer #(:v %)))
-                    :where/union    (s/& (s/cat :k #{:union}
-                                                :v (s/+ ::where))
-                                         (s/conformer #(:v %)))
-                    :where/optional (s/& (s/cat :k #{:optional}
-                                                :v ::where)
-                                         (s/conformer #(:v %)))
-                    :where/minus    (s/& (s/cat :k #{:minus}
-                                                :v ::where)
-                                         (s/conformer #(:v %)))
-                    :where/graph    (s/& (s/cat :k #{:graph}
-                                                :v1 ax/var-or-iri-spec
-                                                :v2 ::where)
-                                         (s/conformer
-                                          (fn [x] [(:v1 x) (:v2 x)])))
-                    :where/service  (s/& (s/cat :k #{:service}
-                                                :v1 ax/var-or-iri-spec
-                                                :v2 ::where)
-                                         (s/conformer
-                                          (fn [x] [(:v1 x) (:v2 x)])))
-                    :where/service-silent (s/& (s/cat :k #{:service-silent}
-                                                      :v1 ax/var-or-iri-spec
-                                                      :v2 ::where)
-                                               (s/conformer
-                                                (fn [x] [(:v1 x) (:v2 x)])))
-                    :where/filter   (s/& (s/cat :k #{:filter}
-                                                :v ::es/expr)
-                                         (s/conformer #(:v %)))
-                    :where/bind     (s/& (s/cat :k #{:bind}
-                                                :v ::es/expr-as-var)
-                                         (s/conformer #(:v %)))
-                    :where/values   (s/& (s/cat :k #{:values}
-                                                :v ::vs/values)
-                                         (s/conformer #(:v %))))
+        (s/coll-of (s/or :where/special where-special-form-spec
+                         :triple/vec    ts/triple-vec-spec
+                         :triple/nform  ts/normal-form-spec)
                    :min-count 1
                    :kind vector?)
         :where-sub/empty

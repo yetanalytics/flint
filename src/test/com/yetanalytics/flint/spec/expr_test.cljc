@@ -1,7 +1,6 @@
 (ns com.yetanalytics.flint.spec.expr-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.spec.axiom :as ax]
             [com.yetanalytics.flint.spec.expr  :as es]))
 
 (deftest conform-expr-test
@@ -38,6 +37,8 @@
     (is (= [:expr/branch [[:expr/op 'bound]
                           [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
            (s/conform ::es/expr '(bound ?foo))))
+    ;; Don't forget to eval the com.yetanalytics.flint.spec.where-test ns!
+    ;; (We can't `require` it due to circular dependencies.)
     (is (= [:expr/branch [[:expr/op 'exists]
                           [:expr/args [[:where-sub/where
                                         [[:triple/vec '[[:ax/var ?s]
@@ -73,6 +74,13 @@
       (is (= [:expr/branch [[:expr/op 'count]
                             [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
              (s/conform ::es/agg-expr '(count ?foo))))
+      ;; Nested aggregates banned by some impls, but is allowed here
+      (is (= [:expr/branch [[:expr/op 'count]
+                            [:expr/args
+                             [[:expr/branch
+                               [[:expr/op 'avg]
+                                [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]]]]]
+             (s/conform ::es/agg-expr '(count (avg ?foo)))))
       (is (= [:expr/branch [[:expr/op 'count]
                             [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
                             [:expr/kwargs [[:distinct? true]]]]]
@@ -102,6 +110,9 @@
                             [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
                             [:expr/kwargs [[:distinct? true]]]]]
              (s/conform ::es/agg-expr '(:my/fn ?foo :distinct? true))))
+      (is (= [:expr/branch [[:expr/op [:ax/prefix-iri :my/fn]]
+                            [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
+             (s/conform ::es/agg-expr '(:my/fn ?foo))))
       (is (s/invalid?
            (s/conform ::es/agg-expr '(count ?foo :bad? true))))
       (is (s/invalid?
@@ -120,103 +131,59 @@
                            :val  '(rand 1)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :expr/nilary]
+                          {:path   [:expr/branch 'rand]
                            :reason "Extra input"
                            :pred   `(s/cat :expr/op es/nilary-ops)
                            :val    '(1)
                            :via    [::es/expr]
-                           :in     [1]}
-                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
-                           :pred `ax/iri?
-                           :val  'rand
-                           :via  [::es/expr]
-                           :in   [0]}
-                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
-                           :pred `ax/prefix-iri?
-                           :val  'rand
-                           :via  [::es/expr]
-                           :in   [0]}]
+                           :in     [1]}]
             ::s/spec     ::es/expr
             ::s/value    '(rand 1)}
-           (-> (s/explain-data ::es/expr '(rand 1))
-               (update ::s/problems (partial filter #(-> % :path last (not= :expr/op)))))))
+           (s/explain-data ::es/expr '(rand 1))))
     (is (= {::s/problems [{:path [:expr/terminal]
                            :pred `(comp not list?)
                            :val  '(not false true)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :expr/unary]
+                          {:path   [:expr/branch 'not]
                            :reason "Extra input"
                            :pred   `(s/cat
                                      :expr/op es/unary-ops
-                                     :expr/arg-1 ::es/expr)
+                                     :expr/arg-1 ~'expr-spec)
                            :val    '(true)
                            :via    [::es/expr]
-                           :in     [2]}
-                           {:path [:expr/branch :expr/custom :expr/op :ax/iri]
-                            :pred `ax/iri?
-                            :val  'not
-                            :via  [::es/expr]
-                            :in   [0]}
-                           {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
-                            :pred `ax/prefix-iri?
-                            :val  'not
-                            :via  [::es/expr]
-                            :in   [0]}]
+                           :in     [2]}]
             ::s/spec ::es/expr
             ::s/value '(not false true)}
-           (-> (s/explain-data ::es/expr '(not false true))
-               (update ::s/problems (partial filter #(-> % :path last (not= :expr/op)))))))
+           (s/explain-data ::es/expr '(not false true))))
     (is (= {::s/problems [{:path [:expr/terminal]
                            :pred `(comp not list?)
                            :val  '(contains "foo")
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :expr/binary :expr/arg-2]
+                          {:path   [:expr/branch 'contains :expr/arg-2]
                            :reason "Insufficient input"
-                           :pred   ::es/expr
+                           :pred   'expr-spec
                            :val    ()
                            :via    [::es/expr ::es/expr]
-                           :in     []}
-                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
-                           :pred `ax/iri?
-                           :val  'contains
-                           :via  [::es/expr]
-                           :in   [0]}
-                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
-                           :pred `ax/prefix-iri?
-                           :val  'contains
-                           :via  [::es/expr]
-                           :in   [0]}]
+                           :in     []}]
             ::s/spec ::es/expr
             ::s/value '(contains "foo")}
-           (-> (s/explain-data ::es/expr '(contains "foo"))
-               (update ::s/problems (partial filter #(-> % :path last (not= :expr/op)))))))
+           (s/explain-data ::es/expr '(contains "foo"))))
     (is (= {::s/problems [{:path [:expr/terminal]
                            :pred `(comp not list?)
                            :val  '(+)
                            :via  [::es/expr]
                            :in   []}
-                          {:path   [:expr/branch :expr/binary-plus :expr/arg-1]
+                          {:path   [:expr/branch '+ :expr/arg-1]
                            :reason "Insufficient input"
-                           :pred   ::es/expr
+                           :pred   'expr-spec
                            :val    ()
                            :via    [::es/expr ::es/expr]
-                           :in     []}
-                          {:path [:expr/branch :expr/custom :expr/op :ax/iri]
-                           :pred `ax/iri?
-                           :val  '+
-                           :via  [::es/expr]
-                           :in   [0]}
-                          {:path [:expr/branch :expr/custom :expr/op :ax/prefix-iri]
-                           :pred `ax/prefix-iri?
-                           :val  '+
-                           :via  [::es/expr]
-                           :in   [0]}]
+                           :in     []}]
             ::s/spec ::es/expr
             ::s/value '(+)}
-           (-> (s/explain-data ::es/expr '(+))
-               (update ::s/problems (partial filter #(-> % :path last (not= :expr/op)))))))))
+           (s/explain-data ::es/expr '(+))))))
 
 (deftest conform-expr-as-var-test
   (testing "Conforming expr AS var clauses"
