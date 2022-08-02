@@ -29,6 +29,11 @@
      (-valid-iri? [s] (val-impl/valid-iri-string?* (.toString s)))
      (-format-iri [s] (str "<" s ">"))))
 
+(extend-protocol p/Prefix
+  #?(:clj clojure.lang.Keyword :cljs Keyword)
+  (-valid-prefix? [k] (val-impl/valid-prefix-keyword? k))
+  (-format-prefix [k] (fmt-impl/format-prefix-keyword k)))
+
 (extend-protocol p/PrefixedIRI
   #?(:clj clojure.lang.Keyword :cljs Keyword)
   (-valid-prefix-iri? [k] (val-impl/valid-prefix-iri-keyword? k))

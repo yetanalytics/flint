@@ -11,6 +11,13 @@
   (-format-iri [this]
     "Convert the full IRI `this` into its string representation."))
 
+(defprotocol Prefix
+  "A SPARQL prefix (e.g. `foo` in `PREFIX foo`)."
+  (-valid-prefix? [this]
+    "Return `true` if `this` is a valid prefix of its type.")
+  (-format-prefix [this]
+    "Convert the prefix `this` into its string representation."))
+
 (defprotocol PrefixedIRI
   "A SPARQL prefixed IRI (e.g. `foo:bar`)."
   (-valid-prefix-iri? [this]

@@ -31,6 +31,11 @@
        (is (= "<http://foo.org/>" ; js/URL auto-adds the final slash
               (p/-format-iri "<http://foo.org/>")
               (p/-format-iri (js/URL. "http://foo.org"))))))
+  (testing "Prefixes"
+    (is (p/-valid-prefix? :foo))
+    (is (p/-valid-prefix? :$))
+    (is (= "foo" (p/-format-prefix :foo)))
+    (is (= "foo" (p/-format-prefix :$))))
   (testing "Prefixed IRIs"
     (is (p/-valid-prefix-iri? :foo/bar))
     (is (= "foo:bar" (p/-format-prefix-iri :foo/bar))))

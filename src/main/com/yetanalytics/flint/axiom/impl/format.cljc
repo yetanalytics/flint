@@ -5,7 +5,10 @@
                 [[goog.string :refer [format]]
                  [goog.string.format]])))
 
-;; IRIs and RDF terms
+;; IRIs, Vars, and Blank Nodes
+
+(defn format-prefix-keyword [k]
+  (if (= :$ k) "" (name k)))
 
 (defn format-prefix-iri-keyword [k]
   (let [kns   (namespace k)
