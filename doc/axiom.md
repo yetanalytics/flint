@@ -172,7 +172,7 @@ which can then be used in a SPARQL query as so:
 ```
 and thus becomes:
 ```sparql
-PREFIX foo: http://foo.org/literals#
+PREFIX foo: <http://foo.org/literals#>
 SELECT ?x
 WHERE {
     ?x ?y \"5/6\"^^foo:rational .
