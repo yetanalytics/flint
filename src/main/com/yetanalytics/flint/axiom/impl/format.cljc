@@ -7,6 +7,9 @@
 
 ;; IRIs, Vars, and Blank Nodes
 
+(defn unwrap-iri-string [s]
+  (->> s (re-matches #"<(.*)>") second))
+
 (defn format-prefix-keyword [k]
   (if (= :$ k) "" (name k)))
 
@@ -55,6 +58,8 @@
     (format "%s:%s" (name rdf-prefix) rdf-suffix)
     (format "<%s%s>" iri/rdf-iri-prefix rdf-suffix)))
 
+;; This could cause fowrard declaration problems, but in practice the impls
+;; should have already been defined when `format-literal` is called.
 (defn format-literal
   "Create a literal of the form `\"strval^^iri\"`. If `append-url?` is `true`
    then the datatype IRI will be appended, and `iri-prefix-m` will map any

@@ -11,6 +11,7 @@
   #?(:clj java.lang.String
      :cljs string)
   (-valid-iri? [s] (val-impl/valid-iri-string? s))
+  (-unwrap-iri [s] (fmt-impl/unwrap-iri-string s))
   (-format-iri [s] s))
 
 #?(:clj
@@ -18,16 +19,19 @@
      java.net.URI
      (-valid-iri? [uri] (val-impl/valid-iri-string?* (.toString uri)))
      (-format-iri [uri] (str "<" uri ">"))
+     (-unwrap-iri [uri] (.toString uri))
 
      java.net.URL
      (-valid-iri? [url] (val-impl/valid-iri-string?* (.toString url)))
-     (-format-iri [url] (str "<" url ">")))
+     (-format-iri [url] (str "<" url ">"))
+     (-unwrap-iri [uri] (.toString uri)))
    
    :cljs
    (extend-protocol p/IRI
      js/URL
      (-valid-iri? [s] (val-impl/valid-iri-string?* (.toString s)))
-     (-format-iri [s] (str "<" s ">"))))
+     (-format-iri [s] (str "<" s ">"))
+     (-unwrap-iri [uri] (.toString uri))))
 
 (extend-protocol p/Prefix
   #?(:clj clojure.lang.Keyword :cljs Keyword)

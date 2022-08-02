@@ -9,7 +9,10 @@
   (-valid-iri? [this]
     "Return `true` if `this` is a valid full IRI of its type.")
   (-format-iri [this]
-    "Convert the full IRI `this` into its string representation."))
+    "Convert the full IRI `this` into its SPARQL string representation.")
+  (-unwrap-iri [this]
+    "Return the underlying IRI string of `this`, without angle bracket
+     wrapping."))
 
 (defprotocol Prefix
   "A SPARQL prefix (e.g. `foo` in `PREFIX foo`)."

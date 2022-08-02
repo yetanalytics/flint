@@ -6,7 +6,8 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [com.yetanalytics.flint.axiom.iri :as iri]
             [com.yetanalytics.flint.axiom.protocol :as p]
-            [com.yetanalytics.flint.axiom.impl]))
+            [com.yetanalytics.flint.axiom.impl]
+            [com.yetanalytics.flint :as flint]))
 
 (deftest axiom-protocol-test
   (testing "IRIs"
@@ -30,12 +31,21 @@
        :cljs
        (is (= "<http://foo.org/>" ; js/URL auto-adds the final slash
               (p/-format-iri "<http://foo.org/>")
-              (p/-format-iri (js/URL. "http://foo.org"))))))
+              (p/-format-iri (js/URL. "http://foo.org")))))
+    #?(:clj
+       (is (= "http://foo.org"
+              (p/-unwrap-iri "<http://foo.org>")
+              (p/-unwrap-iri (java.net.URL. "http://foo.org"))
+              (p/-unwrap-iri (java.net.URI. "http://foo.org"))))
+       :cljs
+       (is (= "http://foo.org/bar#"
+              (p/-unwrap-iri "<http://foo.org/bar#>")
+              (p/-unwrap-iri (js/URL. "http://foo.org/bar#"))))))
   (testing "Prefixes"
     (is (p/-valid-prefix? :foo))
     (is (p/-valid-prefix? :$))
     (is (= "foo" (p/-format-prefix :foo)))
-    (is (= "foo" (p/-format-prefix :$))))
+    (is (= "" (p/-format-prefix :$))))
   (testing "Prefixed IRIs"
     (is (p/-valid-prefix-iri? :foo/bar))
     (is (= "foo:bar" (p/-format-prefix-iri :foo/bar))))
@@ -226,3 +236,94 @@
          :cljs
          (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal-url (js/Date. 0))))))))
+
+(deftest integration-tests
+  (testing "Queries with non-string IRIs"
+    (is (= "SELECT ?x ?z WHERE { ?x <http://foo.org/> ?z . }"
+           #?(:clj (flint/format-query
+                    {:select ['?x '?z]
+                     :where  [['?x (java.net.URL. "http://foo.org/") '?z]]}))
+           #?(:clj (flint/format-query
+                    {:select ['?x '?z]
+                     :where  [['?x (java.net.URI. "http://foo.org/") '?z]]}))
+           #?(:cljs (flint/format-query
+                     {:select ['?x '?z]
+                      :where  [['?x (js/URL. "http://foo.org/") '?z]]}))))
+    #?(:clj (is (= "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX foo: <http://foo.org/> SELECT ?x WHERE { ?x foo:time \"1970-01-01T00:00:00Z\"^^xsd:dateTime . }"
+                   (flint/format-query
+                    {:prefixes {:xsd (java.net.URL. "http://www.w3.org/2001/XMLSchema#")
+                                :foo (java.net.URL. "http://foo.org/")}
+                     :select   ['?x]
+                     :where    [['?x :foo/time (java.time.Instant/EPOCH)]]})
+                   (flint/format-query
+                    {:prefixes {:xsd (java.net.URI. "http://www.w3.org/2001/XMLSchema#")
+                                :foo (java.net.URI. "http://foo.org/")}
+                     :select   ['?x]
+                     :where    [['?x :foo/time (java.util.Date. 0)]]})))
+       :cljs (is (= "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX foo: <http://foo.org/> SELECT ?x WHERE { ?x foo:time \"1970-01-01T00:00:00.000Z\"^^xsd:dateTime . }"
+                    (flint/format-query
+                     {:prefixes {:xsd (js/URL. "http://www.w3.org/2001/XMLSchema#")
+                                 :foo (js/URL. "http://foo.org/")}
+                      :select ['?x]
+                      :where  [['?x :foo/time (js/Date. 0)]]})))))
+  (testing "Queries with forced literal IRIs"
+    (is (= "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT ?x WHERE { ?x ?y \"Blah Blah Blah\"^^xsd:string . }"
+           (flint/format-query
+            {:prefixes {:xsd "<http://www.w3.org/2001/XMLSchema#>"}
+             :select   ['?x]
+             :where    [['?x '?y "Blah Blah Blah"]]}
+            :force-literal-iri? true)))
+    ;; long vs integer
+    (is (= #?(:clj "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT ?x WHERE { ?x ?y \"2\"^^xsd:long . }"
+              :cljs "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT ?x WHERE { ?x ?y \"2\"^^xsd:integer . }")
+           (flint/format-query
+            {:prefixes {:xsd "<http://www.w3.org/2001/XMLSchema#>"}
+             :select   ['?x]
+             :where    [['?x '?y 2]]}
+            :force-literal-iri? true)))
+    (testing "- does not affect lang maps"
+      (is (= "SELECT ?x WHERE { ?x ?y \"Lorem Ipsum\"@lat . }"
+             (flint/format-query
+              {:select   ['?x]
+               :where    [['?x '?y {:lat "Lorem Ipsum"}]]}
+              :force-literal-iri? true))))
+    (testing "- does not affect timestamps"
+      #?(:clj
+         (is (= "SELECT ?x WHERE { ?x ?y \"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }"
+                (flint/format-query
+                 {:select   ['?x]
+                  :where    [['?x '?y java.time.Instant/EPOCH]]}
+                 :force-literal-iri? true)
+                (flint/format-query
+                 {:select   ['?x]
+                  :where    [['?x '?y java.time.Instant/EPOCH]]}
+                 :force-literal-iri? false)))
+         :cljs
+         (is (= "SELECT ?x WHERE { ?x ?y \"1970-01-01T00:00:00.000Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }"
+                (flint/format-query
+                 {:select   ['?x]
+                  :where    [['?x '?y (js/Date. 0)]]}
+                 :force-literal-iri? true)
+                (flint/format-query
+                 {:select   ['?x]
+                  :where    [['?x '?y (js/Date. 0)]]}
+                 :force-literal-iri? false)))))))
+
+(def custom-literal (reify p/Literal
+                      (-valid-literal? [_] true)
+                      (-format-literal [_] "\"custom\"^^<http://foo.org>")
+                      (-format-literal [_ _] "\"custom\"^^<http://foo.org>")
+                      (-format-literal-strval [_] "custom")
+                      (-format-literal-lang-tag [_] nil)
+                      (-format-literal-url [_] "<http://foo.org>")
+                      (-format-literal-url [_ _] "<http://foo.org>")))
+
+(deftest protocol-extension-test
+  (testing "Custom literal via protocol extension"
+    (is (p/-valid-literal? custom-literal))
+    (is (= "\"custom\"^^<http://foo.org>"
+           (p/-format-literal custom-literal)))
+    (is (= "SELECT ?x WHERE { ?x ?y \"custom\"^^<http://foo.org> . }"
+           (flint/format-query
+            {:select ['?x]
+             :where [['?x '?y custom-literal]]})))))
