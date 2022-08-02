@@ -36,16 +36,18 @@
   "A SPARQL literal (e.g. `\"foo\"`, `\"bar\"@en`, `2`, and `true`)."
   (-valid-literal? [this]
     "Return `true` if `this` is a valid literal of its type.")
-  (-format-literal [this] [this prefixes]
+  (-format-literal [this] [this opts]
     "Convert the literal `this` into its string representation.
-     If `prefixes` are provided then the corresponding URIs would be
-     prefixed (e.g. \"http://www.w3.org/2001/XMLSchema#\" to \"xsd\");
-     note that the string representation need not have a URL tag.")
-  (-literal-url [this]
-    "Return the RDF datatype URL associated with `this` literal.
-     Returns `nil` for plain literals like strings (as opposed to typed
-     literals like numerics and booleans).")
-  (-literal-lang-tag [this]
+     The `opts` arg map is implementation-specific, but two common args
+     are `:append-iri?` to force the appending of the datatype IRI suffix
+     and `:iri-prefix-m` to map full datatype IRI strings to prefixes.")
+  (-format-literal-strval [this]
+    "Return the string value reprentation of `this` literal.")
+  (-format-literal-lang-tag [this]
     "Return the language tag string associated with `this` literal.
      Returns `nil` if the literal does not have any language tags
-     or is a typed literal."))
+     or is a typed literal.")
+  (-format-literal-url [this] [this opts]
+    "Return the RDF datatype URL associated with `this` literal.
+     The `opts` arg map is implementation-specific, but a common arg is
+     `:iri-prefix-m` to map full datatype IRI strings to prefixes."))

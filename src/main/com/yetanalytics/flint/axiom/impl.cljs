@@ -30,49 +30,66 @@
 (extend-protocol p/Literal
   ;; String literals
   string
-  (-format-literal
-    ([s] (fmt-impl/format-string-literal s))
-    ([s _] (fmt-impl/format-string-literal s)))
   (-valid-literal? [s] (val-impl/valid-string-literal? s))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] nil)
+  (-format-literal
+    ([s] (str "\"" s "\"")) ; Special treatment of plain string literals
+    ([s opts] (fmt-impl/format-literal s opts)))
+  (-format-literal-strval [s] s)
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([s] (p/-format-literal-url s {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "string" opts)))
 
   ;; Lang map literals
   PersistentArrayMap
+  (-valid-literal? [m] (val-impl/valid-lang-map-literal? m))
   (-format-literal
     ([m] (fmt-impl/format-lang-map-literal m))
     ([m _] (fmt-impl/format-lang-map-literal m)))
-  (-valid-literal? [m] (val-impl/valid-lang-map-literal? m))
-  (-literal-lang-tag [m] (fmt-impl/format-lang-map-tag m))
-  (-literal-url [_] nil)
-
+  (-format-literal-strval [m]
+    (fmt-impl/format-lang-map-val m))
+  (-format-literal-lang-tag [m]
+    (fmt-impl/format-lang-map-tag m))
+  (-format-literal-url ; Always unused during formatting
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-rdf-iri "langString" opts)))
+  
   ;; Numeric literals
   number
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [n]
-    (if (js/Number.isInteger n)
-      "http://www.w3.org/2001/XMLSchema#integer"
-      "http://www.w3.org/2001/XMLSchema#double"))
+  (-format-literal
+    ([n] (p/-format-literal n {}))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n]
+     (p/-format-literal-url n {}))
+    ([n opts]
+     (if (js/Number.isInteger n)
+       (fmt-impl/format-xsd-iri "integer" opts)
+       (fmt-impl/format-xsd-iri "double" opts))))
 
   ;; Boolean literals
   boolean
   (-valid-literal? [_] true)
-  (-format-literal ([b] (.toString b)) ([b _] (.toString b)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#boolean")
+  (-format-literal
+    ([n] (p/-format-literal n {}))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "boolean" opts)))
 
   ;; DateTime literals
   js/Date
-  (-format-literal
-    ([date-ts]
-     (fmt-impl/format-xsd-typed-literal (.toISOString date-ts)
-                                        "dateTime"))
-    ([date-ts prefixes]
-     (fmt-impl/format-xsd-typed-literal (.toISOString date-ts)
-                                        "dateTime"
-                                        prefixes)))
   (-valid-literal? [_] true)
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#dateTime"))
+  (-format-literal
+    ([n] (p/-format-literal n {}))
+    ([n opts] (fmt-impl/format-literal n (assoc opts :append-iri? true))))
+  (-format-literal-strval [n] (.toISOString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts))))

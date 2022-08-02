@@ -1,4 +1,9 @@
-(ns com.yetanalytics.flint.axiom.impl.format)
+(ns com.yetanalytics.flint.axiom.impl.format
+  (:require [com.yetanalytics.flint.axiom.iri      :as iri]
+            [com.yetanalytics.flint.axiom.protocol :as p]
+            #?@(:cljs
+                [[goog.string :refer [format]]
+                 [goog.string.format]])))
 
 ;; IRIs and RDF terms
 
@@ -15,10 +20,7 @@
     (str "_:" ?suffix)
     "[]"))
 
-;; Literals
-
-(defn format-string-literal [str-lit]
-  (str "\"" str-lit "\""))
+;; Lang Map Literals
 
 (defn format-lang-map-tag [lang-map]
   (-> lang-map keys first name))
@@ -31,25 +33,33 @@
         lval (format-lang-map-val lang-map)]
     (str "\"" lval "\"@" ltag)))
 
-(def xsd-iri-prefix
-  "http://www.w3.org/2001/XMLSchema#")
+;; Common format functions
 
-(defn- get-xsd-prefix*
-  [prefixes]
-  (reduce-kv (fn [_ k v]
-               (if (= xsd-iri-prefix v)
-                 (reduced (name k))
-                 nil))
-             nil
-             prefixes))
+(defn format-xsd-iri
+  "Create an XSD datatype IRI of the form `(str xsd-prefix xsd-suffix)`,
+   where `xsd-suffix` should be a string like `\"boolean\"` or `\"dateTime\"`.
+   If `iri-prefix-m` is provided, it will use the prefix associated with
+   the XSD IRI prefix."
+  [xsd-suffix {:keys [iri-prefix-m]}]
+  (iri/xsd-iri (get iri-prefix-m iri/xsd-iri-prefix)
+               xsd-suffix))
 
-(def ^{:private true :arglists '([prefixes])} get-xsd-prefix
-  (memoize get-xsd-prefix*))
+(defn format-rdf-iri
+  "Similar to `format-xsd-iri`, but for the RDF datatype IRI."
+  [rdf-suffix {:keys [iri-prefix-m]}]
+  (iri/rdf-iri (get iri-prefix-m iri/rdf-iri-prefix)
+               rdf-suffix))
 
-(defn format-xsd-typed-literal
-  ([lit-val xsd-suffix]
-   (format-xsd-typed-literal lit-val xsd-suffix nil))
-  ([lit-val xsd-suffix prefixes]
-   (if-some [xsd-prefix (get-xsd-prefix prefixes)]
-     (str "\"" lit-val "\"^^" xsd-prefix ":" xsd-suffix)
-     (str "\"" lit-val "\"^^" xsd-iri-prefix xsd-suffix))))
+(defn format-literal
+  "Create a literal of the form `\"strval^^iri\"`. If `append-url?` is `true`
+   then the datatype IRI will be appended, and `iri-prefix-m` will map any
+   IRI string prefix to a keyword prefix. `literal` should extend
+   `p/Literal` and as such implement `p/-format-literal-strval` and
+   `p/-format-literal-url`."
+  [literal {:keys [append-iri? _iri-prefix-m] :as opts}]
+  (let [strval (p/-format-literal-strval literal)]
+    (if append-iri?
+      (format "\"%s\"^^%s"
+              strval
+              (p/-format-literal-url literal opts))
+      strval)))

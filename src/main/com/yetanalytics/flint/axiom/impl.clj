@@ -31,6 +31,20 @@
   (-valid-bnode? [b] (val-impl/valid-bnode-symbol? b))
   (-format-bnode [b] (fmt-impl/format-bnode-symbol b)))
 
+;; Date helpers
+
+(defn- date->inst
+  [^java.util.Date date-ts]
+  (.toInstant date-ts))
+
+(defn- sql-date->inst
+  [^java.sql.Date sql-date-ts]
+  (.toInstant (java.sql.Timestamp. (.getTime sql-date-ts))))
+
+(defn- sql-time->inst
+  [^java.sql.Time sql-time-ts]
+  (.toInstant (java.sql.Timestamp. (.getTime sql-time-ts))))
+
 (extend-protocol p/Literal
   ;; String literals
   java.lang.String
@@ -38,123 +52,182 @@
     [s]
     (val-impl/valid-string-literal? s))
   (-format-literal
-    ([s] (fmt-impl/format-string-literal s))
-    ([s _] (fmt-impl/format-string-literal s)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] nil)
+    ([s] (str "\"" s "\"")) ; Special treatment of plain string iterals
+    ([s opts] (fmt-impl/format-literal s opts)))
+  (-format-literal-strval [s] s)
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([s] (p/-format-literal-url s {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "string" opts)))
 
   ;; Language Map literals
   clojure.lang.IPersistentMap
-  (-valid-literal?
-    [m]
+  (-valid-literal? [m]
     (val-impl/valid-lang-map-literal? m))
   (-format-literal
-    ([m] (fmt-impl/format-lang-map-literal m))
+    ([m] (p/-format-literal m {}))
     ([m _] (fmt-impl/format-lang-map-literal m)))
-  (-literal-lang-tag
-    [m]
-   (fmt-impl/format-lang-map-tag m))
-  (-literal-url
-   [_]
-   nil)
+  (-format-literal-strval [m]
+    (fmt-impl/format-lang-map-val m))
+  (-format-literal-lang-tag [m]
+    (fmt-impl/format-lang-map-tag m))
+  (-format-literal-url ; Always unused during formatting
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-rdf-iri "langString" opts)))
 
   ;; Numeric literals
   java.lang.Float
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#float")
+  (-format-literal
+    ([n] (p/-format-literal n {}))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "float" opts)))
 
   java.lang.Double
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#double")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "double" opts)))
 
   java.lang.Integer
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#integer")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "integer" opts)))
 
   java.lang.Long
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#long")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "long" opts)))
 
   java.lang.Short
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#short")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "short" opts)))
 
   java.lang.Byte
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#byte")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "byte" opts)))
 
   java.math.BigInteger
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#integer")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "integer" opts)))
 
   java.math.BigDecimal
   (-valid-literal? [_] true)
-  (-format-literal ([n] (.toString n)) ([n _] (.toString n)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#double")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "decimal" opts)))
 
   ;; Boolean literals
   java.lang.Boolean
   (-valid-literal? [_] true)
-  (-format-literal ([b] (.toString b)) ([b _] (.toString b)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#boolean")
+  (-format-literal
+    ([n] (p/-format-literal-strval n))
+    ([n opts] (fmt-impl/format-literal n opts)))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "boolean" opts)))
 
   ;; DateTime literals
   java.time.Instant
   (-valid-literal? [_] true)
   (-format-literal
-   ([inst-ts]
-    (fmt-impl/format-xsd-typed-literal inst-ts "dateTime"))
-   ([inst-ts prefixes]
-    (fmt-impl/format-xsd-typed-literal inst-ts "dateTime" prefixes)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#dateTime")
+    ([n] (p/-format-literal n {}))
+    ([n opts] (fmt-impl/format-literal n (assoc opts :append-iri? true))))
+  (-format-literal-strval [n] (.toString n))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
 
   java.util.Date
   (-valid-literal? [_] true)
   (-format-literal
     ([date-ts]
-     (p/-format-literal (.toInstant date-ts)))
-    ([date-ts prefixes]
-     (p/-format-literal (.toInstant date-ts) prefixes)))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#dateTime")
+     (p/-format-literal (date->inst date-ts)))
+    ([date-ts opts]
+     (p/-format-literal (date->inst date-ts) opts)))
+  (-format-literal-strval [date-ts]
+    (p/-format-literal-strval (date->inst date-ts)))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
 
   ;; Despite their names these java.sql objects can hold both date and time
   ;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
   java.sql.Date
   (-valid-literal? [_] true)
   (-format-literal
-    ([date-ts]
-     (p/-format-literal date-ts {}))
-    ([date-ts prefixes]
-     (let [ts (.toInstant (java.sql.Timestamp. (.getTime date-ts)))]
-       (p/-format-literal ts prefixes))))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#dateTime")
+    ([sql-date-ts]
+     (p/-format-literal (sql-date->inst sql-date-ts)))
+    ([sql-date-ts opts]
+     (p/-format-literal (sql-date->inst sql-date-ts) opts)))
+  (-format-literal-strval [sql-date-ts]
+    (p/-format-literal-strval (sql-date->inst sql-date-ts)))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
 
   java.sql.Time
   (-valid-literal? [_] true)
   (-format-literal
-    ([date-ts]
-     (p/-format-literal date-ts {}))
-    ([date-ts prefixes]
-     (let [ts (.toInstant (java.sql.Timestamp. (.getTime date-ts)))]
-       (p/-format-literal ts prefixes))))
-  (-literal-lang-tag [_] nil)
-  (-literal-url [_] "http://www.w3.org/2001/XMLSchema#dateTime"))
+    ([sql-time-ts]
+     (p/-format-literal (sql-time->inst sql-time-ts)))
+    ([sql-time-ts opts]
+     (p/-format-literal (sql-time->inst sql-time-ts) opts)))
+  (-format-literal-strval [sql-time-ts]
+    (p/-format-literal-strval (sql-time->inst sql-time-ts)))
+  (-format-literal-lang-tag [_] nil)
+  (-format-literal-url
+    ([n] (p/-format-literal-url n {}))
+    ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts))))
