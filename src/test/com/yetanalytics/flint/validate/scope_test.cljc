@@ -245,7 +245,7 @@
     (is (= [{:kind       ::vs/var-in-scope
              :variable   '?y
              :scope-vars #{'?x '?y '?z}
-             :path       [:query/select :where :where-sub/where :where/bind]}]
+             :path       [:query/select :where :where-sub/where :where/special :where/bind]}]
            (->> '{:select [?x]
                   :where [[?x ?y ?z]
                           [:bind [3 ?y]]]}
@@ -259,7 +259,7 @@
              {:kind       ::vs/var-in-scope
               :variable   '?y
               :scope-vars #{'?x '?y '?z}
-              :path       [:query/select :where :where-sub/where :where/bind]}}
+              :path       [:query/select :where :where-sub/where :where/special :where/bind]}}
            (->> '{:select [?w [2 ?x]]
                   :where [[?x ?y ?z]
                           [:bind [3 ?y]]]}

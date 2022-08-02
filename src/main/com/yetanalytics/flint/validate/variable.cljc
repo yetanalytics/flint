@@ -133,6 +133,9 @@
 
 ;; Group
 
+(defmethod get-scope-vars :where/special [[_ vs]]
+  (get-scope-vars vs))
+
 (defmethod get-scope-vars :where/recurse [[_ vs]]
   (get-scope-vars vs))
 

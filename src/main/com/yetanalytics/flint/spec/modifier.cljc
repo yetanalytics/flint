@@ -3,9 +3,8 @@
             [com.yetanalytics.flint.spec.axiom :as ax]
             [com.yetanalytics.flint.spec.expr  :as es]))
 
-;; TODO: Need to restrict `mod/group-expr` to function calls.
-;; However, this may count as a breaking change.
-
+;; Technically a single variable is also an expression, but it's already
+;; distinguished in the context-free grammar so why not also reflect that here.
 (s/def ::group-by
   (s/coll-of (s/or :ax/var          ax/variable?
                    :mod/group-expr  ::es/expr

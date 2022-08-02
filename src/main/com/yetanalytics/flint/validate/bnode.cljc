@@ -2,11 +2,6 @@
   (:require [clojure.set :as cset]
             [clojure.zip :as zip]))
 
-(def bgp-dividers
-  #{:where/recurse :where/union :where/optional
-    :where/minus :where/graph :where/service
-    :where/service-silent :where/bind :where/values})
-
 (defn- get-parent-loc
   "Given a bnode's loc, return its parent (either a `:triple/vec`
    or `:triple/nform` node)."
@@ -30,22 +25,29 @@
           zip/up ; [:triple/nform ...]
           ))))
 
+(defn- bgp-divider?
+  [ast-node]
+  (and (-> ast-node (get-in [0]) (= :where/special))
+       (-> ast-node (get-in [1 0]) (not= :where/filter))))
+
 (defn- get-bgp-index
   "The BGP path is the regular zip loc path appended with an index that
    corresponds to that of the BGP in the WHERE vector. For example:
    
-     [:triple/vec ...]     => 0
-     [:triple/nform ...]   => 0
-     [:where/filter ...]   => 0 ; FILTERs don't divide BGPs
-     [:where/optional ...] => X ; BGP divider
-     [:triple/nform ...]   => 1
+     [:triple/vec ...]       => 0
+     [:triple/nform ...]     => 0
+     [:where/special
+      [:where/filter ...]]   => 0 ; FILTERs don't divide BGPs
+     [:where/special
+      [:where/optional ...]] => X ; BGP divider
+     [:triple/nform ...]     => 1
    
    Note that this only works with locs that are immediate children
    of `:where-sub/where` nodes.
    "
   [loc]
   (let [lefts (zip/lefts loc)]
-    (count (filter (fn [[k _]] (bgp-dividers k)) lefts))))
+    (count (filter bgp-divider? lefts))))
 
 (defn- get-where-index
   [pnode nnode]
