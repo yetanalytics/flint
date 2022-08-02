@@ -54,9 +54,9 @@
            (p/-format-rdf-type 'a))))
   (testing "String Literals"
     (is (p/-valid-literal? "http://foo.org"))
-    ;; (is (not (p/-valid-literal? "<http://foo.org>")))
-    ;; (is (not (p/-valid-literal? "<http://foo.org")))
-    ;; (is (not (p/-valid-literal? "http://foo.org>")))
+    ;; As this is a valid IRI string, it would be validated as an IRI before
+    ;; as a literal, depending on the order in `s/or`.
+    (is (p/-valid-literal? "<http://foo.org>"))
     (is (= "\"blue\"" (p/-format-literal "blue")))
     (is (= "black" (p/-format-literal-strval "black")))
     (is (= "\"yellow\"^^xsd:string"
