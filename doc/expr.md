@@ -202,8 +202,6 @@ GROUP_CONCAT(DISTINCT ?y; SEPARATOR = ";")
 
 **NOTE:** Using aggregates in an invalid clause, e.g. a `FILTER` clause, will cause a spec error.
 
-**NOTE:** Using aggregates inside another aggregate will cause a spec error. (Nesting aggregates inside non-aggregate expressions, or vice versa, is perfectly fine, however.)
-
 **NOTE:** Using aggregates in a `SELECT` query, or including a `GROUP BY` in the query, introduces aggregate restrictions on the `SELECT` clause. See the [SPARQL Queries](query.md) page for more details.
 
 ## Custom Functions

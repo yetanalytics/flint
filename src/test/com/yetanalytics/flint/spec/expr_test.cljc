@@ -74,6 +74,13 @@
       (is (= [:expr/branch [[:expr/op 'count]
                             [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]
              (s/conform ::es/agg-expr '(count ?foo))))
+      ;; Nested aggregates banned by some impls, but is allowed here
+      (is (= [:expr/branch [[:expr/op 'count]
+                            [:expr/args
+                             [[:expr/branch
+                               [[:expr/op 'avg]
+                                [:expr/args [[:expr/terminal [:ax/var '?foo]]]]]]]]]]
+             (s/conform ::es/agg-expr '(count (avg ?foo)))))
       (is (= [:expr/branch [[:expr/op 'count]
                             [:expr/args [[:expr/terminal [:ax/var '?foo]]]]
                             [:expr/kwargs [[:distinct? true]]]]]

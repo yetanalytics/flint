@@ -205,45 +205,42 @@
 (def varardic-agg-spec (varardic-spec* ::agg-expr))
 
 ;; Aggregate Expressions (as opposed to regular exprs with aggregates)
-;; NOTE: Aggregate expressions MUST NOT contain aggregate sub-expressions
-;; (even though regular exprs can contain aggregates).
+
+;; NOTE: Aggregates inside other aggregates are not allowed in Apache Jena,
+;; but are technically allowed by the grammar, so it may be allowed by other
+;; implementations. After all, these two are equivalent:
+;;
+;; SELECT (MAX(AVG(?x)) AS ?maxAvg)                => Banned by Jena
+;; SELECT (AVG(?x) AS ?avg) (MAX(?avg) AS ?maxAvg) => Allowed by Jena
 
 (def aggregate-spec
   (s/cat :expr/op aggregate-ops
-         :expr/arg-1 ::expr
+         :expr/arg-1 ::agg-expr
          :expr/kwargs (keyword-args ::distinct?)))
 
 (def aggregate-wildcard-spec
   (s/cat :expr/op aggregate-expr-or-wild-ops
-         :expr/arg-1 (s/& (s/alt :expr ::expr
+         :expr/arg-1 (s/& (s/alt :expr ::agg-expr
                                  :wildcard wildcard-terminal-spec)
                           (s/conformer second))
          :expr/kwargs (keyword-args ::distinct?)))
 
 (def aggregate-separator-spec
   (s/cat :expr/op aggregate-expr-with-sep-ops
-         :expr/arg-1 ::expr
+         :expr/arg-1 ::agg-expr
          :expr/kwargs (keyword-args ::distinct?
                                     ::separator)))
 
 ;; Custom Expressions
 
-;; In non-aggregate expressions
-(def custom-fn-spec
+(def custom-fn-spec ; non-aggregates
   (s/cat :expr/op ax/iri-spec
          :expr/vargs (s/* ::expr)))
 
-;; In aggregate expressions
-;; Only custom functions that are aggregates use the DISTINCT keyword
 (def aggregate-custom-fn-spec
-  (s/and (s/or :non-aggregate
-               (s/cat :expr/op ax/iri-spec
-                      :expr/vargs (s/* ::agg-expr))
-               :aggregate
-               (s/cat :expr/op ax/iri-spec
-                      :expr/vargs (s/* ::expr)
-                      :expr/kwargs (keyword-args ::distinct?)))
-         (s/conformer second)))
+  (s/cat :expr/op ax/iri-spec
+         :expr/vargs (s/* ::agg-expr)
+         :expr/kwargs (keyword-args ::distinct?)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mutli-specs
