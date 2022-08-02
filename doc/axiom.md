@@ -68,7 +68,7 @@ The characters after the underscore can be written as any word character; period
 
 **NOTE:** Blank nodes have certain restrictions: they cannot be used in any delete-related clauses, nor can the same blank node be repeated across different [basic graph patterns](where.md) or SPARQL updates.
 
-## Wildcard:
+## Wildcard
 
 Examples: `*` and `:*`
 
@@ -76,10 +76,10 @@ The wildcard is used in certain query clauses and expressions in order to "retur
 
 ## Literals
 
-Flint supports the following literals: simple strings, language-tagged strings, numbers, booleans, and dateTime timestamps.
+Flint supports the following literals by default: simple strings, language-tagged strings, numbers, booleans, and dateTime timestamps.
 
 During SPARQL translation, an IRI denoting the datatype is added as a suffix
-if `:force-literal-iri?` is `true` or if it is not a primitive type (e.g. timestamps). For example, the following is a stringified `dateTime` timestamp with an appended datatype IRI:
+if `:force-iris?` is `true` or if it is not a primitive type (e.g. timestamps). For example, the following is a stringified `dateTime` timestamp with an appended datatype IRI:
 ```sparql
 "2022-01-01T10:10:10Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>
 ```
@@ -100,19 +100,19 @@ Examples: `true` and `false`
 
 Booleans are not transformed during SPARQL translation beyond stringification.
 
-#### Strings
+### Strings
 
 Examples: `"Hello World!"`, `"你好世界"`, `"cat: \\\"meow\\\""`, `"foo\\nbar"`
 
 String literals can contain any characters **except** unescaped line breaks, carriage returns, backslashes, or double quotes; this is in order to prevent SPARQL injection attacks. (Therefore strings like `"cat: \"meow\"` and `"foo\nbar"` are not allowed.) Strings are not transformed during SPARQL translation.
 
-#### Language Maps
+### Language Maps
 
 Examples: `{:en "Hello World!"}`, `{:zh "你好世界"}`
 
-Strings with language tags are represented by a map between **one** language tag keyword and the string literal (which follows the same restrictions as simple strings).
+Strings with language tags are represented by a map between **one** language tag keyword and the string literal (which follows the same restrictions as simple strings). Note that this is the only literal that cannot have a datatype IRI appended, even if `:force-iris?` is `true`.
 
-#### Timestamps
+### Timestamps
 
 Examples: `#inst "2022-01-01T10:10:10Z"`
 
@@ -122,6 +122,8 @@ Timestamps are any values for which `inst?` is `true`, i.e. an instance of one o
 - `java.sql.Date` (Clojure)
 - `java.sql.Time` (Clojure)
 - `js/Date` (ClojureScript)
+
+As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have the `xsd:dateTime` IRI appended regardless of the value of `:force-iris?`.
 
 ### Custom Literals
 
@@ -135,6 +137,8 @@ Note that `-format-literal` and `-format-literal-url` also accept an `opts` map 
 Here is an example of an implementation of a `Rational` literal (inspired by an example given by the [Apache Jena documentation](https://jena.apache.org/documentation/notes/typed-literals.html)):
 
 ```clojure
+(require '[com.yetanalytics.flint.axiom.protocol :as p])
+
 (defrecord Rational [numerator denominator]
   p/Literal
   (p/-valid-literal? [_rational]
@@ -158,4 +162,21 @@ Here is an example of an implementation of a `Rational` literal (inspired by an 
       "<http://foo.org/literals#rational>")))
 ```
 
-**NOTE:** A user can also extend other protocols in the namespace to create custom implementations of IRIs and other axiom values.
+which can then be used in a SPARQL query as so:
+```clojure
+(def rational-value (map->Rational {:numerator 5 :denominator 6}))
+
+{:prefixes {:foo "<http://foo.org/literals#>"}
+ :select   ['?x]
+ :where    [['?x '?y rational-value]]}}
+```
+and thus becomes:
+```sparql
+PREFIX foo: http://foo.org/literals#
+SELECT ?x
+WHERE {
+    ?x ?y \"5/6\"^^foo:rational .
+}
+```
+
+**NOTE:** A user can also extend other protocols in the namespace to create custom implementations of IRIs and other RDF Term values.

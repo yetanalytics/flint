@@ -309,15 +309,6 @@
                   :where    [['?x '?y (js/Date. 0)]]}
                  :force-iris? false)))))))
 
-(def custom-literal (reify p/Literal
-                      (-valid-literal? [_] true)
-                      (-format-literal [_] "\"custom\"^^<http://foo.org>")
-                      (-format-literal [_ _] "\"custom\"^^<http://foo.org>")
-                      (-format-literal-strval [_] "custom")
-                      (-format-literal-lang-tag [_] nil)
-                      (-format-literal-url [_] "<http://foo.org>")
-                      (-format-literal-url [_ _] "<http://foo.org>")))
-
 (defrecord Rational [numerator denominator]
   p/Literal
   (p/-valid-literal? [_rational]
