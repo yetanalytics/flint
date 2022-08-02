@@ -16,8 +16,8 @@
   (name v-sym))
 
 (defn format-bnode-symbol [b-sym]
-  (if-some [?suffix (second (re-matches #"_(.+)" (name b-sym)))]
-    (str "_:" ?suffix)
+  (if-some [suffix (second (re-matches #"_(.+)" (name b-sym)))]
+    (format "_:%s" suffix)
     "[]"))
 
 ;; Lang Map Literals
@@ -31,7 +31,7 @@
 (defn format-lang-map-literal [lang-map]
   (let [ltag (format-lang-map-tag lang-map)
         lval (format-lang-map-val lang-map)]
-    (str "\"" lval "\"@" ltag)))
+    (format "\"%s\"@%s" lval ltag)))
 
 ;; Common format functions
 
