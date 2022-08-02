@@ -1,58 +1,32 @@
 (ns com.yetanalytics.flint.format.axiom
-  (:require [com.yetanalytics.flint.format :as f]))
+  (:require [com.yetanalytics.flint.format :as f]
+            [com.yetanalytics.flint.axiom.protocol :as p]
+            [com.yetanalytics.flint.axiom.impl]))
 
 (defmethod f/format-ast-node :ax/iri [_ [_ iri]]
-  iri)
+  (p/-format-iri iri))
+
+(defmethod f/format-ast-node :ax/prefix [_ [_ prefix]]
+  (p/-format-prefix prefix))
 
 (defmethod f/format-ast-node :ax/prefix-iri [_ [_ prefix-iri]]
-  (str (namespace prefix-iri) ":" (name prefix-iri)))
+  (p/-format-prefix-iri prefix-iri))
 
 (defmethod f/format-ast-node :ax/var [_ [_ variable]]
-  (name variable))
+  (p/-format-variable variable))
 
 (defmethod f/format-ast-node :ax/bnode [_ [_ bnode]]
-  (if-some [?suffix (second (re-matches #"_(.+)" (name bnode)))]
-    (str "_:" ?suffix)
-    "[]"))
+  (p/-format-bnode bnode))
 
-(defmethod f/format-ast-node :ax/wildcard [_ [_ _]]
-  "*")
+(defmethod f/format-ast-node :ax/wildcard [_ [_ wildcard]]
+  (p/-format-wildcard wildcard))
 
-(defmethod f/format-ast-node :ax/rdf-type [_ [_ _]]
-  "a")
+(defmethod f/format-ast-node :ax/rdf-type [_ [_ rdf-type]]
+  (p/-format-rdf-type rdf-type))
 
-(defmethod f/format-ast-node :ax/str-lit [_ [_ str-value]]
-  (str "\"" str-value "\""))
+(defmethod f/format-ast-node :ax/literal [opts [_ literal]]
+  (p/-format-literal literal opts))
 
-(defmethod f/format-ast-node :ax/lmap-lit [_ [_ lang-map]]
-  (let [ltag (-> lang-map keys first)
-        lval (-> lang-map vals first)]
-    (str "\"" lval "\"@" (name ltag))))
-
-(defmethod f/format-ast-node :ax/num-lit [_ [_ num-value]]
-  (str num-value))
-
-(defmethod f/format-ast-node :ax/bool-lit [_ [_ bool-value]]
-  (str bool-value))
-
-#?(:clj
-   (defn- inst->str
-     [inst]
-     (cond
-       ;; java.time.Instant - the recommended approach
-       (instance? java.time.Instant inst)
-       (.toString inst)
-       ;; java.util.Date and its subclasses
-       (or (instance? java.sql.Date inst)
-           (instance? java.sql.Time inst))
-       (.toString (.toInstant (java.sql.Timestamp. (.getTime inst))))
-       (instance? java.util.Date inst)
-       (.toString (.toInstant inst)))))
-
-(defmethod f/format-ast-node :ax/dt-lit [{:keys [xsd-prefix]} [_ dt-value]]
-  (let [xsd-suffix  (if xsd-prefix
-                      (str xsd-prefix ":dateTime")
-                      "<http://www.w3.org/2001/XMLSchema#dateTime>")
-        inst-string #?(:clj (inst->str dt-value)
-                       :cljs (.toISOString dt-value))]
-    (str "\"" inst-string "\"^^" xsd-suffix)))
+;; Technically literals in the SPARQL spec but they behave differently in Flint
+(defmethod f/format-ast-node :ax/numeric [_ [_ num]]
+  (str num))

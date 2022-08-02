@@ -9,9 +9,9 @@
 (def path-terminal-spec
   (s/and
    (comp not list?)
-   (s/or :ax/iri        ax/iri?
-         :ax/prefix-iri ax/prefix-iri?
-         :ax/rdf-type   ax/rdf-type?)))
+   (s/or :ax/iri        ax/iri-spec
+         :ax/prefix-iri ax/prefix-iri-spec
+         :ax/rdf-type   ax/rdf-type-spec)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Negated Path

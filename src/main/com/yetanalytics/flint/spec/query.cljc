@@ -42,15 +42,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::from
-  (s/and (s/or :from/single ax/iri-spec
-               :from/coll   (s/and (s/coll-of ax/iri-spec
+  (s/and (s/or :from/single ax/iri-or-prefixed-spec
+               :from/coll   (s/and (s/coll-of ax/iri-or-prefixed-spec
                                               :count 1
                                               :kind vector?)
                                    (s/conformer first)))
          (s/conformer second)))
 
 (s/def ::from-named
-  (s/coll-of ax/iri-spec :min-count 1 :kind vector?))
+  (s/coll-of ax/iri-or-prefixed-spec
+             :min-count 1
+             :kind vector?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query
@@ -93,10 +95,10 @@
                :key-comp-fn key-comp))
 
 (s/def ::describe
-  (s/or :describe/vars-or-iris (s/coll-of ax/var-or-iri-spec
+  (s/or :describe/vars-or-iris (s/coll-of ax/iri-or-var-spec
                                           :min-count 1
                                           :kind vector?)
-        :ax/wildcard ax/wildcard?))
+        :ax/wildcard ax/wildcard-spec))
 
 (def describe-query-spec
   (sparql-keys :req-un [::describe]

@@ -1,21 +1,17 @@
 (ns com.yetanalytics.flint.spec.prologue
   (:require [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.spec.axiom :as ax]))
-
-(defn- prefix-keyword?
-  [k]
-  (and (keyword? k)
-       (nil? (namespace k))
-       (or (re-matches ax/prefix-iri-ns-regex (name k))
-           (= :$ k))))
+            [com.yetanalytics.flint.spec.axiom :as ax]
+            [com.yetanalytics.flint.axiom.impl.validation :refer []]))
 
 ;; single `s/or` used to conform
 
 (s/def ::base
-  (s/or :ax/iri ax/iri?))
+  (s/or :ax/iri ax/iri-spec))
 
 (s/def ::prefixes
-  (s/and (s/map-of prefix-keyword? ax/iri?)
-         (s/conformer (partial map
-                               (fn [[pre iri]]
-                                 [:prologue/prefix [pre [:ax/iri iri]]])))))
+  (s/and (s/map-of ax/prefix-spec ax/iri-spec)
+         (s/conformer
+          (partial map
+                   (fn [[pre iri]]
+                     [:prologue/prefix [[:ax/prefix pre]
+                                        [:ax/iri iri]]])))))

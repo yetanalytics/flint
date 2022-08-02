@@ -26,85 +26,70 @@
 ;; Subjects
 
 (def subj-spec
-  (s/or :ax/var        ax/variable?
-        :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/bnode      ax/bnode?))
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec))
 
 (def subj-novar-spec
-  (s/or :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/bnode      ax/bnode?))
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec))
 
 (def subj-noblank-spec
-  (s/or :ax/var        ax/variable?
-        :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?))
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec))
 
 (def subj-novar-noblank-spec
-  ax/iri-spec)
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec))
 
 ;; Predicates
 
 (def pred-spec
-  (s/or :ax/var        ax/variable?
-        :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/rdf-type   ax/rdf-type?
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/rdf-type   ax/rdf-type-spec
         :triple/path   ::ps/path))
 
 (def pred-nopath-spec
-  (s/or :ax/var        ax/variable?
-        :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/rdf-type   ax/rdf-type?))
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/rdf-type   ax/rdf-type-spec))
 
 (def pred-novar-spec
-  (s/or :ax/iri ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/rdf-type ax/rdf-type?))
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/rdf-type   ax/rdf-type-spec))
 
 ;; Objects
 
 (def obj-spec
-  (s/or :ax/var        ax/variable?
-        :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/bnode      ax/bnode?
-        :ax/str-lit    ax/valid-string?
-        :ax/lmap-lit   ax/lang-map?
-        :ax/num-lit    number?
-        :ax/bool-lit   boolean?
-        :ax/dt-lit     inst?))
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec))
 
 (def obj-novar-spec
-  (s/or :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/bnode      ax/bnode?
-        :ax/str-lit    ax/valid-string?
-        :ax/lmap-lit   ax/lang-map?
-        :ax/num-lit    number?
-        :ax/bool-lit   boolean?
-        :ax/dt-lit     inst?))
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec))
 
 (def obj-noblank-spec
-  (s/or :ax/var        ax/variable?
-        :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/str-lit    ax/valid-string?
-        :ax/lmap-lit   ax/lang-map?
-        :ax/num-lit    number?
-        :ax/bool-lit   boolean?
-        :ax/dt-lit     inst?))
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/literal    ax/literal-spec))
 
 (def obj-novar-noblank-spec
-  (s/or :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/str-lit    ax/valid-string?
-        :ax/lmap-lit   ax/lang-map?
-        :ax/num-lit    number?
-        :ax/bool-lit   boolean?
-        :ax/dt-lit     inst?))
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/literal    ax/literal-spec))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Combo Specs
