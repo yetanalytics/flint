@@ -15,7 +15,7 @@
            (->> '[:update/insert-data
                   [[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
                                                 [:ax/prefix-iri :dc/title]
-                                                [:ax/str-lit "Title"]]]]]]]
+                                                [:ax/literal "Title"]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE DATA clauses"
     (is (= (cstr/join "\n" ["DELETE DATA {"
@@ -30,7 +30,7 @@
                        [:triple/quad-triples
                         [[:triple/vec [[:ax/prefix-iri :foo/x]
                                        [:ax/prefix-iri :dc/title]
-                                       [:ax/str-lit "Title"]]]]]]]]]]]
+                                       [:ax/literal "Title"]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE WHERE clauses"
     (is (= (cstr/join "\n" ["DELETE WHERE {"

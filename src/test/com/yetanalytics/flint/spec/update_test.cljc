@@ -7,10 +7,10 @@
   (testing "Conforming updates"
     (is (= '[[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
                                           [:ax/prefix-iri :dc/title]
-                                          [:ax/str-lit "Title"]]]
+                                          [:ax/literal "Title"]]]
                             [:triple/vec [[:ax/prefix-iri :foo/y]
                                           [:ax/rdf-type :a]
-                                          [:ax/str-lit "MyType"]]]]]]
+                                          [:ax/literal "MyType"]]]]]]
            (s/conform us/insert-data-update-spec
                       '{:insert-data [[:foo/x :dc/title "Title"]
                                       [:foo/y :a "MyType"]]})))
@@ -19,10 +19,10 @@
                               [:triple/quad-triples
                                [[:triple/vec [[:ax/prefix-iri :foo/x]
                                               [:ax/prefix-iri :dc/title]
-                                              [:ax/str-lit "Title"]]]
+                                              [:ax/literal "Title"]]]
                                 [:triple/vec [[:ax/prefix-iri :foo/y]
                                               [:ax/rdf-type :a]
-                                              [:ax/str-lit "MyType"]]]]]]]]]]
+                                              [:ax/literal "MyType"]]]]]]]]]]
            (s/conform us/delete-data-update-spec
                       '{:delete-data [[:graph
                                        "<http://example.org>"

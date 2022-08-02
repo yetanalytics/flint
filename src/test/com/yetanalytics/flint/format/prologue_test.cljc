@@ -15,7 +15,8 @@
     (is (= (cstr/join "\n" ["PREFIX :     <http://default.org>"
                             "PREFIX foo:  <http://foo.org>"
                             "PREFIX barb: <http://bar.org>"])
-           (->> [:prefixes [[:prologue/prefix [:$    [:ax/iri "<http://default.org>"]]]
-                            [:prologue/prefix [:foo  [:ax/iri "<http://foo.org>"]]]
-                            [:prologue/prefix [:barb [:ax/iri "<http://bar.org>"]]]]]
+           (->> [:prefixes
+                 [[:prologue/prefix [[:ax/prefix :$]    [:ax/iri "<http://default.org>"]]]
+                  [:prologue/prefix [[:ax/prefix :foo]  [:ax/iri "<http://foo.org>"]]]
+                  [:prologue/prefix [[:ax/prefix :barb] [:ax/iri "<http://bar.org>"]]]]]
                 format-ast)))))

@@ -20,7 +20,7 @@
                             "    1"
                             "}"])
            (->> '[:query/select
-                  [[:prefixes [[:prologue/prefix [:foo [:ax/iri "<http://example.org/foo/>"]]]]]
+                  [[:prefixes [[:prologue/prefix [[:ax/prefix :foo] [:ax/iri "<http://example.org/foo/>"]]]]]
                    [:select [:select/var-or-exprs [[:ax/var ?x]]]]
                    [:from [:ax/iri "<http://example.org/my-graph/>"]]
                    [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
@@ -31,7 +31,7 @@
                                  [:mod/asc-desc-expr [:expr/terminal [:ax/var ?y]]]]]]]
                    [:values [:values/map
                              [[[:ax/var ?z]]
-                              [[[:ax/num-lit 1]]]]]]]]
+                              [[[:ax/literal 1]]]]]]]]
                 format-ast))))
   (testing "Formatting CONSTRUCT queries"
     (is (= (cstr/join "\n" ["CONSTRUCT {"

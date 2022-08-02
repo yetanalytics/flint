@@ -98,31 +98,31 @@
                      [[:expr/branch
                        [[:expr/op +]
                         [:expr/args
-                         ([:expr/terminal [:ax/num-lit 2]]
-                          [:expr/terminal [:ax/num-lit 2]])]]]
+                         ([:expr/terminal [:ax/literal 2]]
+                          [:expr/terminal [:ax/literal 2]])]]]
                       [:ax/var ?foo]]]]]
                   [:where/special
                    [:where/filter
                     [:expr/branch
                      [[:expr/op not]
                       [:expr/args
-                       ([:expr/terminal [:ax/bool-lit false]])]]]]]
+                       ([:expr/terminal [:ax/literal false]])]]]]]
                   [:where/special
                    [:where/filter
                     [:expr/branch
                      [[:expr/op =]
                       [:expr/args
-                       ([:expr/terminal [:ax/num-lit 2]]
+                       ([:expr/terminal [:ax/literal 2]]
                         [:expr/terminal [:ax/var ?bar]])]]]]]
                   [:where/special
                    [:where/filter
                     [:expr/branch
                      [[:expr/op ns:myfn]
                       [:expr/args
-                       ([:expr/terminal [:ax/num-lit 2]]
+                       ([:expr/terminal [:ax/literal 2]]
                         [:expr/terminal [:ax/var ?baz]])]]]]]
                   [:where/special
                    [:where/values
                     [:values/map [[[:ax/var ?x] [:ax/var ?y]]
-                                  [[[:ax/num-lit 1] [:ax/num-lit 2]]]]]]]]]
+                                  [[[:ax/literal 1] [:ax/literal 2]]]]]]]]]
                (f/format-ast {:pretty? true}))))))
