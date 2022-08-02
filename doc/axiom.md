@@ -145,17 +145,23 @@ Here is an example of an implementation of a `Rational` literal (inspired by an 
     (and (int? numerator)
          (int? denominator)
          (not (zero? denominator))))
+
   (p/-format-literal [rational]
     (p/-format-literal rational {}))
+
   (p/-format-literal [rational opts]
     (str "\"" (p/-format-literal-strval rational)
          "\"^^" (p/-format-literal-url rational opts)))
+
   (p/-format-literal-strval [_rational]
     (str numerator "/" denominator))
+
   (p/-format-literal-lang-tag [_rational]
     nil)
+
   (p/-format-literal-url [rational]
     (p/-format-literal-url rational {}))
+    
   (p/-format-literal-url [_rational {:keys [iri-prefix-m]}]
     (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
       (str (name prefix) ":rational")
