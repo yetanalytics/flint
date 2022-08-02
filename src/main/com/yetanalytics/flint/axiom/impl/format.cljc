@@ -41,14 +41,16 @@
    If `iri-prefix-m` is provided, it will use the prefix associated with
    the XSD IRI prefix."
   [xsd-suffix {:keys [iri-prefix-m]}]
-  (iri/xsd-iri (get iri-prefix-m iri/xsd-iri-prefix)
-               xsd-suffix))
+  (if-some [xsd-prefix (get iri-prefix-m iri/xsd-iri-prefix)]
+    (format "%s:%s" (name xsd-prefix) xsd-suffix)
+    (format "<%s%s>" iri/xsd-iri-prefix xsd-suffix)))
 
 (defn format-rdf-iri
   "Similar to `format-xsd-iri`, but for the RDF datatype IRI."
   [rdf-suffix {:keys [iri-prefix-m]}]
-  (iri/rdf-iri (get iri-prefix-m iri/rdf-iri-prefix)
-               rdf-suffix))
+  (if-some [rdf-prefix (get iri-prefix-m iri/rdf-iri-prefix)]
+    (format "%s:%s" (name rdf-prefix) rdf-suffix)
+    (format "<%s%s>" iri/rdf-iri-prefix rdf-suffix)))
 
 (defn format-literal
   "Create a literal of the form `\"strval^^iri\"`. If `append-url?` is `true`

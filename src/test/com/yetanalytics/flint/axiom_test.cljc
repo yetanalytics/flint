@@ -63,15 +63,15 @@
            (p/-format-literal "yellow"
                               {:append-iri?  true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
-    (is (= (iri/xsd-iri "string")
+    (is (= "<http://www.w3.org/2001/XMLSchema#string>"
            (p/-format-literal-url "green")))
-    (is (= (iri/xsd-iri "xsd" "string")
+    (is (= "xsd:string"
            (p/-format-literal-url "white" {:iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
     (is (nil? (p/-format-literal-lang-tag "red"))))
   (testing "Lang Map Literals"
     (is (p/-valid-literal? {:en "Foo"}))
     (is (= "\"Bar\"@en" (p/-format-literal {:en "Bar"})))
-    (is (= (iri/rdf-iri "langString")
+    (is (= "<http://www.w3.org/1999/02/22-rdf-syntax-ns#langString>"
            (p/-format-literal-url {:en "Baz"})))
     (is (= "rdf:langString"
            (p/-format-literal-url {:en "Bazz"}
@@ -127,20 +127,20 @@
     #?(:clj
        (are [url n]
             (= url (p/-format-literal-url n))
-         "http://www.w3.org/2001/XMLSchema#double" 2.0
-         "http://www.w3.org/2001/XMLSchema#float" (float 2.0)
-         "http://www.w3.org/2001/XMLSchema#long" 2
-         "http://www.w3.org/2001/XMLSchema#integer" (int 2)
-         "http://www.w3.org/2001/XMLSchema#short" (short 2)
-         "http://www.w3.org/2001/XMLSchema#byte" (byte 2)
-         "http://www.w3.org/2001/XMLSchema#decimal" (java.math.BigDecimal. 2.0)
-         "http://www.w3.org/2001/XMLSchema#integer" java.math.BigInteger/TWO)
+         "<http://www.w3.org/2001/XMLSchema#double>" 2.0
+         "<http://www.w3.org/2001/XMLSchema#float>" (float 2.0)
+         "<http://www.w3.org/2001/XMLSchema#long>" 2
+         "<http://www.w3.org/2001/XMLSchema#integer>" (int 2)
+         "<http://www.w3.org/2001/XMLSchema#short>" (short 2)
+         "<http://www.w3.org/2001/XMLSchema#byte>" (byte 2)
+         "<http://www.w3.org/2001/XMLSchema#decimal>" (java.math.BigDecimal. 2.0)
+         "<http://www.w3.org/2001/XMLSchema#integer>" java.math.BigInteger/TWO)
        :cljs
        (are [url n]
             (= url (p/-format-literal-url n))
-         "http://www.w3.org/2001/XMLSchema#integer" 2
-         "http://www.w3.org/2001/XMLSchema#integer" 2.0
-         "http://www.w3.org/2001/XMLSchema#double" 3.14)))
+         "<http://www.w3.org/2001/XMLSchema#integer>" 2
+         "<http://www.w3.org/2001/XMLSchema#integer>" 2.0
+         "<http://www.w3.org/2001/XMLSchema#double>" 3.14)))
   (testing "Boolean Literals"
     (is (p/-valid-literal? true))
     (is (= "true" (p/-format-literal true)))
@@ -148,7 +148,7 @@
            (p/-format-literal true
                               {:append-iri?  true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
-    (is (= "http://www.w3.org/2001/XMLSchema#boolean"
+    (is (= "<http://www.w3.org/2001/XMLSchema#boolean>"
            (p/-format-literal-url true)))
     (is (nil? (p/-format-literal-lang-tag true))))
   (testing "Date/Time Literals:"
@@ -164,13 +164,13 @@
          (is (p/-valid-literal? (js/Date. 0)))))
     (testing "p/-format-literal"
       #?(:clj
-         (is (= "\"1970-01-01T00:00:00Z\"^^http://www.w3.org/2001/XMLSchema#dateTime"
+         (is (= "\"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal (java.time.Instant/EPOCH))
                 (p/-format-literal (java.util.Date. 0))
                 (p/-format-literal (java.sql.Date. 0))
                 (p/-format-literal (java.sql.Time. 0))))
          :cljs
-         (is (= "\"1970-01-01T00:00:00.000Z\"^^http://www.w3.org/2001/XMLSchema#dateTime"
+         (is (= "\"1970-01-01T00:00:00.000Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal (js/Date. 0))))))
     (testing "p/-format-literal with prefix"
       #?(:clj
@@ -213,11 +213,11 @@
          (is (nil? (p/-format-literal-lang-tag (js/Date. 0))))))
     (testing "p/-format-literal-url"
       #?(:clj
-         (is (= "http://www.w3.org/2001/XMLSchema#dateTime"
+         (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal-url (java.time.Instant/EPOCH))
                 (p/-format-literal-url (java.util.Date. 0))
                 (p/-format-literal-url (java.sql.Date. 0))
                 (p/-format-literal-url (java.sql.Time. 0))))
          :cljs
-         (is (= "http://www.w3.org/2001/XMLSchema#dateTime"
+         (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal-url (js/Date. 0))))))))

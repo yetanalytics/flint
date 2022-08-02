@@ -78,7 +78,10 @@
     (val-impl/valid-string-literal? s))
   (-format-literal
     ([s] (str "\"" s "\"")) ; Special treatment of plain string literals
-    ([s opts] (fmt-impl/format-literal s opts)))
+    ([s {:keys [append-iri?] :as opts}]
+     (if append-iri?
+       (fmt-impl/format-literal s opts)
+       (p/-format-literal s))))
   (-format-literal-strval [s] s)
   (-format-literal-lang-tag [_] nil)
   (-format-literal-url
