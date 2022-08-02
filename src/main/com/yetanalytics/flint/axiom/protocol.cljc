@@ -63,7 +63,7 @@
   (-format-literal [this] [this opts]
     "Convert the literal `this` into its string representation.
      The `opts` arg map is implementation-specific, but two common args
-     are `:append-iri?` to force the appending of the datatype IRI suffix
+     are `:force-iri?` to force the appending of the datatype IRI suffix
      and `:iri-prefix-m` to map full datatype IRI strings to prefixes.")
   (-format-literal-strval [this]
     "Return the string value reprentation of `this` literal.")

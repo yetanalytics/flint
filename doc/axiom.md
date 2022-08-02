@@ -130,7 +130,7 @@ A user can implement a custom literal by extending `com.yetanalytics.flint.axiom
 - `-format-literal` to format the entire string.
 - `-format-literal-strval`, `-format-literal-lang-tag`, and `-format-literal-url` to format individual aspects of the literal value.
 
-Note that `-format-literal` and `-format-literal-url` also accept an `opts` map for optional arguments that affect formatting. Currently implement literals accept the args `:append-iri?` (to force-append datatype IRIs) and `:iri-prefix-m` (a map from base IRI strings to prefixes to shorten datatype IRIs).
+Note that `-format-literal` and `-format-literal-url` also accept an `opts` map for optional arguments that affect formatting. Currently implement literals accept the args `:force-iri?` (to force-append datatype IRIs) and `:iri-prefix-m` (a map from base IRI strings to prefixes to shorten datatype IRIs).
 
 Here is an example of an implementation of a `Rational` literal (inspired by an example given by the [Apache Jena documentation](https://jena.apache.org/documentation/notes/typed-literals.html)):
 

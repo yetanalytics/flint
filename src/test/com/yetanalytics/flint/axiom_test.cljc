@@ -76,7 +76,7 @@
     (is (= "black" (p/-format-literal-strval "black")))
     (is (= "\"yellow\"^^xsd:string"
            (p/-format-literal "yellow"
-                              {:append-iri?  true
+                              {:force-iri?   true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
     (is (= "<http://www.w3.org/2001/XMLSchema#string>"
            (p/-format-literal-url "green")))
@@ -102,7 +102,7 @@
     (is (nil? (p/-format-literal-lang-tag 2.0)))
     (is (= "\"2\"^^xsd:integer"
            (p/-format-literal (int 2)
-                              {:append-iri?  true
+                              {:force-iri?   true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
     #?(:clj
        (is (= "2.0"
@@ -122,7 +122,7 @@
               (p/-format-literal 2))))
     #?(:clj
        (are [s n]
-            (= s (p/-format-literal n {:append-iri? true
+            (= s (p/-format-literal n {:force-iri?   true
                                        :iri-prefix-m {iri/xsd-iri-prefix :xsd}}))
          "\"2.0\"^^xsd:double" 2.0
          "\"2.0\"^^xsd:float" (float 2.0)
@@ -134,7 +134,7 @@
          "\"2\"^^xsd:integer" java.math.BigInteger/TWO)
        :cljs
        (are [s n]
-            (= s (p/-format-literal n {:append-iri? true
+            (= s (p/-format-literal n {:force-iri?   true
                                        :iri-prefix-m {iri/xsd-iri-prefix :xsd}}))
          "\"2\"^^xsd:integer" 2
          "\"2\"^^xsd:integer" 2.0
@@ -161,7 +161,7 @@
     (is (= "true" (p/-format-literal true)))
     (is (= "\"true\"^^xsd:boolean"
            (p/-format-literal true
-                              {:append-iri?  true
+                              {:force-iri?   true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
     (is (= "<http://www.w3.org/2001/XMLSchema#boolean>"
            (p/-format-literal-url true)))
@@ -272,7 +272,7 @@
             {:prefixes {:xsd "<http://www.w3.org/2001/XMLSchema#>"}
              :select   ['?x]
              :where    [['?x '?y "Blah Blah Blah"]]}
-            :force-literal-iri? true)))
+            :force-iris? true)))
     ;; long vs integer
     (is (= #?(:clj "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT ?x WHERE { ?x ?y \"2\"^^xsd:long . }"
               :cljs "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT ?x WHERE { ?x ?y \"2\"^^xsd:integer . }")
@@ -280,34 +280,34 @@
             {:prefixes {:xsd "<http://www.w3.org/2001/XMLSchema#>"}
              :select   ['?x]
              :where    [['?x '?y 2]]}
-            :force-literal-iri? true)))
+            :force-iris? true)))
     (testing "- does not affect lang maps"
       (is (= "SELECT ?x WHERE { ?x ?y \"Lorem Ipsum\"@lat . }"
              (flint/format-query
               {:select   ['?x]
                :where    [['?x '?y {:lat "Lorem Ipsum"}]]}
-              :force-literal-iri? true))))
+              :force-iris? true))))
     (testing "- does not affect timestamps"
       #?(:clj
          (is (= "SELECT ?x WHERE { ?x ?y \"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }"
                 (flint/format-query
                  {:select   ['?x]
                   :where    [['?x '?y java.time.Instant/EPOCH]]}
-                 :force-literal-iri? true)
+                 :force-iris? true)
                 (flint/format-query
                  {:select   ['?x]
                   :where    [['?x '?y java.time.Instant/EPOCH]]}
-                 :force-literal-iri? false)))
+                 :force-iris? false)))
          :cljs
          (is (= "SELECT ?x WHERE { ?x ?y \"1970-01-01T00:00:00.000Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }"
                 (flint/format-query
                  {:select   ['?x]
                   :where    [['?x '?y (js/Date. 0)]]}
-                 :force-literal-iri? true)
+                 :force-iris? true)
                 (flint/format-query
                  {:select   ['?x]
                   :where    [['?x '?y (js/Date. 0)]]}
-                 :force-literal-iri? false)))))))
+                 :force-iris? false)))))))
 
 (def custom-literal (reify p/Literal
                       (-valid-literal? [_] true)

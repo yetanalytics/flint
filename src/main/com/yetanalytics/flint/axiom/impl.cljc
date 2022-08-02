@@ -87,8 +87,8 @@
     (val-impl/valid-string-literal? s))
   (-format-literal
     ([s] (str "\"" s "\"")) ; Special treatment of plain string literals
-    ([s {:keys [append-iri?] :as opts}]
-     (if append-iri?
+    ([s {:keys [force-iri?] :as opts}]
+     (if force-iri?
        (fmt-impl/format-literal s opts)
        (p/-format-literal s))))
   (-format-literal-strval [s] s)
@@ -262,7 +262,7 @@
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal n {}))
-       ([n opts] (fmt-impl/format-literal n (assoc opts :append-iri? true))))
+       ([n opts] (fmt-impl/format-literal n (assoc opts :force-iri? true))))
      (-format-literal-strval [n] (.toString n))
      (-format-literal-lang-tag [_] nil)
      (-format-literal-url
@@ -319,7 +319,7 @@
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal n {}))
-       ([n opts] (fmt-impl/format-literal n (assoc opts :append-iri? true))))
+       ([n opts] (fmt-impl/format-literal n (assoc opts :force-iri? true))))
      (-format-literal-strval [n] (.toISOString n))
      (-format-literal-lang-tag [_] nil)
      (-format-literal-url

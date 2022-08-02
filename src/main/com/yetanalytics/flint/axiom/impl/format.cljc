@@ -61,14 +61,14 @@
 ;; This could cause fowrard declaration problems, but in practice the impls
 ;; should have already been defined when `format-literal` is called.
 (defn format-literal
-  "Create a literal of the form `\"strval^^iri\"`. If `append-url?` is `true`
+  "Create a literal of the form `\"strval^^iri\"`. If `force-iri?` is `true`
    then the datatype IRI will be appended, and `iri-prefix-m` will map any
    IRI string prefix to a keyword prefix. `literal` should extend
    `p/Literal` and as such implement `p/-format-literal-strval` and
    `p/-format-literal-url`."
-  [literal {:keys [append-iri? _iri-prefix-m] :as opts}]
+  [literal {:keys [force-iri? _iri-prefix-m] :as opts}]
   (let [strval (p/-format-literal-strval literal)]
-    (if append-iri?
+    (if force-iri?
       (format "\"%s\"^^%s"
               strval
               (p/-format-literal-url literal opts))

@@ -165,11 +165,11 @@
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
    does not conform to spec or otherwise fails validation."
-  [query & {:keys [pretty? validate? spec-ed? force-literal-iri?]
-            :or   {pretty?            false
-                   validate?          true
-                   spec-ed?           false
-                   force-literal-iri? false}}]
+  [query & {:keys [pretty? validate? spec-ed? force-iris?]
+            :or   {pretty?     false
+                   validate?   true
+                   spec-ed?    false
+                   force-iris? false}}]
   (let [ast       (conform-query spec-ed? query)
         prefix-m  (:prefixes query)
         _         (when validate?
@@ -180,7 +180,7 @@
                       (assert-bnodes query ast nodes-m)))
         iri-pre-m (reverse-prefix-map prefix-m)
         opt-m     {:pretty?      pretty?
-                   :append-iri?  force-literal-iri?
+                   :force-iri?   force-iris?
                    :iri-prefix-m iri-pre-m}]
     (f/format-ast ast opt-m)))
 
@@ -191,11 +191,11 @@
 (defn format-update
   "Format `update` into a SPARQL Update string. Throws an exception if `update`
    does not conform to spec or otherwise fails validation."
-  [update & {:keys [pretty? validate? spec-ed? force-literal-iri?]
-             :or   {pretty?            false
-                    validate?          true
-                    spec-ed?           false
-                    force-literal-iri? false}}]
+  [update & {:keys [pretty? validate? spec-ed? force-iris?]
+             :or   {pretty?     false
+                    validate?   true
+                    spec-ed?    false
+                    force-iris? false}}]
   (let [ast       (conform-update spec-ed? update)
         prefix-m  (:prefixes update)
         _         (when validate?
@@ -206,7 +206,7 @@
                       (assert-bnodes update ast nodes-m)))
         iri-pre-m (reverse-prefix-map prefix-m)
         opt-m     {:pretty?      pretty?
-                   :append-iri?  force-literal-iri?
+                   :force-iri?   force-iris?
                    :iri-prefix-m iri-pre-m}]
     (f/format-ast ast opt-m)))
 
@@ -214,11 +214,11 @@
   "Format the coll `updates` into a SPARQL Update Request string. Throws
    an exception if any update does not conform to spec or otherwise
    fails validation."
-  [updates & {:keys [pretty? validate? spec-ed? force-literal-iri?]
-              :or   {pretty?             false
-                     validate?           true
-                     spec-ed?            false
-                     force-literal-iri? false}}]
+  [updates & {:keys [pretty? validate? spec-ed? force-iris?]
+              :or   {pretty?     false
+                     validate?   true
+                     spec-ed?    false
+                     force-iris? false}}]
   (let [idxs     (-> updates count range)
         asts     (map (partial conform-update spec-ed?) updates idxs)
         pre-maps (reduce (fn [pm-coll {pm :prefixes :as _update}]
@@ -236,7 +236,7 @@
                      (assert-bnodes-coll updates asts nodes-m-coll)))
         opt-maps (map (fn [iri-pre-m]
                         {:pretty?      pretty?
-                         :append-iri?  force-literal-iri?
+                         :force-iri?   force-iris?
                          :iri-prefix-m iri-pre-m})
                       iri-maps)]
     (-> (map f/format-ast asts opt-maps)
