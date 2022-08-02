@@ -318,12 +318,40 @@
                       (-format-literal-url [_] "<http://foo.org>")
                       (-format-literal-url [_ _] "<http://foo.org>")))
 
+(defrecord Rational [numerator denominator]
+  p/Literal
+  (p/-valid-literal? [_rational]
+    (and (int? numerator)
+         (int? denominator)
+         (not (zero? denominator))))
+  (p/-format-literal [rational]
+    (p/-format-literal rational {}))
+  (p/-format-literal [rational opts]
+    (str "\"" (p/-format-literal-strval rational)
+         "\"^^" (p/-format-literal-url rational opts)))
+  (p/-format-literal-strval [_rational]
+    (str numerator "/" denominator))
+  (p/-format-literal-lang-tag [_rational]
+    nil)
+  (p/-format-literal-url [rational]
+    (p/-format-literal-url rational {}))
+  (p/-format-literal-url [_rational {:keys [iri-prefix-m]}]
+    (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
+      (str (name prefix) ":rational")
+      "<http://foo.org/literals#rational>")))
+
 (deftest protocol-extension-test
   (testing "Custom literal via protocol extension"
-    (is (p/-valid-literal? custom-literal))
-    (is (= "\"custom\"^^<http://foo.org>"
-           (p/-format-literal custom-literal)))
-    (is (= "SELECT ?x WHERE { ?x ?y \"custom\"^^<http://foo.org> . }"
+    (is (p/-valid-literal? (->Rational 2 3)))
+    (is (not (p/-valid-literal? (->Rational 2 0))))
+    (is (= "\"3/4\"^^<http://foo.org/literals#rational>"
+           (p/-format-literal (->Rational 3 4))))
+    (is (= "SELECT ?x WHERE { ?x ?y \"5/6\"^^<http://foo.org/literals#rational> . }"
            (flint/format-query
             {:select ['?x]
-             :where [['?x '?y custom-literal]]})))))
+             :where [['?x '?y (->Rational 5 6)]]})))
+    (is (= "PREFIX foo: <http://foo.org/literals#> SELECT ?x WHERE { ?x ?y \"7/8\"^^foo:rational . }"
+           (flint/format-query
+            {:prefixes {:foo "<http://foo.org/literals#>"}
+             :select   ['?x]
+             :where    [['?x '?y (->Rational 7 8)]]})))))

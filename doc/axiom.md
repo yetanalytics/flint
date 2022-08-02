@@ -12,9 +12,11 @@ Internationalized Resource Identifiers (IRIs) and their subset Universal Resourc
 
 ### Full IRIs
 
-Examples: `<http://absolute-iri-example.com/>`, `<relative-iri>`
+Examples: `<http://absolute-iri-example.com/>`, `<relative-iri>`, `(java.net.URL. <http://foo.org>)`
 
-Full IRIs in Flint are written as strings of the form `<my-iri-string>`. The string inside the angle bracket pair can include any characters **except** for whitespace, `^`, `<`, `>`, `"`, `\`, `|`, or `` ` ``. Translating to SPARQL does not affect full IRIs.
+Full IRIs in Flint are written as one of the following:
+- Strings of the form `<my-iri-string>`. The string inside the angle bracket pair can include any characters **except** for whitespace, `^`, `<`, `>`, `"`, `\`, `|`, or `` ` ``. Translating to SPARQL does not affect full IRIs.
+- Instances of either `java.net.URL`, `java.net.URI` (in Clojure), or `js/URL` (in ClojureScript). The inner string must follow the above restrictions.
 
 **NOTE:** This can mean that any string can become a IRI in Flint, though in practice they should conform to the [specification for IRIs](https://www.google.com/search?q=iri+spec&oq=IRI+spec&aqs=chrome.0.69i59j0i512j0i22i30l5.2040j0j7&sourceid=chrome&ie=UTF-8) after expansion.
 
@@ -76,37 +78,8 @@ The wildcard is used in certain query clauses and expressions in order to "retur
 
 Flint supports the following literals: simple strings, language-tagged strings, numbers, booleans, and dateTime timestamps.
 
-**NOTE:** For simplicity, Flint does not allow for user-defined RDF types despite it being allowed on the SPARQL spec.
-
-### Numbers
-
-Examples: `0`, `-2`, `3.14`
-
-Numbers cover both integers and doubles, which are represented as integer and double literals in SPARQL, respectively. Neither are transformed during SPARQL translation beyond stringification.
-
-### Booleans
-
-Examples: `true` and `false`
-
-Booleans are not transformed during SPARQL translation beyond stringification.
-
-### Simple strings
-
-Examples: `"Hello World!"`, `"你好世界"`, `"cat: \\\"meow\\\""`, `"foo\\nbar"`
-
-In Flint, string literals can contain any characters **except** unescaped line breaks, carriage returns, backslashes, or double quotes; this is in order to prevent SPARQL injection attacks. (Therefore strings like `"cat: \"meow\"` and `"foo\nbar"` are not allowed.) Strings are not transformed during SPARQL translation.
-
-### Language-tagged strings
-
-Examples: `{:en "Hello World!"}`, `{:zh "你好世界"}`
-
-In Flint, strings with language tags are represented by a map between **one** language tag keyword and the string literal (which follows the same restrictions as simple strings).
-
-### dateTime timestamps
-
-Examples: `#inst "2022-01-01T10:10:10Z"`
-
-In Flint, dateTime timestamps are any values for which `inst?` is `true`. During SPARQL translation, an IRI denoting the datatype is added as a suffix (since dateTime timestamps, unlike other literals, do not have a non-suffixed representation in SPARQL):
+During SPARQL translation, an IRI denoting the datatype is added as a suffix
+if `:force-literal-iri?` is `true` or if it is not a primitive type (e.g. timestamps). For example, the following is a stringified `dateTime` timestamp with an appended datatype IRI:
 ```sparql
 "2022-01-01T10:10:10Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>
 ```
@@ -114,3 +87,75 @@ If one includes an entry for the XMLSchema IRI prefix in their prefixes map, the
 ```sparql
 "2022-01-01T10:10:10Z"^^xsd:dateTime
 ```
+
+### Numbers
+
+Examples: `0`, `-2`, `3.14`
+
+Numbers cover both integers and doubles, which are represented as integer and double literals in SPARQL, respectively. Neither are transformed during SPARQL translation beyond stringification. Note that the datatype IRI will vary depending on whether it is a double or integer, as well the underlying representation (e.g. Clojure integers will have the datatype IRI `xsd:long` as they are Java long values by default).
+
+### Booleans
+
+Examples: `true` and `false`
+
+Booleans are not transformed during SPARQL translation beyond stringification.
+
+#### Strings
+
+Examples: `"Hello World!"`, `"你好世界"`, `"cat: \\\"meow\\\""`, `"foo\\nbar"`
+
+String literals can contain any characters **except** unescaped line breaks, carriage returns, backslashes, or double quotes; this is in order to prevent SPARQL injection attacks. (Therefore strings like `"cat: \"meow\"` and `"foo\nbar"` are not allowed.) Strings are not transformed during SPARQL translation.
+
+#### Language Maps
+
+Examples: `{:en "Hello World!"}`, `{:zh "你好世界"}`
+
+Strings with language tags are represented by a map between **one** language tag keyword and the string literal (which follows the same restrictions as simple strings).
+
+#### Timestamps
+
+Examples: `#inst "2022-01-01T10:10:10Z"`
+
+Timestamps are any values for which `inst?` is `true`, i.e. an instance of one of the following:
+- `java.time.Instant` (Clojure)
+- `java.util.Date` (Clojure)
+- `java.sql.Date` (Clojure)
+- `java.sql.Time` (Clojure)
+- `js/Date` (ClojureScript)
+
+### Custom Literals
+
+A user can implement a custom literal by extending `com.yetanalytics.flint.axiom.protocol/Literal` and defining the following:
+- `-valid-literal?` to validate the value.
+- `-format-literal` to format the entire string.
+- `-format-literal-strval`, `-format-literal-lang-tag`, and `-format-literal-url` to format individual aspects of the literal value.
+
+Note that `-format-literal` and `-format-literal-url` also accept an `opts` map for optional arguments that affect formatting. Currently implement literals accept the args `:append-iri?` (to force-append datatype IRIs) and `:iri-prefix-m` (a map from base IRI strings to prefixes to shorten datatype IRIs).
+
+Here is an example of an implementation of a `Rational` literal (inspired by an example given by the [Apache Jena documentation](https://jena.apache.org/documentation/notes/typed-literals.html)):
+
+```clojure
+(defrecord Rational [numerator denominator]
+  p/Literal
+  (p/-valid-literal? [_rational]
+    (and (int? numerator)
+         (int? denominator)
+         (not (zero? denominator))))
+  (p/-format-literal [rational]
+    (p/-format-literal rational {}))
+  (p/-format-literal [rational opts]
+    (str "\"" (p/-format-literal-strval rational)
+         "\"^^" (p/-format-literal-url rational opts)))
+  (p/-format-literal-strval [_rational]
+    (str numerator "/" denominator))
+  (p/-format-literal-lang-tag [_rational]
+    nil)
+  (p/-format-literal-url [rational]
+    (p/-format-literal-url rational {}))
+  (p/-format-literal-url [_rational {:keys [iri-prefix-m]}]
+    (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
+      (str (name prefix) ":rational")
+      "<http://foo.org/literals#rational>")))
+```
+
+**NOTE:** A user can also extend other protocols in the namespace to create custom implementations of IRIs and other axiom values.
