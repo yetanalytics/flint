@@ -27,6 +27,24 @@
   (-valid-bnode? [b] (val-impl/valid-bnode-symbol? b))
   (-format-bnode [b] (fmt-impl/format-bnode-symbol b)))
 
+(extend-protocol p/Wildcard
+  Keyword
+  (-valid-wildcard? [k] (= :* k))
+  (-format-wildcard [k] (name k))
+
+  Symbol
+  (-valid-wildcard? [sym] (= '* sym))
+  (-format-wildcard [sym] (name sym)))
+
+(extend-protocol p/RDFType
+  Keyword
+  (-valid-rdf-type? [k] (= :a k))
+  (-format-rdf-type [k] (name k))
+
+  Symbol
+  (-valid-rdf-type? [sym] (= 'a sym))
+  (-format-rdf-type [sym] (name sym)))
+
 (extend-protocol p/Literal
   ;; String literals
   string

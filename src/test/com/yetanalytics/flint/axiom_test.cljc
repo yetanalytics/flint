@@ -40,6 +40,18 @@
   (testing "Blank Nodes"
     (is (p/-valid-bnode? '_bar))
     (is (= "_:bar" (p/-format-bnode '_bar))))
+  (testing "Wildcards"
+    (is (p/-valid-wildcard? :*))
+    (is (p/-valid-wildcard? '*))
+    (is (= "*"
+           (p/-format-wildcard :*)
+           (p/-format-wildcard '*))))
+  (testing "RDF Type Shorthands"
+    (is (p/-valid-rdf-type? :a))
+    (is (p/-valid-rdf-type? 'a))
+    (is (= "a"
+           (p/-format-rdf-type :a)
+           (p/-format-rdf-type 'a))))
   (testing "String Literals"
     (is (p/-valid-literal? "http://foo.org"))
     ;; (is (not (p/-valid-literal? "<http://foo.org>")))

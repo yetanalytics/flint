@@ -74,6 +74,8 @@
   [x]
   (s/valid? (s/map-of keyword? valid-string? :min-count 1 :max-count 1) x))
 
+;; Axiom specs
+
 ;; Composite specs
 
 (def iri-spec

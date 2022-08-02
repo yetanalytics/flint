@@ -32,6 +32,20 @@
   (-format-bnode [this]
     "Convert the blank node `this` into its string representation."))
 
+(defprotocol Wildcard
+  "A SPARQL wildcard representation (i.e. `*`)."
+  (-valid-wildcard? [this]
+    "Return `true` if `this` is a valid wildcard.")
+  (-format-wildcard [this]
+    "Convert the wildcard `this` into its string representation."))
+
+(defprotocol RDFType
+  "A SPARQL shorthand for `rdf:type` (i.e. `a`)."
+  (-valid-rdf-type? [this]
+    "Return `true` if `this` is a valid `rdf:type` shorthand.")
+  (-format-rdf-type [this]
+    "Convert the `rdf:type` shorthand `this` into its string representation."))
+
 (defprotocol Literal
   "A SPARQL literal (e.g. `\"foo\"`, `\"bar\"@en`, `2`, and `true`)."
   (-valid-literal? [this]
