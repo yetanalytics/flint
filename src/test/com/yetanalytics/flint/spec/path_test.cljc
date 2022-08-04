@@ -1,7 +1,7 @@
 (ns com.yetanalytics.flint.spec.path-test
   (:require [clojure.test :refer [deftest testing is are]]
             [clojure.spec.alpha :as s]
-            [com.yetanalytics.flint.axiom.protocol :as p]
+            [com.yetanalytics.flint.spec.axiom :as ax]
             [com.yetanalytics.flint.spec.path  :as ps]))
 
 (deftest conform-path-test
@@ -71,17 +71,17 @@
 (deftest invalid-path-test
   (testing "Invalid paths"
     (is (= {::s/problems [{:path [:path/terminal :ax/iri]
-                           :pred `(fn [~'%] (satisfies? p/IRI ~'%))
+                           :pred `ax/iri-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
                           {:path [:path/terminal :ax/prefix-iri]
-                           :pred `(fn [~'%] (satisfies? p/PrefixedIRI ~'%))
+                           :pred `ax/prefix-iri-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
                           {:path [:path/terminal :ax/rdf-type]
-                           :pred `(fn [~'%] (satisfies? p/RDFType ~'%))
+                           :pred `ax/rdf-type-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}

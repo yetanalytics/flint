@@ -237,6 +237,55 @@
          (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal-url (js/Date. 0))))))))
 
+(deftest axiom-default-test
+  (testing "p/-valid-xxx? returns false."
+    (is (= false
+           (p/-valid-iri? []) 
+           (p/-valid-prefix? [])
+           (p/-valid-variable? [])
+           (p/-valid-bnode? [])
+           (p/-valid-wildcard? [])
+           (p/-valid-rdf-type? [])
+           (p/-valid-literal? [])))
+    (is (= false
+           (p/-valid-iri? nil)
+           (p/-valid-prefix? nil)
+           (p/-valid-variable? nil)
+           (p/-valid-bnode? nil)
+           (p/-valid-wildcard? nil)
+           (p/-valid-rdf-type? nil)
+           (p/-valid-literal? nil))))
+  (testing "p/-format-xxx throws an error."
+    (is (thrown-with-msg?
+         #?(:clj clojure.lang.ExceptionInfo :cljs js/Error)
+         #"Call of method: -format-iri on default implementation of protocol .+/IRI is not permitted"
+         (p/-format-iri [])))
+    (is (thrown-with-msg?
+         #?(:clj clojure.lang.ExceptionInfo :cljs js/Error)
+         #"Call of method: -format-literal on default implementation of protocol .+/Literal is not permitted"
+         (p/-format-literal [] {:force-iri? true})))
+    (is (thrown-with-msg?
+         #?(:clj clojure.lang.ExceptionInfo :cljs js/Error)
+         #"Call of method: -format-literal-url on default implementation of protocol .+/Literal is not permitted"
+         (p/-format-literal-url [] {:force-iri? true})))
+    (are [f]
+         (try (f nil)
+              (catch #?(:clj java.lang.Throwable :cljs js/Error) e
+                (boolean (re-matches #"Call of method: .+ on default implementation of protocol .+ is not permitted"
+                                     (ex-message e)))))
+      p/-format-iri
+      p/-unwrap-iri
+      p/-format-prefix
+      p/-format-prefix-iri
+      p/-format-variable
+      p/-format-bnode
+      p/-format-wildcard
+      p/-format-rdf-type
+      p/-format-literal
+      p/-format-literal-strval
+      p/-format-literal-lang-tag
+      p/-format-literal-url)))
+
 (deftest integration-tests
   (testing "Queries with non-string IRIs"
     (is (= "SELECT ?x ?z WHERE { ?x <http://foo.org/> ?z . }"

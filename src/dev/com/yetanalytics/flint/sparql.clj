@@ -153,3 +153,20 @@
     DROP SILENT DEFAULT;
     DROP SILENT NAMED;
     DROP SILENT ALL;"))
+
+(comment
+  (require '[com.yetanalytics.flint :as flint]
+           '[criterium.core :as crit])
+  
+  (crit/quick-bench
+   (flint/format-query
+    {:prefixes {:foo "<http://foo.com/>"}
+     :select ['?x]
+     :where [['?x :foo/bar "eleventy-six"]]}))
+  
+  (dotimes [_ 10000]
+    (flint/format-query
+     {:prefixes {:foo "<http://foo.com/>"}
+      :select ['?x]
+      :where [['?x :foo/bar "eleventy-six"]]}))
+  )

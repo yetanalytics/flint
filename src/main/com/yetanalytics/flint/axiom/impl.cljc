@@ -1,7 +1,69 @@
 (ns com.yetanalytics.flint.axiom.impl
+  {:clj-kondo/config
+   '{:lint-as {com.yetanalytics.flint.axiom.impl/extend-protocol-default
+               clojure.core/extend-protocol}}}
   (:require [com.yetanalytics.flint.axiom.protocol        :as p]
             [com.yetanalytics.flint.axiom.impl.format     :as fmt-impl]
-            [com.yetanalytics.flint.axiom.impl.validation :as val-impl]))
+            [com.yetanalytics.flint.axiom.impl.validation :as val-impl])
+  #?(:cljs (:require-macros [com.yetanalytics.flint.axiom.impl
+                             :refer [extend-protocol-default]])))
+
+#?(:clj
+   (defn- extend-protocol-default-err-msg
+     [method protocol]
+     ;; Base this off the IllegalArgumentException error message when you call
+     ;; a protocol on a non-implementing instance.
+     (format "Call of method: %s on default implementation of protocol %s is not permitted"
+             method
+             protocol)))
+
+#?(:clj
+   (defmacro extend-protocol-default
+     "Perform `extend-protocol` on `protocol` and `types`, expanding it on each
+   type as so:
+   
+     (extend-protocol protocol
+       type
+       (validation-f args false)
+       (other-fn args (throw ex-info err-msg {}))
+       ...)"
+     [protocol types validation-fsig & fsigs]
+     `(extend-protocol ~protocol
+        ~@(mapcat
+           (fn [type]
+             (concat
+              `(~type
+                ~(concat validation-fsig '(false)))
+              (map (fn [fsig#]
+                     (let [fname# (first fsig#)
+                           fargs# (rest fsig#)
+                           ermsg# (extend-protocol-default-err-msg
+                                   fname#
+                                   protocol)]
+                       (if (= 1 (count fargs#))
+                         ;; Single arity
+                         `(~fname# ~(first fargs#) (throw (ex-info ~ermsg# {})))
+                         ;; Multiple arity
+                         `(~fname# ~@(map (fn [farg#]
+                                            `(~farg# (throw (ex-info ~ermsg# {}))))
+                                          fargs#)))))
+                   fsigs)))
+           (if (coll? types) types [types]))))
+
+   ;; Forward declaration manages to shut up clj-kondo's undeclared symbol
+   ;; errors in cljs mode
+   :cljs
+   (declare extend-protocol-default))
+
+(comment
+  (macroexpand-1 '(extend-protocol-default p/Literal
+                                           [java.lang.Object nil]
+                                           (-valid-literal? [x])
+                                           (-format-literal [x] [x opts])
+                                           (-format-literal-strval [x])
+                                           (-format-literal-lang-tag [x])
+                                           (-format-literal-url [x] [x opts])))
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IRIs
@@ -25,7 +87,7 @@
      (-valid-iri? [url] (val-impl/valid-iri-string?* (.toString url)))
      (-format-iri [url] (str "<" url ">"))
      (-unwrap-iri [uri] (.toString uri)))
-   
+
    :cljs
    (extend-protocol p/IRI
      js/URL
@@ -42,6 +104,24 @@
   #?(:clj clojure.lang.Keyword :cljs Keyword)
   (-valid-prefix-iri? [k] (val-impl/valid-prefix-iri-keyword? k))
   (-format-prefix-iri [k] (fmt-impl/format-prefix-iri-keyword k)))
+
+;; IRI defaults
+
+(extend-protocol-default p/IRI
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-iri? [_])
+                         (-format-iri [_])
+                         (-unwrap-iri [_]))
+
+(extend-protocol-default p/Prefix
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-prefix? [_])
+                         (-format-prefix [_]))
+
+(extend-protocol-default p/PrefixedIRI
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-prefix-iri? [_])
+                         (-format-prefix-iri [_]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Variables, Blank Nodes, and other symbols
@@ -74,6 +154,28 @@
   #?(:clj clojure.lang.Symbol :cljs Symbol)
   (-valid-rdf-type? [sym] (= 'a sym))
   (-format-rdf-type [sym] (name sym)))
+
+;; Defaults
+
+(extend-protocol-default p/Variable
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-variable? [_])
+                         (-format-variable [_]))
+
+(extend-protocol-default p/BlankNode
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-bnode? [_])
+                         (-format-bnode [_]))
+
+(extend-protocol-default p/Wildcard
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-wildcard? [_])
+                         (-format-wildcard [_]))
+
+(extend-protocol-default p/RDFType
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-rdf-type? [_])
+                         (-format-rdf-type [_]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Basic Literals (strings, lang maps, booleans)
@@ -312,7 +414,7 @@
      (-format-literal-url
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts))))
-   
+
    :cljs
    (extend-protocol p/Literal
      js/Date
@@ -325,3 +427,15 @@
      (-format-literal-url
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Default Literals Implementation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(extend-protocol-default p/Literal
+                         #?(:clj [java.lang.Object nil] :cljs default)
+                         (-valid-literal? [_])
+                         (-format-literal [_] [_ _])
+                         (-format-literal-strval [_])
+                         (-format-literal-lang-tag [_])
+                         (-format-literal-url [_] [_ _]))

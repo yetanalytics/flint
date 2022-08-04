@@ -6,36 +6,28 @@
 ;; Axiom specs
 
 (def iri-spec
-  (s/and #(satisfies? p/IRI %)
-         p/-valid-iri?))
+  p/-valid-iri?)
 
 (def prefix-spec
-  (s/and #(satisfies? p/Prefix %)
-         p/-valid-prefix?))
+  p/-valid-prefix?)
 
 (def prefix-iri-spec
-  (s/and #(satisfies? p/PrefixedIRI %)
-         p/-valid-prefix-iri?))
+  p/-valid-prefix-iri?)
 
 (def variable-spec
-  (s/and #(satisfies? p/Variable %)
-         p/-valid-variable?))
+  p/-valid-variable?)
 
 (def bnode-spec
-  (s/and #(satisfies? p/BlankNode %)
-         p/-valid-bnode?))
+  p/-valid-bnode?)
 
 (def wildcard-spec
-  (s/and #(satisfies? p/Wildcard %)
-         p/-valid-wildcard?))
+  p/-valid-wildcard?)
 
 (def rdf-type-spec
-  (s/and #(satisfies? p/RDFType %)
-         p/-valid-rdf-type?))
+  p/-valid-rdf-type?)
 
 (def literal-spec
-  (s/and #(satisfies? p/Literal %)
-         p/-valid-literal?))
+  p/-valid-literal?)
 
 ;; Composite specs
 
