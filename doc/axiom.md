@@ -16,7 +16,8 @@ Examples: `<http://absolute-iri-example.com/>`, `<relative-iri>`, `(java.net.URL
 
 Full IRIs in Flint are written as one of the following:
 - Strings of the form `<my-iri-string>`. The string inside the angle bracket pair can include any characters **except** for whitespace, `^`, `<`, `>`, `"`, `\`, `|`, or `` ` ``. Translating to SPARQL does not affect full IRIs.
-- Instances of either `java.net.URL`, `java.net.URI` (in Clojure), or `js/URL` (in ClojureScript). The inner string must follow the above restrictions.
+- `java.net.URL` instances (Clojure only). The inner string must follow the above restrictions, i.e. no whitespace, `<`, `>`, etc.
+- `js/URL` (ClojureScript only). The inner string must follow the above restrictions.
 
 **NOTE:** This can mean that any string can become a IRI in Flint, though in practice they should conform to the [specification for IRIs](https://www.google.com/search?q=iri+spec&oq=IRI+spec&aqs=chrome.0.69i59j0i512j0i22i30l5.2040j0j7&sourceid=chrome&ie=UTF-8) after expansion.
 
