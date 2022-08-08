@@ -363,8 +363,33 @@
       (str (name prefix) ":rational")
       "<http://foo.org/literals#rational>")))
 
-(deftest protocol-extension-test
-  (testing "Custom literal via protocol extension"
+#?(:clj
+   (extend-type clojure.lang.Ratio p/Literal
+     (p/-valid-literal?
+       [ratio]
+       (not= java.math.BigInteger/ZERO (.denominator ratio)))
+     (p/-format-literal
+       ([ratio]
+        (p/-format-literal ratio {}))
+       ([ratio opts]
+        (str "\"" (p/-format-literal-strval ratio)
+             "\"^^" (p/-format-literal-url ratio opts))))
+     (p/-format-literal-strval
+       [ratio]
+       (str (.numerator ratio) "/" (.denominator ratio)))
+     (p/-format-literal-lang-tag
+       [_ratio]
+       nil)
+     (p/-format-literal-url
+       ([ratio]
+        (p/-format-literal-url ratio {}))
+       ([_ratio {:keys [iri-prefix-m]}]
+        (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
+          (str (name prefix) ":ratio")
+          "<http://foo.org/literals#ratio>")))))
+
+(deftest custom-impl-test
+  (testing "Custom literal via defrecord"
     (is (p/-valid-literal? (->Rational 2 3)))
     (is (not (p/-valid-literal? (->Rational 2 0))))
     (is (= "\"3/4\"^^<http://foo.org/literals#rational>"
@@ -377,4 +402,21 @@
            (flint/format-query
             {:prefixes {:foo "<http://foo.org/literals#>"}
              :select   ['?x]
-             :where    [['?x '?y (->Rational 7 8)]]})))))
+             :where    [['?x '?y (->Rational 7 8)]]}))))
+  #?(:clj
+     (testing "Custom literal via extend-protocol"
+       (is (p/-valid-literal? (/ 2 3)))
+       (is (not (p/-valid-literal?
+                 (clojure.lang.Ratio. java.math.BigInteger/TWO
+                                      java.math.BigInteger/ZERO))))
+       (is (= "\"3/4\"^^<http://foo.org/literals#ratio>"
+              (p/-format-literal (/ 3 4))))
+       (is (= "SELECT ?x WHERE { ?x ?y \"5/6\"^^<http://foo.org/literals#ratio> . }"
+              (flint/format-query
+               {:select ['?x]
+                :where [['?x '?y (/ 5 6)]]})))
+       (is (= "PREFIX foo: <http://foo.org/literals#> SELECT ?x WHERE { ?x ?y \"7/8\"^^foo:ratio . }"
+              (flint/format-query
+               {:prefixes {:foo "<http://foo.org/literals#>"}
+                :select   ['?x]
+                :where    [['?x '?y (/ 7 8)]]}))))))

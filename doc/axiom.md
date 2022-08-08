@@ -186,4 +186,36 @@ WHERE {
 }
 ```
 
-**NOTE:** A user can also extend other protocols in the namespace to create custom implementations of IRIs and other RDF Term values.
+Alternately you can extend a pre-existing Clojure(Script) type using `extend-protocol` or `extend-type`, e.g. with Clojure's `Ratio` type:
+```clojure
+(extend-protocol p/Literal
+  clojure.lang.Ratio 
+  (p/-valid-literal?
+    [ratio]
+    (not= java.math.BigInteger/ZERO (.denominator ratio)))
+  
+  (p/-format-literal
+    ([ratio]
+     (p/-format-literal ratio {}))
+    ([ratio opts]
+     (str "\"" (p/-format-literal-strval ratio)
+           "\"^^" (p/-format-literal-url ratio opts))))
+  
+  (p/-format-literal-strval
+    [ratio]
+    (str (.numerator ratio) "/" (.denominator ratio)))
+  
+  (p/-format-literal-lang-tag
+    [_ratio]
+    nil)
+  
+  (p/-format-literal-url
+    ([ratio]
+     (p/-format-literal-url ratio {}))
+    ([_ratio {:keys [iri-prefix-m]}]
+     (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
+       (str (name prefix) ":ratio")
+       "<http://foo.org/literals#ratio>"))))
+```
+
+**NOTE:** A user can also extend other protocols in the `flint.axiom.protocol` namespace, e.g. `IRI` or `PrefixedIRI` to create custom implementations of other SPARQL values.
