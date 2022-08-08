@@ -83,7 +83,7 @@
     (is (= #?(:clj "2.0" :cljs "2") (p/-format-literal 2.0)))
     (is (nil? (p/-format-literal-lang-tag 2)))
     (is (nil? (p/-format-literal-lang-tag 2.0)))
-    (is (= "\"2\"^^xsd:integer"
+    (is (= #?(:clj "\"2\"^^xsd:int" :cljs "\"2\"^^xsd:integer")
            (p/-format-literal (int 2)
                               {:force-iri?   true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
@@ -97,7 +97,8 @@
               (p/-format-literal (int 2))
               (p/-format-literal (short 2))
               (p/-format-literal (byte 2))
-              (p/-format-literal java.math.BigInteger/TWO)
+              (p/-format-literal (bigint 2))
+              (p/-format-literal java.math.BigInteger/TWO) 
               (p/-format-literal (java.math.BigDecimal. 2.0)))))
     #?(:cljs
        (is (= "2"
@@ -110,9 +111,10 @@
          "\"2.0\"^^xsd:double" 2.0
          "\"2.0\"^^xsd:float" (float 2.0)
          "\"2\"^^xsd:long" 2
-         "\"2\"^^xsd:integer" (int 2)
+         "\"2\"^^xsd:int" (int 2)
          "\"2\"^^xsd:short" (short 2)
          "\"2\"^^xsd:byte" (byte 2)
+         "\"2\"^^xsd:integer" (bigint 2)
          "\"2\"^^xsd:decimal" (java.math.BigDecimal. 2.0)
          "\"2\"^^xsd:integer" java.math.BigInteger/TWO)
        :cljs
@@ -128,9 +130,10 @@
          "<http://www.w3.org/2001/XMLSchema#double>" 2.0
          "<http://www.w3.org/2001/XMLSchema#float>" (float 2.0)
          "<http://www.w3.org/2001/XMLSchema#long>" 2
-         "<http://www.w3.org/2001/XMLSchema#integer>" (int 2)
+         "<http://www.w3.org/2001/XMLSchema#int>" (int 2)
          "<http://www.w3.org/2001/XMLSchema#short>" (short 2)
          "<http://www.w3.org/2001/XMLSchema#byte>" (byte 2)
+         "<http://www.w3.org/2001/XMLSchema#integer>" (bigint 2)
          "<http://www.w3.org/2001/XMLSchema#decimal>" (java.math.BigDecimal. 2.0)
          "<http://www.w3.org/2001/XMLSchema#integer>" java.math.BigInteger/TWO)
        :cljs
