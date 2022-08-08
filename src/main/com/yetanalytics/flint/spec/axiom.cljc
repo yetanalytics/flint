@@ -4,30 +4,33 @@
             [com.yetanalytics.flint.axiom.impl]))
 
 ;; Axiom specs
+;; We need to wrap them in functions in order to ensure that the functions
+;; are called dynamically, rather than have fixed definitions. Otherwise
+;; `extend-protocol` will not work.
 
 (def iri-spec
-  p/-valid-iri?)
+  #(p/-valid-iri? %))
 
 (def prefix-spec
-  p/-valid-prefix?)
+  #(p/-valid-prefix? %))
 
 (def prefix-iri-spec
-  p/-valid-prefix-iri?)
+  #(p/-valid-prefix-iri? %))
 
 (def variable-spec
-  p/-valid-variable?)
+  #(p/-valid-variable? %))
 
 (def bnode-spec
-  p/-valid-bnode?)
+  #(p/-valid-bnode? %))
 
 (def wildcard-spec
-  p/-valid-wildcard?)
+  #(p/-valid-wildcard? %))
 
 (def rdf-type-spec
-  p/-valid-rdf-type?)
+  #(p/-valid-rdf-type? %))
 
 (def literal-spec
-  p/-valid-literal?)
+  #(p/-valid-literal? %))
 
 ;; Composite specs
 
