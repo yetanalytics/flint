@@ -157,16 +157,32 @@
 (comment
   (require '[com.yetanalytics.flint :as flint]
            '[criterium.core :as crit])
-  
+
   (crit/quick-bench
    (flint/format-query
     {:prefixes {:foo "<http://foo.com/>"}
      :select ['?x]
      :where [['?x :foo/bar "eleventy-six"]]}))
-  
+
   (dotimes [_ 10000]
     (flint/format-query
      {:prefixes {:foo "<http://foo.com/>"}
       :select ['?x]
       :where [['?x :foo/bar "eleventy-six"]]}))
+  
+  (crit/quick-bench
+   (flint/format-query
+    {:prefixes {:foo "<http://foo.com/>"}
+     :select ['?x]
+     :where [['?x :foo/oooooooooone "ONE"]
+             ['?x :foo/ttttttttttwo "TWO"]
+             ['?x :foo/ththththree "THREE"]
+             ['?x :foo/ffffffffour "FOUR"]
+             ['?x :foo/ffffffffive "FIVE"]
+             ['?x :foo/sssssssssix "SIX"]
+             ['?x :foo/ssssssseven "SEVEN"]
+             ['?x :foo/eiiiiiiight "EIGHT"]
+             ['?x :foo/niiiiiiiine "NINE"]
+             ['?x :foo/ttttttttten "TEN"]]}
+    :validate? false))
   )
