@@ -20,7 +20,7 @@
 #?(:clj
    (defmacro extend-protocol-default
      "Perform `extend-protocol` on `protocol` and `types`, expanding it on each
-   type as so:
+      type as so:
    
      (extend-protocol protocol
        type
@@ -34,20 +34,21 @@
              (concat
               `(~type
                 ~(concat validation-fsig '(false)))
-              (map (fn [fsig#]
-                     (let [fname# (first fsig#)
-                           fargs# (rest fsig#)
-                           ermsg# (extend-protocol-default-err-msg
-                                   fname#
-                                   protocol)]
-                       (if (= 1 (count fargs#))
-                         ;; Single arity
-                         `(~fname# ~(first fargs#) (throw (ex-info ~ermsg# {})))
-                         ;; Multiple arity
-                         `(~fname# ~@(map (fn [farg#]
-                                            `(~farg# (throw (ex-info ~ermsg# {}))))
-                                          fargs#)))))
-                   fsigs)))
+              (map
+               (fn [fsig#]
+                 (let [fname# (first fsig#)
+                       fargs# (rest fsig#)
+                       ermsg# (extend-protocol-default-err-msg
+                               fname#
+                               protocol)]
+                   (if (= 1 (count fargs#))
+                     ;; Single arity
+                     `(~fname# ~(first fargs#) (throw (ex-info ~ermsg# {})))
+                     ;; Multiple arity
+                     `(~fname# ~@(map (fn [farg#]
+                                        `(~farg# (throw (ex-info ~ermsg# {}))))
+                                      fargs#)))))
+               fsigs)))
            (if (coll? types) types [types]))))
 
    ;; Forward declaration manages to shut up clj-kondo's undeclared symbol
@@ -74,26 +75,15 @@
      :cljs string)
   (-valid-iri? [s] (val-impl/valid-iri-string? s))
   (-unwrap-iri [s] (fmt-impl/unwrap-iri-string s))
-  (-format-iri [s] s))
+  (-format-iri [s] s)
 
-#?(:clj
-   (extend-protocol p/IRI
-     java.net.URI
-     (-valid-iri? [uri] (val-impl/valid-iri-string?* (.toString uri)))
-     (-format-iri [uri] (str "<" uri ">"))
-     (-unwrap-iri [uri] (.toString uri))
-
-     java.net.URL
-     (-valid-iri? [url] (val-impl/valid-iri-string?* (.toString url)))
-     (-format-iri [url] (str "<" url ">"))
-     (-unwrap-iri [uri] (.toString uri)))
-
-   :cljs
-   (extend-protocol p/IRI
-     js/URL
-     (-valid-iri? [s] (val-impl/valid-iri-string?* (.toString s)))
-     (-format-iri [s] (str "<" s ">"))
-     (-unwrap-iri [uri] (.toString uri))))
+  ;; Don't extend java.net.URL due to the fact that its .equals method
+  ;; performs HTTP resolution.
+  #?(:clj java.net.URI
+     :cljs js/URL)
+  (-valid-iri? [uri] (val-impl/valid-iri-string?* (.toString uri)))
+  (-format-iri [uri] (str "<" uri ">"))
+  (-unwrap-iri [uri] (.toString uri)))
 
 (extend-protocol p/Prefix
   #?(:clj clojure.lang.Keyword :cljs Keyword)

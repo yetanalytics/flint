@@ -12,35 +12,18 @@
 (deftest axiom-protocol-test
   (testing "IRIs"
     (is (not (p/-valid-iri? "http://foo.org")))
-    (is (= "<http://foo.org>"
-           (p/-format-iri "<http://foo.org>")))
-    #?(:clj
-       (is (= true
-              (p/-valid-iri? "<http://foo.org>")
-              (p/-valid-iri? (java.net.URL. "http://foo.org"))
-              (p/-valid-iri? (java.net.URI. "http://foo.org"))))
-       :cljs
-       (is (= true
-              (p/-valid-iri? "<http://foo.org/>")
-              (p/-valid-iri? (js/URL. "http://foo.org")))))
-    #?(:clj
-       (is (= "<http://foo.org>"
-              (p/-format-iri "<http://foo.org>")
-              (p/-format-iri (java.net.URL. "http://foo.org"))
-              (p/-format-iri (java.net.URI. "http://foo.org"))))
-       :cljs
-       (is (= "<http://foo.org/>" ; js/URL auto-adds the final slash
-              (p/-format-iri "<http://foo.org/>")
-              (p/-format-iri (js/URL. "http://foo.org")))))
-    #?(:clj
-       (is (= "http://foo.org"
-              (p/-unwrap-iri "<http://foo.org>")
-              (p/-unwrap-iri (java.net.URL. "http://foo.org"))
-              (p/-unwrap-iri (java.net.URI. "http://foo.org"))))
-       :cljs
-       (is (= "http://foo.org/bar#"
-              (p/-unwrap-iri "<http://foo.org/bar#>")
-              (p/-unwrap-iri (js/URL. "http://foo.org/bar#"))))))
+    (is (= true
+           (p/-valid-iri? "<http://foo.org>")
+           #?(:clj (p/-valid-iri? (java.net.URI. "http://foo.org"))
+              :cljs (p/-valid-iri? (js/URL. "http://foo.org")))))
+    (is (= "<http://foo.org/>" ; js/URL auto-adds the final slash
+           (p/-format-iri "<http://foo.org/>")
+           #?(:clj (p/-format-iri (java.net.URI. "http://foo.org/"))
+              :cljs (p/-format-iri (js/URL. "http://foo.org")))))
+    (is (= "http://foo.org/bar#"
+           (p/-unwrap-iri "<http://foo.org/bar#>")
+           #?(:clj (p/-unwrap-iri (java.net.URI. "http://foo.org/bar#"))
+              :cljs (p/-unwrap-iri (js/URL. "http://foo.org/bar#"))))))
   (testing "Prefixes"
     (is (p/-valid-prefix? :foo))
     (is (p/-valid-prefix? :$))
@@ -291,17 +274,14 @@
     (is (= "SELECT ?x ?z WHERE { ?x <http://foo.org/> ?z . }"
            #?(:clj (flint/format-query
                     {:select ['?x '?z]
-                     :where  [['?x (java.net.URL. "http://foo.org/") '?z]]}))
-           #?(:clj (flint/format-query
-                    {:select ['?x '?z]
                      :where  [['?x (java.net.URI. "http://foo.org/") '?z]]}))
            #?(:cljs (flint/format-query
                      {:select ['?x '?z]
                       :where  [['?x (js/URL. "http://foo.org/") '?z]]}))))
     #?(:clj (is (= "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX foo: <http://foo.org/> SELECT ?x WHERE { ?x foo:time \"1970-01-01T00:00:00Z\"^^xsd:dateTime . }"
                    (flint/format-query
-                    {:prefixes {:xsd (java.net.URL. "http://www.w3.org/2001/XMLSchema#")
-                                :foo (java.net.URL. "http://foo.org/")}
+                    {:prefixes {:xsd (java.net.URI. "http://www.w3.org/2001/XMLSchema#")
+                                :foo (java.net.URI. "http://foo.org/")}
                      :select   ['?x]
                      :where    [['?x :foo/time (java.time.Instant/EPOCH)]]})
                    (flint/format-query
