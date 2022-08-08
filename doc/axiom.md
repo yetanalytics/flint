@@ -117,12 +117,9 @@ Strings with language tags are represented by a map between **one** language tag
 
 Examples: `#inst "2022-01-01T10:10:10Z"`
 
-Timestamps are any values for which `inst?` is `true`, i.e. an instance of one of the following:
-- `java.time.Instant` (Clojure)
-- `java.util.Date` (Clojure)
-- `java.sql.Date` (Clojure)
-- `java.sql.Time` (Clojure)
-- `js/Date` (ClojureScript)
+Timestamp values should satisfy the `inst?` predicate. This covers the following types:
+- In Clojure: `java.time.Instant` and `java.util.Date` (the latter covers the `Date`, `Time`, and `Timestamp` classes in the `java.sql` package).
+- In ClojureScript: `js/Date`.
 
 As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have the `xsd:dateTime` IRI appended regardless of the value of `:force-iris?`.
 

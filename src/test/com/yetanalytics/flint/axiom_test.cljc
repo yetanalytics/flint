@@ -159,6 +159,7 @@
               (p/-valid-literal? ts)
            (java.time.Instant/EPOCH)
            (java.util.Date. 0)
+           (java.sql.Timestamp. 0)
            (java.sql.Date. 0)
            (java.sql.Time. 0))
          :cljs
@@ -168,6 +169,7 @@
          (is (= "\"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal (java.time.Instant/EPOCH))
                 (p/-format-literal (java.util.Date. 0))
+                (p/-format-literal (java.sql.Timestamp. 0))
                 (p/-format-literal (java.sql.Date. 0))
                 (p/-format-literal (java.sql.Time. 0))))
          :cljs
@@ -198,6 +200,7 @@
          (is (= "1970-01-01T00:00:00Z"
                 (p/-format-literal-strval (java.time.Instant/EPOCH))
                 (p/-format-literal-strval (java.util.Date. 0))
+                (p/-format-literal-strval (java.sql.Timestamp. 0))
                 (p/-format-literal-strval (java.sql.Date. 0))
                 (p/-format-literal-strval (java.sql.Time. 0))))
          :cljs
@@ -208,6 +211,7 @@
          (is (= nil
                 (p/-format-literal-lang-tag (java.time.Instant/EPOCH))
                 (p/-format-literal-lang-tag (java.util.Date. 0))
+                (p/-format-literal-lang-tag (java.sql.Timestamp. 0))
                 (p/-format-literal-lang-tag (java.sql.Date. 0))
                 (p/-format-literal-lang-tag (java.sql.Time. 0))))
          :cljs
@@ -217,6 +221,7 @@
          (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal-url (java.time.Instant/EPOCH))
                 (p/-format-literal-url (java.util.Date. 0))
+                (p/-format-literal-url (java.sql.Timestamp. 0))
                 (p/-format-literal-url (java.sql.Date. 0))
                 (p/-format-literal-url (java.sql.Time. 0))))
          :cljs

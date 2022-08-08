@@ -333,6 +333,18 @@
 ;; DateTime Literals
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; DateTime in Clojure covers all `inst?` values, i.e. java.time.Instant and
+;; java.util.Date. The latter is included because that is the default class
+;; `#inst` literals are evaluated to, even though it is deprecated for most
+;; purposes.
+
+;; The java.util.Date class has the java.sql.Timestamp, Date, and Time
+;; subclasses. The latter two have separate implementations since they throw
+;; exceptions if `.toInstant` is directly called on them.
+
+;; Despite their names these java.sql objects can hold both date and time
+;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
+
 #?(:clj
    (defn- date->inst
      [^java.util.Date date-ts]
@@ -375,8 +387,6 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
 
-     ;; Despite their names these java.sql objects can hold both date and time
-     ;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
      java.sql.Date
      (-valid-literal? [_] true)
      (-format-literal
