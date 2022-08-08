@@ -20,7 +20,7 @@
 #?(:clj
    (defmacro extend-protocol-default
      "Perform `extend-protocol` on `protocol` and `types`, expanding it on each
-   type as so:
+      type as so:
    
      (extend-protocol protocol
        type
@@ -34,20 +34,21 @@
              (concat
               `(~type
                 ~(concat validation-fsig '(false)))
-              (map (fn [fsig#]
-                     (let [fname# (first fsig#)
-                           fargs# (rest fsig#)
-                           ermsg# (extend-protocol-default-err-msg
-                                   fname#
-                                   protocol)]
-                       (if (= 1 (count fargs#))
-                         ;; Single arity
-                         `(~fname# ~(first fargs#) (throw (ex-info ~ermsg# {})))
-                         ;; Multiple arity
-                         `(~fname# ~@(map (fn [farg#]
-                                            `(~farg# (throw (ex-info ~ermsg# {}))))
-                                          fargs#)))))
-                   fsigs)))
+              (map
+               (fn [fsig#]
+                 (let [fname# (first fsig#)
+                       fargs# (rest fsig#)
+                       ermsg# (extend-protocol-default-err-msg
+                               fname#
+                               protocol)]
+                   (if (= 1 (count fargs#))
+                     ;; Single arity
+                     `(~fname# ~(first fargs#) (throw (ex-info ~ermsg# {})))
+                     ;; Multiple arity
+                     `(~fname# ~@(map (fn [farg#]
+                                        `(~farg# (throw (ex-info ~ermsg# {}))))
+                                      fargs#)))))
+               fsigs)))
            (if (coll? types) types [types]))))
 
    ;; Forward declaration manages to shut up clj-kondo's undeclared symbol
@@ -55,45 +56,23 @@
    :cljs
    (declare extend-protocol-default))
 
-(comment
-  (macroexpand-1 '(extend-protocol-default p/Literal
-                                           [java.lang.Object nil]
-                                           (-valid-literal? [x])
-                                           (-format-literal [x] [x opts])
-                                           (-format-literal-strval [x])
-                                           (-format-literal-lang-tag [x])
-                                           (-format-literal-url [x] [x opts])))
-  )
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IRIs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (extend-protocol p/IRI
-  #?(:clj java.lang.String
-     :cljs string)
+  #?(:clj String :cljs string)
   (-valid-iri? [s] (val-impl/valid-iri-string? s))
   (-unwrap-iri [s] (fmt-impl/unwrap-iri-string s))
-  (-format-iri [s] s))
+  (-format-iri [s] s)
 
-#?(:clj
-   (extend-protocol p/IRI
-     java.net.URI
-     (-valid-iri? [uri] (val-impl/valid-iri-string?* (.toString uri)))
-     (-format-iri [uri] (str "<" uri ">"))
-     (-unwrap-iri [uri] (.toString uri))
-
-     java.net.URL
-     (-valid-iri? [url] (val-impl/valid-iri-string?* (.toString url)))
-     (-format-iri [url] (str "<" url ">"))
-     (-unwrap-iri [uri] (.toString uri)))
-
-   :cljs
-   (extend-protocol p/IRI
-     js/URL
-     (-valid-iri? [s] (val-impl/valid-iri-string?* (.toString s)))
-     (-format-iri [s] (str "<" s ">"))
-     (-unwrap-iri [uri] (.toString uri))))
+  ;; Don't extend java.net.URL due to the fact that its .equals method
+  ;; performs HTTP resolution.
+  #?(:clj java.net.URI
+     :cljs js/URL)
+  (-valid-iri? [uri] (val-impl/valid-iri-string?* (.toString uri)))
+  (-format-iri [uri] (str "<" uri ">"))
+  (-unwrap-iri [uri] (.toString uri)))
 
 (extend-protocol p/Prefix
   #?(:clj clojure.lang.Keyword :cljs Keyword)
@@ -108,18 +87,18 @@
 ;; IRI defaults
 
 (extend-protocol-default p/IRI
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-iri? [_])
                          (-format-iri [_])
                          (-unwrap-iri [_]))
 
 (extend-protocol-default p/Prefix
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-prefix? [_])
                          (-format-prefix [_]))
 
 (extend-protocol-default p/PrefixedIRI
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-prefix-iri? [_])
                          (-format-prefix-iri [_]))
 
@@ -158,22 +137,22 @@
 ;; Defaults
 
 (extend-protocol-default p/Variable
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-variable? [_])
                          (-format-variable [_]))
 
 (extend-protocol-default p/BlankNode
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-bnode? [_])
                          (-format-bnode [_]))
 
 (extend-protocol-default p/Wildcard
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-wildcard? [_])
                          (-format-wildcard [_]))
 
 (extend-protocol-default p/RDFType
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-rdf-type? [_])
                          (-format-rdf-type [_]))
 
@@ -182,8 +161,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (extend-protocol p/Literal
-  #?(:clj java.lang.String
-     :cljs string)
+  #?(:clj String :cljs string)
   (-valid-literal?
     [s]
     (val-impl/valid-string-literal? s))
@@ -214,8 +192,7 @@
     ([n] (p/-format-literal-url n {}))
     ([_ opts] (fmt-impl/format-rdf-iri "langString" opts)))
 
-  #?(:clj java.lang.Boolean
-     :cljs boolean)
+  #?(:clj Boolean :cljs boolean)
   (-valid-literal? [_] true)
   (-format-literal
     ([n] (p/-format-literal-strval n))
@@ -231,10 +208,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #?(:clj
+   ;; See: "XSD data types" in
+   ;; https://jena.apache.org/documentation/notes/typed-literals.html
    (extend-protocol p/Literal
-     ;; See: "XSD data types" in
-     ;; https://jena.apache.org/documentation/notes/typed-literals.html
-     java.lang.Float
+     ;; Decimal types
+     Float
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal n {}))
@@ -245,7 +223,7 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "float" opts)))
 
-     java.lang.Double
+     Double ; Clojure decimal default type
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal-strval n))
@@ -256,7 +234,7 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "double" opts)))
 
-     java.lang.Integer
+     java.math.BigDecimal
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal-strval n))
@@ -265,9 +243,21 @@
      (-format-literal-lang-tag [_] nil)
      (-format-literal-url
        ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "integer" opts)))
+       ([_ opts] (fmt-impl/format-xsd-iri "decimal" opts)))
 
-     java.lang.Long
+     ;; Integral types
+     Integer
+     (-valid-literal? [_] true)
+     (-format-literal
+       ([n] (p/-format-literal-strval n))
+       ([n opts] (fmt-impl/format-literal n opts)))
+     (-format-literal-strval [n] (.toString n))
+     (-format-literal-lang-tag [_] nil)
+     (-format-literal-url
+       ([n] (p/-format-literal-url n {}))
+       ([_ opts] (fmt-impl/format-xsd-iri "int" opts)))
+
+     Long ; Clojure integer default type
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal-strval n))
@@ -278,7 +268,7 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "long" opts)))
 
-     java.lang.Short
+     Short
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal-strval n))
@@ -289,7 +279,7 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "short" opts)))
 
-     java.lang.Byte
+     Byte
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal-strval n))
@@ -311,7 +301,7 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "integer" opts)))
 
-     java.math.BigDecimal
+     clojure.lang.BigInt
      (-valid-literal? [_] true)
      (-format-literal
        ([n] (p/-format-literal-strval n))
@@ -320,7 +310,7 @@
      (-format-literal-lang-tag [_] nil)
      (-format-literal-url
        ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "decimal" opts))))
+       ([_ opts] (fmt-impl/format-xsd-iri "integer" opts))))
 
    :cljs
    (extend-protocol p/Literal
@@ -342,6 +332,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DateTime Literals
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; DateTime in Clojure covers all `inst?` values, i.e. java.time.Instant and
+;; java.util.Date. The latter is included because that is the default class
+;; `#inst` literals are evaluated to, even though it is deprecated for most
+;; purposes.
+
+;; The java.util.Date class has the java.sql.Timestamp, Date, and Time
+;; subclasses. The latter two have separate implementations since they throw
+;; exceptions if `.toInstant` is directly called on them.
+
+;; Despite their names these java.sql objects can hold both date and time
+;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
 
 #?(:clj
    (defn- date->inst
@@ -385,8 +387,6 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
 
-     ;; Despite their names these java.sql objects can hold both date and time
-     ;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
      java.sql.Date
      (-valid-literal? [_] true)
      (-format-literal
@@ -433,7 +433,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (extend-protocol-default p/Literal
-                         #?(:clj [java.lang.Object nil] :cljs default)
+                         #?(:clj [Object nil] :cljs default)
                          (-valid-literal? [_])
                          (-format-literal [_] [_ _])
                          (-format-literal-strval [_])

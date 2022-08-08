@@ -16,7 +16,8 @@ Examples: `<http://absolute-iri-example.com/>`, `<relative-iri>`, `(java.net.URL
 
 Full IRIs in Flint are written as one of the following:
 - Strings of the form `<my-iri-string>`. The string inside the angle bracket pair can include any characters **except** for whitespace, `^`, `<`, `>`, `"`, `\`, `|`, or `` ` ``. Translating to SPARQL does not affect full IRIs.
-- Instances of either `java.net.URL`, `java.net.URI` (in Clojure), or `js/URL` (in ClojureScript). The inner string must follow the above restrictions.
+- `java.net.URL` instances (Clojure only). The inner string must follow the above restrictions, i.e. no whitespace, `<`, `>`, etc.
+- `js/URL` (ClojureScript only). The inner string must follow the above restrictions.
 
 **NOTE:** This can mean that any string can become a IRI in Flint, though in practice they should conform to the [specification for IRIs](https://www.google.com/search?q=iri+spec&oq=IRI+spec&aqs=chrome.0.69i59j0i512j0i22i30l5.2040j0j7&sourceid=chrome&ie=UTF-8) after expansion.
 
@@ -116,12 +117,9 @@ Strings with language tags are represented by a map between **one** language tag
 
 Examples: `#inst "2022-01-01T10:10:10Z"`
 
-Timestamps are any values for which `inst?` is `true`, i.e. an instance of one of the following:
-- `java.time.Instant` (Clojure)
-- `java.util.Date` (Clojure)
-- `java.sql.Date` (Clojure)
-- `java.sql.Time` (Clojure)
-- `js/Date` (ClojureScript)
+Timestamp values should satisfy the `inst?` predicate. This covers the following types:
+- In Clojure: `java.time.Instant` and `java.util.Date` (the latter covers the `Date`, `Time`, and `Timestamp` classes in the `java.sql` package).
+- In ClojureScript: `js/Date`.
 
 As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have the `xsd:dateTime` IRI appended regardless of the value of `:force-iris?`.
 
@@ -185,4 +183,36 @@ WHERE {
 }
 ```
 
-**NOTE:** A user can also extend other protocols in the namespace to create custom implementations of IRIs and other RDF Term values.
+Alternately you can extend a pre-existing Clojure(Script) type using `extend-protocol` or `extend-type`, e.g. with Clojure's `Ratio` type:
+```clojure
+(extend-protocol p/Literal
+  clojure.lang.Ratio 
+  (p/-valid-literal?
+    [ratio]
+    (not= java.math.BigInteger/ZERO (.denominator ratio)))
+  
+  (p/-format-literal
+    ([ratio]
+     (p/-format-literal ratio {}))
+    ([ratio opts]
+     (str "\"" (p/-format-literal-strval ratio)
+           "\"^^" (p/-format-literal-url ratio opts))))
+  
+  (p/-format-literal-strval
+    [ratio]
+    (str (.numerator ratio) "/" (.denominator ratio)))
+  
+  (p/-format-literal-lang-tag
+    [_ratio]
+    nil)
+  
+  (p/-format-literal-url
+    ([ratio]
+     (p/-format-literal-url ratio {}))
+    ([_ratio {:keys [iri-prefix-m]}]
+     (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
+       (str (name prefix) ":ratio")
+       "<http://foo.org/literals#ratio>"))))
+```
+
+**NOTE:** A user can also extend other protocols in the `flint.axiom.protocol` namespace, e.g. `IRI` or `PrefixedIRI` to create custom implementations of other SPARQL values.

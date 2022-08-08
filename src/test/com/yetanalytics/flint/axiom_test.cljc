@@ -12,35 +12,18 @@
 (deftest axiom-protocol-test
   (testing "IRIs"
     (is (not (p/-valid-iri? "http://foo.org")))
-    (is (= "<http://foo.org>"
-           (p/-format-iri "<http://foo.org>")))
-    #?(:clj
-       (is (= true
-              (p/-valid-iri? "<http://foo.org>")
-              (p/-valid-iri? (java.net.URL. "http://foo.org"))
-              (p/-valid-iri? (java.net.URI. "http://foo.org"))))
-       :cljs
-       (is (= true
-              (p/-valid-iri? "<http://foo.org/>")
-              (p/-valid-iri? (js/URL. "http://foo.org")))))
-    #?(:clj
-       (is (= "<http://foo.org>"
-              (p/-format-iri "<http://foo.org>")
-              (p/-format-iri (java.net.URL. "http://foo.org"))
-              (p/-format-iri (java.net.URI. "http://foo.org"))))
-       :cljs
-       (is (= "<http://foo.org/>" ; js/URL auto-adds the final slash
-              (p/-format-iri "<http://foo.org/>")
-              (p/-format-iri (js/URL. "http://foo.org")))))
-    #?(:clj
-       (is (= "http://foo.org"
-              (p/-unwrap-iri "<http://foo.org>")
-              (p/-unwrap-iri (java.net.URL. "http://foo.org"))
-              (p/-unwrap-iri (java.net.URI. "http://foo.org"))))
-       :cljs
-       (is (= "http://foo.org/bar#"
-              (p/-unwrap-iri "<http://foo.org/bar#>")
-              (p/-unwrap-iri (js/URL. "http://foo.org/bar#"))))))
+    (is (= true
+           (p/-valid-iri? "<http://foo.org>")
+           #?(:clj (p/-valid-iri? (java.net.URI. "http://foo.org"))
+              :cljs (p/-valid-iri? (js/URL. "http://foo.org")))))
+    (is (= "<http://foo.org/>" ; js/URL auto-adds the final slash
+           (p/-format-iri "<http://foo.org/>")
+           #?(:clj (p/-format-iri (java.net.URI. "http://foo.org/"))
+              :cljs (p/-format-iri (js/URL. "http://foo.org")))))
+    (is (= "http://foo.org/bar#"
+           (p/-unwrap-iri "<http://foo.org/bar#>")
+           #?(:clj (p/-unwrap-iri (java.net.URI. "http://foo.org/bar#"))
+              :cljs (p/-unwrap-iri (js/URL. "http://foo.org/bar#"))))))
   (testing "Prefixes"
     (is (p/-valid-prefix? :foo))
     (is (p/-valid-prefix? :$))
@@ -100,7 +83,7 @@
     (is (= #?(:clj "2.0" :cljs "2") (p/-format-literal 2.0)))
     (is (nil? (p/-format-literal-lang-tag 2)))
     (is (nil? (p/-format-literal-lang-tag 2.0)))
-    (is (= "\"2\"^^xsd:integer"
+    (is (= #?(:clj "\"2\"^^xsd:int" :cljs "\"2\"^^xsd:integer")
            (p/-format-literal (int 2)
                               {:force-iri?   true
                                :iri-prefix-m {iri/xsd-iri-prefix :xsd}})))
@@ -114,7 +97,8 @@
               (p/-format-literal (int 2))
               (p/-format-literal (short 2))
               (p/-format-literal (byte 2))
-              (p/-format-literal java.math.BigInteger/TWO)
+              (p/-format-literal (bigint 2))
+              (p/-format-literal java.math.BigInteger/TWO) 
               (p/-format-literal (java.math.BigDecimal. 2.0)))))
     #?(:cljs
        (is (= "2"
@@ -127,9 +111,10 @@
          "\"2.0\"^^xsd:double" 2.0
          "\"2.0\"^^xsd:float" (float 2.0)
          "\"2\"^^xsd:long" 2
-         "\"2\"^^xsd:integer" (int 2)
+         "\"2\"^^xsd:int" (int 2)
          "\"2\"^^xsd:short" (short 2)
          "\"2\"^^xsd:byte" (byte 2)
+         "\"2\"^^xsd:integer" (bigint 2)
          "\"2\"^^xsd:decimal" (java.math.BigDecimal. 2.0)
          "\"2\"^^xsd:integer" java.math.BigInteger/TWO)
        :cljs
@@ -145,9 +130,10 @@
          "<http://www.w3.org/2001/XMLSchema#double>" 2.0
          "<http://www.w3.org/2001/XMLSchema#float>" (float 2.0)
          "<http://www.w3.org/2001/XMLSchema#long>" 2
-         "<http://www.w3.org/2001/XMLSchema#integer>" (int 2)
+         "<http://www.w3.org/2001/XMLSchema#int>" (int 2)
          "<http://www.w3.org/2001/XMLSchema#short>" (short 2)
          "<http://www.w3.org/2001/XMLSchema#byte>" (byte 2)
+         "<http://www.w3.org/2001/XMLSchema#integer>" (bigint 2)
          "<http://www.w3.org/2001/XMLSchema#decimal>" (java.math.BigDecimal. 2.0)
          "<http://www.w3.org/2001/XMLSchema#integer>" java.math.BigInteger/TWO)
        :cljs
@@ -173,6 +159,7 @@
               (p/-valid-literal? ts)
            (java.time.Instant/EPOCH)
            (java.util.Date. 0)
+           (java.sql.Timestamp. 0)
            (java.sql.Date. 0)
            (java.sql.Time. 0))
          :cljs
@@ -182,6 +169,7 @@
          (is (= "\"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal (java.time.Instant/EPOCH))
                 (p/-format-literal (java.util.Date. 0))
+                (p/-format-literal (java.sql.Timestamp. 0))
                 (p/-format-literal (java.sql.Date. 0))
                 (p/-format-literal (java.sql.Time. 0))))
          :cljs
@@ -212,6 +200,7 @@
          (is (= "1970-01-01T00:00:00Z"
                 (p/-format-literal-strval (java.time.Instant/EPOCH))
                 (p/-format-literal-strval (java.util.Date. 0))
+                (p/-format-literal-strval (java.sql.Timestamp. 0))
                 (p/-format-literal-strval (java.sql.Date. 0))
                 (p/-format-literal-strval (java.sql.Time. 0))))
          :cljs
@@ -222,6 +211,7 @@
          (is (= nil
                 (p/-format-literal-lang-tag (java.time.Instant/EPOCH))
                 (p/-format-literal-lang-tag (java.util.Date. 0))
+                (p/-format-literal-lang-tag (java.sql.Timestamp. 0))
                 (p/-format-literal-lang-tag (java.sql.Date. 0))
                 (p/-format-literal-lang-tag (java.sql.Time. 0))))
          :cljs
@@ -231,6 +221,7 @@
          (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
                 (p/-format-literal-url (java.time.Instant/EPOCH))
                 (p/-format-literal-url (java.util.Date. 0))
+                (p/-format-literal-url (java.sql.Timestamp. 0))
                 (p/-format-literal-url (java.sql.Date. 0))
                 (p/-format-literal-url (java.sql.Time. 0))))
          :cljs
@@ -291,17 +282,14 @@
     (is (= "SELECT ?x ?z WHERE { ?x <http://foo.org/> ?z . }"
            #?(:clj (flint/format-query
                     {:select ['?x '?z]
-                     :where  [['?x (java.net.URL. "http://foo.org/") '?z]]}))
-           #?(:clj (flint/format-query
-                    {:select ['?x '?z]
                      :where  [['?x (java.net.URI. "http://foo.org/") '?z]]}))
            #?(:cljs (flint/format-query
                      {:select ['?x '?z]
                       :where  [['?x (js/URL. "http://foo.org/") '?z]]}))))
     #?(:clj (is (= "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX foo: <http://foo.org/> SELECT ?x WHERE { ?x foo:time \"1970-01-01T00:00:00Z\"^^xsd:dateTime . }"
                    (flint/format-query
-                    {:prefixes {:xsd (java.net.URL. "http://www.w3.org/2001/XMLSchema#")
-                                :foo (java.net.URL. "http://foo.org/")}
+                    {:prefixes {:xsd (java.net.URI. "http://www.w3.org/2001/XMLSchema#")
+                                :foo (java.net.URI. "http://foo.org/")}
                      :select   ['?x]
                      :where    [['?x :foo/time (java.time.Instant/EPOCH)]]})
                    (flint/format-query
@@ -380,8 +368,33 @@
       (str (name prefix) ":rational")
       "<http://foo.org/literals#rational>")))
 
-(deftest protocol-extension-test
-  (testing "Custom literal via protocol extension"
+#?(:clj
+   (extend-type clojure.lang.Ratio p/Literal
+     (p/-valid-literal?
+       [ratio]
+       (not= java.math.BigInteger/ZERO (.denominator ratio)))
+     (p/-format-literal
+       ([ratio]
+        (p/-format-literal ratio {}))
+       ([ratio opts]
+        (str "\"" (p/-format-literal-strval ratio)
+             "\"^^" (p/-format-literal-url ratio opts))))
+     (p/-format-literal-strval
+       [ratio]
+       (str (.numerator ratio) "/" (.denominator ratio)))
+     (p/-format-literal-lang-tag
+       [_ratio]
+       nil)
+     (p/-format-literal-url
+       ([ratio]
+        (p/-format-literal-url ratio {}))
+       ([_ratio {:keys [iri-prefix-m]}]
+        (if-some [prefix (get iri-prefix-m "http://foo.org/literals#")]
+          (str (name prefix) ":ratio")
+          "<http://foo.org/literals#ratio>")))))
+
+(deftest custom-impl-test
+  (testing "Custom literal via defrecord"
     (is (p/-valid-literal? (->Rational 2 3)))
     (is (not (p/-valid-literal? (->Rational 2 0))))
     (is (= "\"3/4\"^^<http://foo.org/literals#rational>"
@@ -394,4 +407,21 @@
            (flint/format-query
             {:prefixes {:foo "<http://foo.org/literals#>"}
              :select   ['?x]
-             :where    [['?x '?y (->Rational 7 8)]]})))))
+             :where    [['?x '?y (->Rational 7 8)]]}))))
+  #?(:clj
+     (testing "Custom literal via extend-protocol"
+       (is (p/-valid-literal? (/ 2 3)))
+       (is (not (p/-valid-literal?
+                 (clojure.lang.Ratio. java.math.BigInteger/TWO
+                                      java.math.BigInteger/ZERO))))
+       (is (= "\"3/4\"^^<http://foo.org/literals#ratio>"
+              (p/-format-literal (/ 3 4))))
+       (is (= "SELECT ?x WHERE { ?x ?y \"5/6\"^^<http://foo.org/literals#ratio> . }"
+              (flint/format-query
+               {:select ['?x]
+                :where [['?x '?y (/ 5 6)]]})))
+       (is (= "PREFIX foo: <http://foo.org/literals#> SELECT ?x WHERE { ?x ?y \"7/8\"^^foo:ratio . }"
+              (flint/format-query
+               {:prefixes {:foo "<http://foo.org/literals#>"}
+                :select   ['?x]
+                :where    [['?x '?y (/ 7 8)]]}))))))
