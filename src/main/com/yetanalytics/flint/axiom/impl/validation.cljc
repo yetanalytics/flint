@@ -84,11 +84,13 @@
   [(char->int \<)])
 
 (def iri-banned-range
-  (mapv char->int [\< \> \{ \} \" \\ \| \^ \` \space]))
+  (conj (mapv char->int [\< \> \" \{ \} \| \^ \` \\])
+        [0x0000 0x0020]))
 
 (def iri-end-range
   [(char->int \>)])
 
+;; 0x0022, 0x005C, 0x000A, 0x000D, respectively
 (def literal-banned-range
   (mapv char->int [\" \return \newline \\]))
 
@@ -106,18 +108,27 @@
 ;; Regexes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
+#?(:cljs
+   (defn- hex-str [n]
+     (.toUpperCase (.toString ^number n 16))))
+
 (defn- ascii-point->str
   [n]
-  (let [c (char n)]
-    (case c
-      \- "\\-"
-      \" "\\\""
-      \\ "\\\\"
-      \^ "\\^"
-      \space "\\s"
-      \return "\\r"
-      \newline "\\n"
-      (str c))))
+  (cond
+    ;; Control characters + space
+    (<= n 0x000F)
+    #?(:clj (format "\\u000%x" n)
+       :cljs (format "\\u000%s" (hex-str n)))
+    (or (<= 0x0010 n 0x0020)
+        (= 0x00FF n))
+    #?(:clj (format "\\u00%x" n)
+       :cljs (format "\\u00%s" (hex-str n)))
+    ;; Chars to be escaped in regex
+    (#{\- \" \\ \^ \[ \] \?} (char n))
+    (str "\\" (char n))
+    ;; Regular chars
+    :else
+    (str (char n))))
 
 (defn- code-point->str
   [n]
@@ -132,16 +143,15 @@
        :else
        (format "\\u%x" n))
      :cljs
-     (let [hex-str (.toUpperCase (.toString ^number n 16))]
-       (cond
-         (<= n 0x007F)
-         (ascii-point->str n)
-         (<= n 0x00FF)
-         (format "\\u00%s" hex-str)
-         (<= n 0x0FFF)
-         (format "\\u0%s" hex-str)
-         :else
-         (format "\\u%s" hex-str)))))
+     (cond
+       (<= n 0x007F)
+       (ascii-point->str n)
+       (<= n 0x00FF)
+       (format "\\u00%s" (hex-str n))
+       (<= n 0x0FFF)
+       (format "\\u0%s" (hex-str n))
+       :else
+       (format "\\u%s" (hex-str n)))))
 
 (defn- ranges->regex-charset
   ([ranges]
