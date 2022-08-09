@@ -13,6 +13,7 @@
 (def qmark-range [(char->int \?)])
 (def uscore-range [(char->int \_)])
 (def bslash-range [(char->int \\)])
+(def percent-range [(char->int \%)])
 
 (def unicode-range-no-digits
   [[(char->int \A) (char->int \Z)]
@@ -95,6 +96,11 @@
 ;; not the newline char `\n` nor the return char `\r`.
 (def literal-escape-range
   (mapv char->int [\t \b \n \r \f \\ \" \']))
+
+(def hex-range
+  [[(char->int \0) (char->int \9)]
+   [(char->int \A) (char->int \F)]
+   [(char->int \a) (char->int \f)]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Regexes
@@ -190,13 +196,18 @@
                         prefix-ns-end))))
 
 (def prefix-name-regex
-  (let [prefix-name-start (ranges->regex-charset prefix-name-start-range)
+  (let [percent-encode*   (ranges->regex-charset hex-range)
+        percent-encode    (str "(?:%" percent-encode* percent-encode* ")")
+        prefix-name-start (ranges->regex-charset prefix-name-start-range)
         prefix-name-body  (ranges->regex-charset prefix-name-body-range)
         prefix-name-end   (ranges->regex-charset prefix-name-end-range)]
-    (re-pattern (format "%s(?:%s*%s)?"
+    (re-pattern (format "(?:%s|%s)(?:(?:%s|%s)*(?:%s|%s))?"
                         prefix-name-start
+                        percent-encode
                         prefix-name-body
-                        prefix-name-end))))
+                        percent-encode
+                        prefix-name-end
+                        percent-encode))))
 
 (def literal-regex
   (let [literal-banned (ranges->regex-charset literal-banned-range true)
@@ -230,6 +241,8 @@
           (unicode-bitset uscore-range)))
 #?(:clj (def ^java.util.BitSet bslash-bitset
           (unicode-bitset bslash-range)))
+#?(:clj (def ^java.util.BitSet percent-bitset
+          (unicode-bitset percent-range)))
 
 #?(:clj (def ^java.util.BitSet iri-start-bitset
           (unicode-bitset iri-start-range)))
@@ -272,6 +285,9 @@
           (unicode-bitset literal-banned-range*)))
 #?(:clj (def ^java.util.BitSet string-escape-bitset
           (unicode-bitset literal-escape-range)))
+
+#?(:clj (def ^java.util.BitSet hex-bitset
+          (unicode-bitset hex-range)))
 
 #?(:clj
    (defmacro in-bitset?
@@ -384,26 +400,41 @@
            (recur-if (in-bitset? prefix-ns-body-bitset ns-str idx)
                      (inc idx)))))))
 
-
 #?(:clj
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-prefix-name-str?*
      [^String name-str]
      (let [ccnt (.codePointCount name-str 0 (count name-str))
            lidx (dec ccnt)]
-       (loop [idx 0]
+       (loop [idx  0
+              pesc 0]
          (cond
+           ;; End of string
            (>= idx ccnt)
-           (<= 1 ccnt) ; Need to have at least one char
+           (and (<= 1 ccnt)   ; Need to have at least one char
+                (zero? pesc)) ; Cannot terminate in the middle of hex seq
+           ;; Percent encoding
+           (not= 0 pesc)
+           (recur-if (in-bitset? hex-bitset name-str idx)
+                     (inc idx)
+                     (dec pesc))
+           (in-bitset? percent-bitset name-str idx)
+           (recur-if true
+                     (inc idx)
+                     2)
+           ;; Not percent encoding
            (= idx 0)
            (recur-if (in-bitset? prefix-name-start-bitset name-str idx)
-                     (inc idx))
+                     (inc idx)
+                     0)
            (= idx lidx)
            (recur-if (in-bitset? prefix-name-end-bitset name-str idx)
-                     (inc idx))
+                     (inc idx)
+                     0)
            :else
            (recur-if (in-bitset? prefix-name-body-bitset name-str idx)
-                     (inc idx)))))))
+                     (inc idx)
+                     0))))))
 
 #?(:clj
    #_{:clj-kondo/ignore [:loop-without-recur]}
@@ -528,9 +559,15 @@
 
   (crit/quick-bench
    (re-matches var-regex (name '?supercalifragilisticexpialidocious)))
+  
+  (crit/bench
+   (re-matches var-regex (name '?x)))
 
   (crit/quick-bench
    (valid-var-symbol? '?supercalifragilisticexpialidocious))
+  
+  (crit/bench
+   (valid-var-symbol? '?x))
 
   ;; Non-ASCII bench
   (crit/quick-bench
@@ -543,6 +580,13 @@
   (crit/quick-bench
    (re-matches literal-regex
                "\\\"supercalifragilisticexpialidocious\\\""))
-  
+
   (crit/quick-bench
-   (valid-literal-str? "\\\"supercalifragilisticexpialidocious\\\"")))
+   (valid-literal-str? "\\\"supercalifragilisticexpialidocious\\\""))
+
+  ;; Prefix name bench
+  (crit/bench
+   (re-matches prefix-name-regex (name :foo%80bar)))
+  
+  (crit/bench
+   (valid-prefix-keyword? :foo%80bar)))
