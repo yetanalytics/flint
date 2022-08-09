@@ -29,7 +29,8 @@
       (is (not (s/valid? ax/prefix-iri-spec :foo#baz/bar)))
       (is (not (s/valid? ax/prefix-iri-spec :foo/bar'baz)))
       (is (not (s/valid? ax/prefix-iri-spec :foo'baz/bar)))
-      (is (not (s/valid? ax/prefix-iri-spec :你好))))
+      ;; Unicode
+      (is (s/valid? ax/prefix-iri-spec :你好)))
     (testing "- not reserved keywords"
       (is (not (s/valid? ax/prefix-iri-spec :a)))
       (is (not (s/valid? ax/prefix-iri-spec :*)))))
@@ -46,7 +47,8 @@
       (is (not (s/valid? ax/variable-spec '?.foobar)))
       (is (not (s/valid? ax/variable-spec '?foo#bar)))
       (is (not (s/valid? ax/variable-spec '?foo'bar)))
-      (is (not (s/valid? ax/variable-spec '?你好)))))
+      ;; Unicode
+      (is (s/valid? ax/variable-spec '?你好))))
   (testing "blank nodes"
     (is (s/valid? ax/bnode-spec '_))
     (is (s/valid? ax/bnode-spec '_1))
@@ -54,7 +56,8 @@
     (is (s/valid? ax/bnode-spec '_foo.bar))
     (is (not (s/valid? ax/bnode-spec 'foo)))
     (is (not (s/valid? ax/bnode-spec '_.foobar)))
-    (is (not (s/valid? ax/bnode-spec '_你好))))
+    ;; Unicode
+    (is (s/valid? ax/bnode-spec '_你好)))
   (testing "strings"
     (is (s/valid? ax/literal-spec "foo bar"))
     (testing "- double quotes"
