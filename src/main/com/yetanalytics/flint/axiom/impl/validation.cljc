@@ -319,7 +319,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-iri-body-str?*
      [^String ibs]
-     (let [ccnt (.codePointCount ibs 0 (count ibs))]
+     (let [ccnt (count ibs)]
        (loop [idx 0]
          (cond
            (>= idx ccnt)
@@ -332,7 +332,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-iri-str?*
      [^String is]
-     (let [ccnt (.codePointCount is 0 (count is))
+     (let [ccnt (count is)
            lidx (dec ccnt)]
        (loop [idx 0]
          (cond
@@ -352,7 +352,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-var-str?*
      [^String vs]
-     (let [ccnt (.codePointCount vs 0 (count vs))]
+     (let [ccnt (count vs)]
        (loop [idx 0]
          (cond
            (>= idx ccnt)
@@ -371,7 +371,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-bnode-str?*
      [^String bns]
-     (let [ccnt (.codePointCount bns 0 (count bns))
+     (let [ccnt (count bns)
            lidx (dec ccnt)]
        (loop [idx 0]
          (cond
@@ -394,7 +394,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-prefix-ns-str?*
      [^String ns-str]
-     (let [ccnt (.codePointCount ns-str 0 (count ns-str))
+     (let [ccnt (count ns-str)
            lidx (dec ccnt)]
        (loop [idx 0]
          (cond
@@ -414,7 +414,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-prefix-name-str?*
      [^String name-str]
-     (let [ccnt (.codePointCount name-str 0 (count name-str))
+     (let [ccnt (count name-str)
            lidx (dec ccnt)]
        (loop [idx  0
               pesc 0]
@@ -450,7 +450,7 @@
    #_{:clj-kondo/ignore [:loop-without-recur]}
    (defn- valid-literal-str?*
      [^String s]
-     (let [ccnt (.codePointCount s 0 (count s))]
+     (let [ccnt (count s)]
        (loop [idx  0
               esc? false]
          (cond
@@ -507,7 +507,7 @@
   "Is `k` a valid SPARQL prefix keyword?"
   [k]
   (boolean (and (nil? (namespace k))
-                (or (valid-prefix-name-str? (name k))
+                (or (valid-prefix-ns-str? (name k))
                     (= :$ k)))))
 
 (defn valid-prefix-iri-keyword?
@@ -569,13 +569,13 @@
 
   (crit/quick-bench
    (re-matches var-regex (name '?supercalifragilisticexpialidocious)))
-  
+
   (crit/bench
    (re-matches var-regex (name '?x)))
 
   (crit/quick-bench
    (valid-var-symbol? '?supercalifragilisticexpialidocious))
-  
+
   (crit/bench
    (valid-var-symbol? '?x))
 
@@ -597,6 +597,6 @@
   ;; Prefix name bench
   (crit/bench
    (re-matches prefix-name-regex (name :foo%80bar)))
-  
+
   (crit/bench
    (valid-prefix-keyword? :foo%80bar)))
