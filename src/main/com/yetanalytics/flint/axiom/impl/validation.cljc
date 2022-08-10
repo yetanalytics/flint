@@ -12,6 +12,7 @@
 
 (def qmark-range [(char->int \?)])
 (def uscore-range [(char->int \_)])
+(def hyphen-range [(char->int \-)])
 (def bslash-range [(char->int \\)])
 (def percent-range [(char->int \%)])
 
@@ -103,6 +104,15 @@
   [[(char->int \0) (char->int \9)]
    [(char->int \A) (char->int \F)]
    [(char->int \a) (char->int \f)]])
+
+(def alpha-range
+  [[(char->int \A) (char->int \Z)]
+   [(char->int \a) (char->int \z)]])
+
+(def alphanum-range
+  [[(char->int \0) (char->int \9)]
+   [(char->int \A) (char->int \Z)]
+   [(char->int \a) (char->int \z)]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Regexes
@@ -226,6 +236,13 @@
                         literal-banned
                         literal-escape))))
 
+(def lang-tag-regex
+  (let [lang-tag-start (ranges->regex-charset alpha-range)
+        lang-tag-body  (ranges->regex-charset alphanum-range)]
+    (re-pattern (format "%s+(?:-%s+)*"
+                        lang-tag-start
+                        lang-tag-body))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Clojure-specific validation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
@@ -249,6 +266,8 @@
           (unicode-bitset qmark-range)))
 #?(:clj (def ^java.util.BitSet uscore-bitset
           (unicode-bitset uscore-range)))
+#?(:clj (def ^java.util.BitSet hyphen-bitset
+          (unicode-bitset hyphen-range)))
 #?(:clj (def ^java.util.BitSet bslash-bitset
           (unicode-bitset bslash-range)))
 #?(:clj (def ^java.util.BitSet percent-bitset
@@ -289,7 +308,7 @@
 
 ;; Exclude backslash since we don't want to return false upon encountering
 ;; the start of an escape sequence.
-#?(:clj (def literal-banned-range*
+#?(:clj (def ^java.util.BitSet literal-banned-range*
           (filterv #(not= % (char->int \\)) literal-banned-range)))
 #?(:clj (def ^java.util.BitSet string-banned-bitset
           (unicode-bitset literal-banned-range*)))
@@ -298,6 +317,10 @@
 
 #?(:clj (def ^java.util.BitSet hex-bitset
           (unicode-bitset hex-range)))
+#?(:clj (def ^java.util.BitSet alpha-bitset
+          (unicode-bitset alpha-range)))
+#?(:clj (def ^java.util.BitSet alphanum-bitset
+          (unicode-bitset alphanum-range)))
 
 #?(:clj
    (defmacro in-bitset?
@@ -465,6 +488,34 @@
                      (inc idx)
                      (in-bitset? bslash-bitset s idx)))))))
 
+#?(:clj
+   #_{:clj-kondo/ignore [:loop-without-recur]}
+   (defn- valid-lang-tag-str?*
+     [^String ltag-str]
+     (let [ccnt (count ltag-str)]
+       (loop [idx     0
+              pre-hyp 0
+              hyp-cnt 0]
+         (cond
+           (>= idx ccnt)
+           (and (<= 1 ccnt)            ; Need to have at least one char
+                (not= 0 pre-hyp)) ; Cannot have a dangling hyphen
+           (in-bitset? hyphen-bitset ltag-str idx)
+           (recur-if (< 0 pre-hyp)
+                     (inc idx)
+                     0
+                     (inc hyp-cnt))
+           (zero? hyp-cnt)
+           (recur-if (in-bitset? alpha-bitset ltag-str idx)
+                     (inc idx)
+                     (inc pre-hyp)
+                     hyp-cnt)
+           :else
+           (recur-if (in-bitset? alphanum-bitset ltag-str idx)
+                     (inc idx)
+                     (inc pre-hyp)
+                     hyp-cnt))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Validation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -547,6 +598,11 @@
   #?(:clj (valid-literal-str?* str-lit)
      :cljs (boolean (re-matches literal-regex str-lit))))
 
+(defn- valid-lang-tag-str?
+  [ltag-str]
+  #?(:clj (valid-lang-tag-str?* ltag-str)
+     :cljs (boolean (re-matches lang-tag-regex ltag-str))))
+
 (defn valid-string-literal?
   "Is `str-lit` a string and does not contains unescaped `\"`, `\\`, `\\n`,
    nor `\\r`? (This filtering is to avoid SPARQL injection attacks.)"
@@ -556,9 +612,14 @@
 (defn valid-lang-map-literal?
   "Is `lang-map` a singleton map between a language tag and valid string?"
   [lang-map]
-  (boolean (and (->> lang-map count (= 1))
-                (->> lang-map keys first keyword?)
-                (->> lang-map vals first (re-matches literal-regex)))))
+  (let [lcnt (->> lang-map count)
+        ltag (->> lang-map keys first)
+        lval (->> lang-map vals first)]
+    (boolean (and (= 1 lcnt)
+                  (keyword? ltag)
+                  (string? lval)
+                  (valid-lang-tag-str? (name ltag))
+                  (valid-literal-str? lval)))))
 
 (comment
   (require '[criterium.core :as crit])

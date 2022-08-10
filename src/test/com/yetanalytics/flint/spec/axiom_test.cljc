@@ -209,7 +209,20 @@
       "\\a"   false
       "\\2"   false)
     (is (not (v/valid-string-literal? "\"\n\r\t\"")))
-    (is (v/valid-string-literal? "\\\"\\n\\r\\t\\\""))))
+    (is (v/valid-string-literal? "\\\"\\n\\r\\t\\\"")))
+  (testing "Language maps"
+    (are [x] (v/valid-lang-map-literal? x)
+      {:en "foo"}
+      {:en-US "foo"}
+      {:en-80 "bar"})
+    (are [x] (not (v/valid-lang-map-literal? x))
+      {:-en "foo"}
+      {:-en-US "foo"}
+      {:en- "foo"}
+      {:en-US- "foo"}
+      {:en--US "foo"}
+      {:en-! "foo"}
+      {:zh-你好 "foo"})))
 
 (deftest spec-test
   (testing "IRIs"
@@ -239,4 +252,5 @@
   (testing "lang map literals"
     (is (s/valid? ax/literal-spec {:en "foo"}))
     (is (s/valid? ax/literal-spec {:not-a-real-ltag "bar"}))
-    (is (not (s/valid? ax/literal-spec {:en "\"foo\""})))))
+    (is (not (s/valid? ax/literal-spec {:en "\"foo\""})))
+    (is (not (s/valid? ax/literal-spec {"en" "bar"})))))
