@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.axiom.impl.validation
-  #?(:cljs (:require [goog.string :refer [format]]
+  #?(:clj  (:import [java.util BitSet])
+     :cljs (:require [goog.string :refer [format]]
                      [goog.string.format])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10,13 +11,15 @@
   [c]
   #?(:clj (int c) :cljs (.charCodeAt c)))
 
-(def qmark-range [(char->int \?)])
-(def uscore-range [(char->int \_)])
-(def hyphen-range [(char->int \-)])
-(def bslash-range [(char->int \\)])
-(def percent-range [(char->int \%)])
+#?(:clj (def ^:private qmark-range [(char->int \?)]))
+#?(:clj (def ^:private uscore-range [(char->int \_)]))
+#?(:clj (def ^:private hyphen-range [(char->int \-)]))
+#?(:clj (def ^:private bslash-range [(char->int \\)]))
+#?(:clj (def ^:private percent-range [(char->int \%)]))
+#?(:clj (def ^:private open-abrac-range [(char->int \<)]))
+#?(:clj (def ^:private close-abrac-range [(char->int \>)]))
 
-(def unicode-range-no-digits
+(def ^:private unicode-range-no-digits
   [[(char->int \A) (char->int \Z)]
    [(char->int \a) (char->int \z)]
    [0x00C0 0x00D6] ; * Latin letters with diacritics + spacing modifiers
@@ -37,79 +40,73 @@
 ;; This is okay since it's doubtful people will be using emojis and other
 ;; supplemental plane chars in Flint.
 
-(def unicode-range-start
+(def ^:private unicode-range-start
   (into [[(char->int \0) (char->int \9)] (char->int \_)]
         unicode-range-no-digits))
 
 ;; \u00B7        = middle dot ·
 ;; \u0300-\u036F = combining characters
 ;; \u203F-\u2040 = ties
-(def unicode-range
+(def ^:private unicode-range
   (into [0x00B7 [0x0300 0x036F] [0x203F 0x2040]]
         unicode-range-start))
 
-(def var-start-range
+(def ^:private var-start-range
   unicode-range-start)
 
-(def var-body-range
+(def ^:private var-body-range
   unicode-range)
 
-(def bnode-start-range
+(def ^:private bnode-start-range
   unicode-range-start)
 
-(def bnode-body-range
+(def ^:private bnode-body-range
   (into [(char->int \-) (char->int \.)] unicode-range))
 
-(def bnode-end-range
+(def ^:private bnode-end-range
   (into [(char->int \-)] unicode-range))
 
-(def prefix-ns-start-range
+(def ^:private prefix-ns-start-range
   unicode-range-no-digits)
 
-(def prefix-ns-body-range
+(def ^:private prefix-ns-body-range
   (into [(char->int \-) (char->int \.)] unicode-range))
 
-(def prefix-ns-end-range
+(def ^:private prefix-ns-end-range
   (into [(char->int \-)] unicode-range))
 
-(def prefix-name-start-range
+(def ^:private prefix-name-start-range
   (into [(char->int \:)] unicode-range-start))
 
-(def prefix-name-body-range
+(def ^:private prefix-name-body-range
   (into [(char->int \:) (char->int \-) (char->int \.)] unicode-range))
 
-(def prefix-name-end-range
+(def ^:private prefix-name-end-range
   (into [(char->int \:) (char->int \-)] unicode-range))
 
-(def iri-start-range
-  [(char->int \<)])
-
-(def iri-banned-range
+(def ^:private iri-banned-range
   (conj (mapv char->int [\< \> \" \{ \} \| \^ \` \\])
         [0x0000 0x0020]))
 
-(def iri-end-range
-  [(char->int \>)])
-
 ;; 0x0022, 0x005C, 0x000A, 0x000D, respectively
-(def literal-banned-range
+(def ^:private literal-banned-range
   (mapv char->int [\" \return \newline \\]))
 
 ;; Note in the second part that we need to match the letters `n`, `r`, etc.,
 ;; not the newline char `\n` nor the return char `\r`.
-(def literal-escape-range
+(def ^:private literal-escape-range
   (mapv char->int [\t \b \n \r \f \\ \" \']))
 
-(def hex-range
+(def ^:private hex-range
   [[(char->int \0) (char->int \9)]
    [(char->int \A) (char->int \F)]
    [(char->int \a) (char->int \f)]])
 
-(def alpha-range
+(def ^:private alpha-range
   [[(char->int \A) (char->int \Z)]
    [(char->int \a) (char->int \z)]])
 
-(def alphanum-range
+(def ^:private alphanum-range
   [[(char->int \0) (char->int \9)]
    [(char->int \A) (char->int \Z)]
    [(char->int \a) (char->int \z)]])
@@ -255,71 +252,71 @@
      (let [cp-ranges# (if (symbol? code-point-ranges)
                         @(ns-resolve *ns* code-point-ranges)
                         code-point-ranges)]
-       `(doto (java.util.BitSet. 0xFFFF)
+       `(doto (BitSet. 0xFFFF)
           ~@(map (fn [r#]
                    (if (vector? r#)
                      `(.set ~(first r#) ~(inc (second r#)))
                      `(.set ~r#)))
                  cp-ranges#)))))
 
-#?(:clj (def ^java.util.BitSet qmark-bitset
+#?(:clj (def ^{:private true :tag BitSet} qmark-bitset
           (unicode-bitset qmark-range)))
-#?(:clj (def ^java.util.BitSet uscore-bitset
+#?(:clj (def ^{:private true :tag BitSet} uscore-bitset
           (unicode-bitset uscore-range)))
-#?(:clj (def ^java.util.BitSet hyphen-bitset
+#?(:clj (def ^{:private true :tag BitSet} hyphen-bitset
           (unicode-bitset hyphen-range)))
-#?(:clj (def ^java.util.BitSet bslash-bitset
+#?(:clj (def ^{:private true :tag BitSet} bslash-bitset
           (unicode-bitset bslash-range)))
-#?(:clj (def ^java.util.BitSet percent-bitset
+#?(:clj (def ^{:private true :tag BitSet} percent-bitset
           (unicode-bitset percent-range)))
 
-#?(:clj (def ^java.util.BitSet iri-start-bitset
-          (unicode-bitset iri-start-range)))
-#?(:clj (def ^java.util.BitSet iri-banned-bitset
+#?(:clj (def ^{:private true :tag BitSet} iri-start-bitset
+          (unicode-bitset open-abrac-range)))
+#?(:clj (def ^{:private true :tag BitSet} iri-banned-bitset
           (unicode-bitset iri-banned-range)))
-#?(:clj (def ^java.util.BitSet iri-end-bitset
-          (unicode-bitset iri-end-range)))
+#?(:clj (def ^{:private true :tag BitSet} iri-end-bitset
+          (unicode-bitset close-abrac-range)))
 
-#?(:clj (def ^java.util.BitSet var-start-bitset
+#?(:clj (def ^{:private true :tag BitSet} var-start-bitset
           (unicode-bitset var-start-range)))
-#?(:clj (def ^java.util.BitSet var-body-bitset
+#?(:clj (def ^{:private true :tag BitSet} var-body-bitset
           (unicode-bitset var-body-range)))
 
-#?(:clj (def ^java.util.BitSet bnode-start-bitset
+#?(:clj (def ^{:private true :tag BitSet} bnode-start-bitset
           (unicode-bitset bnode-start-range)))
-#?(:clj (def ^java.util.BitSet bnode-body-bitset
+#?(:clj (def ^{:private true :tag BitSet} bnode-body-bitset
           (unicode-bitset bnode-body-range)))
-#?(:clj (def ^java.util.BitSet bnode-end-bitset
+#?(:clj (def ^{:private true :tag BitSet} bnode-end-bitset
           (unicode-bitset bnode-end-range)))
 
-#?(:clj (def ^java.util.BitSet prefix-ns-start-bitset
+#?(:clj (def ^{:private true :tag BitSet} prefix-ns-start-bitset
           (unicode-bitset prefix-ns-start-range)))
-#?(:clj (def ^java.util.BitSet prefix-ns-body-bitset
+#?(:clj (def ^{:private true :tag BitSet} prefix-ns-body-bitset
           (unicode-bitset prefix-ns-body-range)))
-#?(:clj (def ^java.util.BitSet prefix-ns-end-bitset
+#?(:clj (def ^{:private true :tag BitSet} prefix-ns-end-bitset
           (unicode-bitset prefix-ns-end-range)))
 
-#?(:clj (def ^java.util.BitSet prefix-name-start-bitset
+#?(:clj (def ^{:private true :tag BitSet} prefix-name-start-bitset
           (unicode-bitset prefix-name-start-range)))
-#?(:clj (def ^java.util.BitSet prefix-name-body-bitset
+#?(:clj (def ^{:private true :tag BitSet} prefix-name-body-bitset
           (unicode-bitset prefix-name-body-range)))
-#?(:clj (def ^java.util.BitSet prefix-name-end-bitset
+#?(:clj (def ^{:private true :tag BitSet} prefix-name-end-bitset
           (unicode-bitset prefix-name-end-range)))
 
 ;; Exclude backslash since we don't want to return false upon encountering
 ;; the start of an escape sequence.
-#?(:clj (def ^java.util.BitSet literal-banned-range*
+#?(:clj (def ^{:private true :tag BitSet} literal-banned-range*
           (filterv #(not= % (char->int \\)) literal-banned-range)))
-#?(:clj (def ^java.util.BitSet string-banned-bitset
+#?(:clj (def ^{:private true :tag BitSet} string-banned-bitset
           (unicode-bitset literal-banned-range*)))
-#?(:clj (def ^java.util.BitSet string-escape-bitset
+#?(:clj (def ^{:private true :tag BitSet} string-escape-bitset
           (unicode-bitset literal-escape-range)))
 
-#?(:clj (def ^java.util.BitSet hex-bitset
+#?(:clj (def ^{:private true :tag BitSet} hex-bitset
           (unicode-bitset hex-range)))
-#?(:clj (def ^java.util.BitSet alpha-bitset
+#?(:clj (def ^{:private true :tag BitSet} alpha-bitset
           (unicode-bitset alpha-range)))
-#?(:clj (def ^java.util.BitSet alphanum-bitset
+#?(:clj (def ^{:private true :tag BitSet} alphanum-bitset
           (unicode-bitset alphanum-range)))
 
 #?(:clj
@@ -327,7 +324,7 @@
      "Inlined check on whether the code point at `idx` in `s` can be found
       in `bitset`."
      [bitset s idx]
-     `(.get ^java.util.BitSet ~bitset (.codePointAt ^String ~s ~idx))))
+     `(.get ^BitSet ~bitset (.codePointAt ^String ~s ~idx))))
 
 #?(:clj
    (defmacro recur-if
