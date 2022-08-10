@@ -238,7 +238,7 @@
          (is (= nil
                 (p/-format-literal-lang-tag js-date)))
          (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
-                (p/-format-literal-lang-tag js-date)))))))
+                (p/-format-literal-url js-date)))))))
 
 (deftest axiom-default-test
   (testing "p/-valid-xxx? returns false."
