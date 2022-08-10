@@ -16,8 +16,8 @@ Examples: `<http://absolute-iri-example.com/>`, `<relative-iri>`, `(java.net.URL
 
 Full IRIs in Flint are written as one of the following:
 - Strings of the form `<my-iri-string>`. The string inside the angle bracket pair can include any characters **except** for whitespace, `^`, `<`, `>`, `"`, `\`, `|`, or `` ` ``. Translating to SPARQL does not affect full IRIs.
-- `java.net.URL` instances (Clojure only). The inner string must follow the above restrictions, i.e. no whitespace, `<`, `>`, etc.
-- `js/URL` (ClojureScript only). The inner string must follow the above restrictions.
+- [`java.net.URI`](https://docs.oracle.com/javase/8/docs/api/java/net/URI.html) instances (Clojure). The inner string must follow the above restrictions, i.e. no whitespace, `<`, `>`, etc.
+- [`js/URL`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) objects (ClojureScript). The inner string must follow the above restrictions.
 
 **NOTE:** This can mean that any string can become a IRI in Flint, though in practice they should conform to the [specification for IRIs](https://www.google.com/search?q=iri+spec&oq=IRI+spec&aqs=chrome.0.69i59j0i512j0i22i30l5.2040j0j7&sourceid=chrome&ie=UTF-8) after expansion.
 
@@ -93,7 +93,9 @@ If one includes an entry for the XMLSchema IRI prefix in their prefixes map, the
 
 Examples: `0`, `-2`, `3.14`
 
-Numbers cover both integers and doubles, which are represented as integer and double literals in SPARQL, respectively. Neither are transformed during SPARQL translation beyond stringification. Note that the datatype IRI will vary depending on whether it is a double or integer, as well the underlying representation (e.g. Clojure integers will have the datatype IRI `xsd:long` as they are Java long values by default).
+Numbers cover both integers and doubles, which are represented as integer and double literals in SPARQL, respectively. In addition to primitive values, `java.math.BigInteger`, `java.math.BigDecimal`, and `clojure.lang.BigInt` classes are also supported in Clojure.
+
+Numbers are not transformed during SPARQL translation beyond stringification. Note that the datatype IRI will vary depending on whether it is a double or integer, as well the underlying representation (e.g. Clojure integers will have the datatype IRI `xsd:long` as they are Java long values by default).
 
 ### Booleans
 
@@ -117,11 +119,12 @@ Strings with language tags are represented by a map between **one** language tag
 
 Examples: `#inst "2022-01-01T10:10:10Z"`
 
-Timestamp values should satisfy the `inst?` predicate. This covers the following types:
-- In Clojure: `java.time.Instant` and `java.util.Date` (the latter covers the `Date`, `Time`, and `Timestamp` classes in the `java.sql` package).
-- In ClojureScript: `js/Date`.
+Timestamp literal values include the following classes:
+- [`java.time.Temporal`](https://docs.oracle.com/javase/8/docs/api/java/time/temporal/Temporal.html) classes (Clojure). These include (in the `java.time` package) `Instant`, `ZonedDateTime`, `OffsetDateTime`, and `LocalDateTime`. In addition, the `OffsetTime`, `LocalTime`, and `LocalDate` classes are supported if the user only wants to represented time or date information.
+- [`java.util.Date`](https://docs.oracle.com/javase/8/docs/api/java/util/Date.html) classes (Clojure). These include, in addition to that class itself, its `java.sql` package subclasses `Timestamp`, `Date`, and `Time`.
+- [`js/Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) (ClojureScript).
 
-As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have the `xsd:dateTime` IRI appended regardless of the value of `:force-iris?`.
+As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have (depending on the class) one of the `xsd:dateTime`, `xsd:date`, or `xsd:time` IRIs appended regardless of the value of `:force-iris?`.
 
 ### Custom Literals
 

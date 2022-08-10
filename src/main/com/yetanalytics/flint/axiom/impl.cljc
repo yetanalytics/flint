@@ -4,9 +4,14 @@
                clojure.core/extend-protocol}}}
   (:require [com.yetanalytics.flint.axiom.protocol        :as p]
             [com.yetanalytics.flint.axiom.impl.format     :as fmt-impl]
-            [com.yetanalytics.flint.axiom.impl.validation :as val-impl])
+            [com.yetanalytics.flint.axiom.impl.validation :as val-impl]
+            #?(:clj [clojure.string :as cstr]))
   #?(:cljs (:require-macros [com.yetanalytics.flint.axiom.impl
                              :refer [extend-protocol-default]])))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Macros and Helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #?(:clj
    (defn- extend-protocol-default-err-msg
@@ -55,6 +60,46 @@
    ;; errors in cljs mode
    :cljs
    (declare extend-protocol-default))
+
+#?(:clj
+   (defmacro extend-xsd-literal
+     "Macro that expands into a basic `extend-type` over the Literal protocol.
+      If `force-iri?` is true, then the resulting literal always has the XSD
+      datatype IRI appended; `strval-fn` overrides the default `.toString` call.
+      Without any kwargs, `(extend-xsd-literal t iri-suffix)` expands into:
+      
+      (extend-type t p/Literal
+        (-valid-literal?
+          [_] true)
+        (-format-literal
+          ([n] (p/-format-literal n {}))
+          ([n opts] (fmt-impl/format-literal n opts)))
+        (-format-literal-strval
+          [n] (.toString n))
+        (-format-literal-lang-tag
+          [n] nil)
+        (-format-literal-url
+          ([n] (p/-format-literal-url n {}))
+          ([n opts] (fmt-impl/format-xsd-iri iri-suffix opts))))"
+     [t iri-suffix & {:keys [force-iri?
+                             strval-fn]}]
+     `(extend-type ~t
+        p/Literal
+        (~'-valid-literal? [~'_] true)
+        (~'-format-literal
+          ([~'n] (p/-format-literal ~'n {}))
+          ([~'n ~'opts]
+           ~(if force-iri?
+              `(fmt-impl/format-literal ~'n (assoc ~'opts :force-iri? true))
+              `(fmt-impl/format-literal ~'n ~'opts))))
+        (~'-format-literal-strval [~'n]
+          ~(if (some? strval-fn)
+             `(~strval-fn ~'n)
+             `(.toString ~'n)))
+        (~'-format-literal-lang-tag [~'_] nil)
+        (~'-format-literal-url
+          ([~'n] (p/-format-literal-url ~'n {}))
+          ([~'_ ~'opts] (fmt-impl/format-xsd-iri ~iri-suffix ~'opts))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IRIs
@@ -157,8 +202,10 @@
                          (-format-rdf-type [_]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Basic Literals (strings, lang maps, booleans)
+;; Literals
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Basic Literals (strings, lang maps, booleans)
 
 (extend-protocol p/Literal
   #?(:clj String :cljs string)
@@ -203,116 +250,24 @@
     ([n] (p/-format-literal-url n {}))
     ([_ opts] (fmt-impl/format-xsd-iri "boolean" opts))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Numeric Literals
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; See: "XSD data types" in
+;; https://jena.apache.org/documentation/notes/typed-literals.html
+
+;; Note: Clojure decimal default is Double, integer default is Long
 #?(:clj
-   ;; See: "XSD data types" in
-   ;; https://jena.apache.org/documentation/notes/typed-literals.html
-   (extend-protocol p/Literal
-     ;; Decimal types
-     Float
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal n {}))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "float" opts)))
+   (do (extend-xsd-literal Float "float")
+       (extend-xsd-literal Double "double")
+       (extend-xsd-literal Integer "int")
+       (extend-xsd-literal Long "long")
+       (extend-xsd-literal Short "short")
+       (extend-xsd-literal Byte "byte")
+       (extend-xsd-literal java.math.BigDecimal "decimal")
+       (extend-xsd-literal java.math.BigInteger "integer")
+       (extend-xsd-literal clojure.lang.BigInt "integer")))
 
-     Double ; Clojure decimal default type
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "double" opts)))
-
-     java.math.BigDecimal
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "decimal" opts)))
-
-     ;; Integral types
-     Integer
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "int" opts)))
-
-     Long ; Clojure integer default type
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "long" opts)))
-
-     Short
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "short" opts)))
-
-     Byte
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "byte" opts)))
-
-     java.math.BigInteger
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "integer" opts)))
-
-     clojure.lang.BigInt
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal-strval n))
-       ([n opts] (fmt-impl/format-literal n opts)))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "integer" opts))))
-
-   :cljs
+#?(:cljs
    (extend-protocol p/Literal
      number
      (-valid-literal? [_] true)
@@ -329,93 +284,76 @@
           (fmt-impl/format-xsd-iri "integer" opts)
           (fmt-impl/format-xsd-iri "double" opts))))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DateTime Literals
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; DateTime in Clojure covers all `inst?` values, i.e. java.time.Instant and
 ;; java.util.Date. The latter is included because that is the default class
 ;; `#inst` literals are evaluated to, even though it is deprecated for most
-;; purposes.
+;; purposes. In addition, DateTime covers additional java.time.Temporal
+;; classes, e.g. if a user wants to use ZonedDateTime to convey timezone info.
 
 ;; The java.util.Date class has the java.sql.Timestamp, Date, and Time
 ;; subclasses. The latter two have separate implementations since they throw
 ;; exceptions if `.toInstant` is directly called on them.
 
-;; Despite their names these java.sql objects can hold both date and time
-;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
+#?(:clj
+   (defn- zoned-ts->offset-str
+     [^java.time.ZonedDateTime zoned-ts]
+     (.toString (.toOffsetDateTime zoned-ts))))
 
 #?(:clj
-   (defn- date->inst
+   (defn- date->inst-str
      [^java.util.Date date-ts]
-     (.toInstant date-ts)))
+     (.toString (.toInstant date-ts))))
 
 #?(:clj
-   (defn- sql-date->inst
+   (defn- sql-date->inst-str
      [^java.sql.Date sql-date-ts]
-     (.toInstant (java.sql.Timestamp. (.getTime sql-date-ts)))))
+     (let [millis  (.getTime sql-date-ts)
+           instant (java.time.Instant/ofEpochMilli millis)]
+       (-> (.toString ^java.time.Instant instant)
+           (cstr/split #"T" 2)
+           first))))
 
 #?(:clj
-   (defn- sql-time->inst
+   (defn- sql-time->inst-str
      [^java.sql.Time sql-time-ts]
-     (.toInstant (java.sql.Timestamp. (.getTime sql-time-ts)))))
+     (let [millis  (.getTime sql-time-ts)
+           instant (java.time.Instant/ofEpochMilli millis)]
+       (-> (.toString ^java.time.Instant instant)
+           (cstr/split #"T" 2)
+           second))))
 
 #?(:clj
-   (extend-protocol p/Literal
-     java.time.Instant
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([n] (p/-format-literal n {}))
-       ([n opts] (fmt-impl/format-literal n (assoc opts :force-iri? true))))
-     (-format-literal-strval [n] (.toString n))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
+   (do
+     ;; java.time.Temporal classes
+     (extend-xsd-literal java.time.Instant "dateTime"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.ZonedDateTime "dateTime"
+                         :strval-fn zoned-ts->offset-str
+                         :force-iri? true)
+     (extend-xsd-literal java.time.OffsetDateTime "dateTime"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.OffsetTime "time"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.LocalDateTime "dateTime"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.LocalDate "date"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.LocalTime "time"
+                         :force-iri? true)
+     ;; java.util.Date classes
+     (extend-xsd-literal java.util.Date "dateTime"
+                         :strval-fn date->inst-str
+                         :force-iri? true)
+     (extend-xsd-literal java.sql.Date "date"
+                         :strval-fn sql-date->inst-str
+                         :force-iri? true)
+     (extend-xsd-literal java.sql.Time "time"
+                         :strval-fn sql-time->inst-str
+                         :force-iri? true)))
 
-     java.util.Date
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([date-ts]
-        (p/-format-literal (date->inst date-ts)))
-       ([date-ts opts]
-        (p/-format-literal (date->inst date-ts) opts)))
-     (-format-literal-strval [date-ts]
-       (p/-format-literal-strval (date->inst date-ts)))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
-
-     java.sql.Date
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([sql-date-ts]
-        (p/-format-literal (sql-date->inst sql-date-ts)))
-       ([sql-date-ts opts]
-        (p/-format-literal (sql-date->inst sql-date-ts) opts)))
-     (-format-literal-strval [sql-date-ts]
-       (p/-format-literal-strval (sql-date->inst sql-date-ts)))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))
-
-     java.sql.Time
-     (-valid-literal? [_] true)
-     (-format-literal
-       ([sql-time-ts]
-        (p/-format-literal (sql-time->inst sql-time-ts)))
-       ([sql-time-ts opts]
-        (p/-format-literal (sql-time->inst sql-time-ts) opts)))
-     (-format-literal-strval [sql-time-ts]
-       (p/-format-literal-strval (sql-time->inst sql-time-ts)))
-     (-format-literal-lang-tag [_] nil)
-     (-format-literal-url
-       ([n] (p/-format-literal-url n {}))
-       ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts))))
-
-   :cljs
+#?(:cljs
    (extend-protocol p/Literal
      js/Date
      (-valid-literal? [_] true)
@@ -428,9 +366,7 @@
        ([n] (p/-format-literal-url n {}))
        ([_ opts] (fmt-impl/format-xsd-iri "dateTime" opts)))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Default Literals Implementation
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Default Literal Implementation
 
 (extend-protocol-default p/Literal
                          #?(:clj [Object nil] :cljs default)
