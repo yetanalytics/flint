@@ -9,6 +9,10 @@
   #?(:cljs (:require-macros [com.yetanalytics.flint.axiom.impl
                              :refer [extend-protocol-default]])))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Macros and Helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 #?(:clj
    (defn- extend-protocol-default-err-msg
      [method protocol]
@@ -285,11 +289,17 @@
 ;; DateTime in Clojure covers all `inst?` values, i.e. java.time.Instant and
 ;; java.util.Date. The latter is included because that is the default class
 ;; `#inst` literals are evaluated to, even though it is deprecated for most
-;; purposes.
+;; purposes. In addition, DateTime covers additional java.time.Temporal
+;; classes, e.g. if a user wants to use ZonedDateTime to convey timezone info.
 
 ;; The java.util.Date class has the java.sql.Timestamp, Date, and Time
 ;; subclasses. The latter two have separate implementations since they throw
 ;; exceptions if `.toInstant` is directly called on them.
+
+#?(:clj
+   (defn- zoned-ts->offset-str
+     [^java.time.ZonedDateTime zoned-ts]
+     (.toString (.toOffsetDateTime zoned-ts))))
 
 #?(:clj
    (defn- date->inst-str
@@ -315,17 +325,33 @@
            second))))
 
 #?(:clj
-   (do (extend-xsd-literal java.time.Instant "dateTime"
-                           :force-iri? true)
-       (extend-xsd-literal java.util.Date "dateTime"
-                           :strval-fn date->inst-str
-                           :force-iri? true)
-       (extend-xsd-literal java.sql.Date "date"
-                           :strval-fn sql-date->inst-str
-                           :force-iri? true)
-       (extend-xsd-literal java.sql.Time "time"
-                           :strval-fn sql-time->inst-str
-                           :force-iri? true)))
+   (do
+     ;; java.time.Temporal classes
+     (extend-xsd-literal java.time.Instant "dateTime"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.ZonedDateTime "dateTime"
+                         :strval-fn zoned-ts->offset-str
+                         :force-iri? true)
+     (extend-xsd-literal java.time.OffsetDateTime "dateTime"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.OffsetTime "time"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.LocalDateTime "dateTime"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.LocalDate "date"
+                         :force-iri? true)
+     (extend-xsd-literal java.time.LocalTime "time"
+                         :force-iri? true)
+     ;; java.util.Date classes
+     (extend-xsd-literal java.util.Date "dateTime"
+                         :strval-fn date->inst-str
+                         :force-iri? true)
+     (extend-xsd-literal java.sql.Date "date"
+                         :strval-fn sql-date->inst-str
+                         :force-iri? true)
+     (extend-xsd-literal java.sql.Time "time"
+                         :strval-fn sql-time->inst-str
+                         :force-iri? true)))
 
 #?(:cljs
    (extend-protocol p/Literal
