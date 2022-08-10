@@ -188,23 +188,17 @@
   )
 
 (comment
-  (require '[com.yetanalytics.flint.axiom.impl.vaidation :as v])
+  (require '[com.yetanalytics.flint.axiom.impl.validation :as v])
 
   ;; ASCII bench
   (crit/quick-bench
-   (re-matches #"\?\w+" (name '?supercalifragilisticexpialidocious)))
+   (re-matches #"\?\w+" (name '?foo)))
 
   (crit/quick-bench
-   (re-matches v/var-regex (name '?supercalifragilisticexpialidocious)))
-
-  (crit/bench
-   (re-matches v/var-regex (name '?x)))
+   (re-matches v/var-regex (name '?foo)))
 
   (crit/quick-bench
-   (v/valid-var-symbol? '?supercalifragilisticexpialidocious))
-
-  (crit/bench
-   (v/valid-var-symbol? '?x))
+   (v/valid-var-symbol? '?foo))
 
   ;; Non-ASCII bench
   (crit/quick-bench
@@ -219,7 +213,7 @@
                "\\\"supercalifragilisticexpialidocious\\\""))
 
   (crit/quick-bench
-   (v/valid-literal-str? "\\\"supercalifragilisticexpialidocious\\\""))
+   (v/valid-string-literal? "\\\"supercalifragilisticexpialidocious\\\""))
 
   ;; Prefix name bench
   (crit/bench
