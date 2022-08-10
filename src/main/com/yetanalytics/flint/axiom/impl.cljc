@@ -4,7 +4,8 @@
                clojure.core/extend-protocol}}}
   (:require [com.yetanalytics.flint.axiom.protocol        :as p]
             [com.yetanalytics.flint.axiom.impl.format     :as fmt-impl]
-            [com.yetanalytics.flint.axiom.impl.validation :as val-impl])
+            [com.yetanalytics.flint.axiom.impl.validation :as val-impl]
+            #?(:clj [clojure.string :as cstr]))
   #?(:cljs (:require-macros [com.yetanalytics.flint.axiom.impl
                              :refer [extend-protocol-default]])))
 
@@ -290,9 +291,6 @@
 ;; subclasses. The latter two have separate implementations since they throw
 ;; exceptions if `.toInstant` is directly called on them.
 
-;; Despite their names these java.sql objects can hold both date and time
-;; info, being wrappers for java.util.Date, hence the use of xsd:dateTime.
-
 #?(:clj
    (defn- date->inst-str
      [^java.util.Date date-ts]
@@ -301,12 +299,20 @@
 #?(:clj
    (defn- sql-date->inst-str
      [^java.sql.Date sql-date-ts]
-     (.toString (.toInstant (java.sql.Timestamp. (.getTime sql-date-ts))))))
+     (let [millis  (.getTime sql-date-ts)
+           instant (java.time.Instant/ofEpochMilli millis)]
+       (-> (.toString ^java.time.Instant instant)
+           (cstr/split #"T" 2)
+           first))))
 
 #?(:clj
    (defn- sql-time->inst-str
      [^java.sql.Time sql-time-ts]
-     (.toString (.toInstant (java.sql.Timestamp. (.getTime sql-time-ts))))))
+     (let [millis  (.getTime sql-time-ts)
+           instant (java.time.Instant/ofEpochMilli millis)]
+       (-> (.toString ^java.time.Instant instant)
+           (cstr/split #"T" 2)
+           second))))
 
 #?(:clj
    (do (extend-xsd-literal java.time.Instant "dateTime"
@@ -314,10 +320,10 @@
        (extend-xsd-literal java.util.Date "dateTime"
                            :strval-fn date->inst-str
                            :force-iri? true)
-       (extend-xsd-literal java.sql.Date "dateTime"
+       (extend-xsd-literal java.sql.Date "date"
                            :strval-fn sql-date->inst-str
                            :force-iri? true)
-       (extend-xsd-literal java.sql.Time "dateTime"
+       (extend-xsd-literal java.sql.Time "time"
                            :strval-fn sql-time->inst-str
                            :force-iri? true)))
 

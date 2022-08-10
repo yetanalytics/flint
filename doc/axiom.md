@@ -121,7 +121,7 @@ Timestamp values should satisfy the `inst?` predicate. This covers the following
 - In Clojure: `java.time.Instant` and `java.util.Date` (the latter covers the `Date`, `Time`, and `Timestamp` classes in the `java.sql` package).
 - In ClojureScript: `js/Date`.
 
-As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have the `xsd:dateTime` IRI appended regardless of the value of `:force-iris?`.
+As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have the `xsd:dateTime` IRI (or `xsd:date`/`xsd:time` for `java.sql.Date` and `java.sql.Time` instances, respectively) appended regardless of the value of `:force-iris?`.
 
 ### Custom Literals
 

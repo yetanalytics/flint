@@ -152,81 +152,58 @@
     (is (= "<http://www.w3.org/2001/XMLSchema#boolean>"
            (p/-format-literal-url true)))
     (is (nil? (p/-format-literal-lang-tag true))))
-  (testing "Date/Time Literals:"
-    (testing " -valid-literal?"
-      #?(:clj
-         (are [ts]
-              (p/-valid-literal? ts)
-           (java.time.Instant/EPOCH)
-           (java.util.Date. 0)
-           (java.sql.Timestamp. 0)
-           (java.sql.Date. 0)
-           (java.sql.Time. 0))
-         :cljs
-         (is (p/-valid-literal? (js/Date. 0)))))
-    (testing "p/-format-literal"
-      #?(:clj
-         (is (= "\"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
-                (p/-format-literal (java.time.Instant/EPOCH))
-                (p/-format-literal (java.util.Date. 0))
-                (p/-format-literal (java.sql.Timestamp. 0))
-                (p/-format-literal (java.sql.Date. 0))
-                (p/-format-literal (java.sql.Time. 0))))
-         :cljs
-         (is (= "\"1970-01-01T00:00:00.000Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
-                (p/-format-literal (js/Date. 0))))))
-    (testing "p/-format-literal with prefix"
-      #?(:clj
-         (is (= "\"1970-01-01T00:00:00Z\"^^xsd:dateTime"
-                (p/-format-literal (java.time.Instant/EPOCH)
-                                   {:iri-prefix-m
-                                    {"http://www.w3.org/2001/XMLSchema#" :xsd}})
-                (p/-format-literal (java.util.Date. 0)
-                                   {:iri-prefix-m
-                                    {"http://www.w3.org/2001/XMLSchema#" :xsd}})
-                (p/-format-literal (java.sql.Date. 0)
-                                   {:iri-prefix-m
-                                    {"http://www.w3.org/2001/XMLSchema#" :xsd}})
-                (p/-format-literal (java.sql.Time. 0)
-                                   {:iri-prefix-m
-                                    {"http://www.w3.org/2001/XMLSchema#" :xsd}})))
-         :cljs
-         (is (= "\"1970-01-01T00:00:00.000Z\"^^xsd:dateTime"
-                (p/-format-literal (js/Date. 0)
-                                   {:iri-prefix-m
-                                    {"http://www.w3.org/2001/XMLSchema#" :xsd}})))))
-    (testing "p/-format-literal-strval"
-      #?(:clj
-         (is (= "1970-01-01T00:00:00Z"
-                (p/-format-literal-strval (java.time.Instant/EPOCH))
-                (p/-format-literal-strval (java.util.Date. 0))
-                (p/-format-literal-strval (java.sql.Timestamp. 0))
-                (p/-format-literal-strval (java.sql.Date. 0))
-                (p/-format-literal-strval (java.sql.Time. 0))))
-         :cljs
-         (is (= "1970-01-01T00:00:00.000Z"
-                (p/-format-literal-strval (js/Date. 0))))))
-    (testing "p/-format-literal-lang-tag"
-      #?(:clj
-         (is (= nil
-                (p/-format-literal-lang-tag (java.time.Instant/EPOCH))
-                (p/-format-literal-lang-tag (java.util.Date. 0))
-                (p/-format-literal-lang-tag (java.sql.Timestamp. 0))
-                (p/-format-literal-lang-tag (java.sql.Date. 0))
-                (p/-format-literal-lang-tag (java.sql.Time. 0))))
-         :cljs
-         (is (nil? (p/-format-literal-lang-tag (js/Date. 0))))))
-    (testing "p/-format-literal-url"
-      #?(:clj
-         (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
-                (p/-format-literal-url (java.time.Instant/EPOCH))
-                (p/-format-literal-url (java.util.Date. 0))
-                (p/-format-literal-url (java.sql.Timestamp. 0))
-                (p/-format-literal-url (java.sql.Date. 0))
-                (p/-format-literal-url (java.sql.Time. 0))))
-         :cljs
-         (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
-                (p/-format-literal-url (js/Date. 0))))))))
+  (testing "Date/Time Literals"
+    #?(:clj
+       (testing "- java.time.Temporal classes"
+         (let [inst-ts (java.time.Instant/EPOCH)]
+           (are [ts] (p/-valid-literal? ts)
+             inst-ts)
+           (is (= "\"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
+                  (p/-format-literal inst-ts)))
+           (is (= "\"1970-01-01T00:00:00Z\"^^xsd:dateTime"
+                  (p/-format-literal
+                   inst-ts
+                   {:iri-prefix-m {"http://www.w3.org/2001/XMLSchema#" :xsd}})))
+           (is (= "1970-01-01T00:00:00Z"
+                  (p/-format-literal-strval inst-ts)))
+           (is (= nil
+                  (p/-format-literal-lang-tag inst-ts)))
+           (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
+                  (p/-format-literal-url inst-ts))))))
+    #?(:clj
+       (testing "- java.util.Date classes"
+         (let [date-ts  (java.util.Date. 0)
+               sql-ts   (java.sql.Timestamp. 0)
+               sql-date (java.sql.Date. 0)
+               sql-time (java.sql.Time. 0)]
+           (are [ts] (p/-valid-literal? ts)
+             date-ts
+             sql-ts
+             sql-date
+             sql-time)
+           (is (= "\"1970-01-01T00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
+                  (p/-format-literal date-ts)
+                  (p/-format-literal sql-ts)))
+           (is (= "\"1970-01-01\"^^<http://www.w3.org/2001/XMLSchema#date>"
+                  (p/-format-literal sql-date)))
+           (is (= "\"00:00:00Z\"^^<http://www.w3.org/2001/XMLSchema#time>"
+                  (p/-format-literal sql-time))))))
+    #?(:cljs
+       (testing "- js/Date"
+         (let [js-date (js/Date. 0)]
+           (is (p/-valid-literal? js-date))
+           (is (= "\"1970-01-01T00:00:00.000Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>"
+                  (p/-format-literal js-date)))
+           (is (= "\"1970-01-01T00:00:00.000Z\"^^xsd:dateTime"
+                  (p/-format-literal
+                   js-date
+                   {:iri-prefix-m {"http://www.w3.org/2001/XMLSchema#" :xsd}})))
+           (is (= "1970-01-01T00:00:00.000Z"
+                  (p/-format-literal-strval js-date)))
+           (is (= nil
+                  (p/-format-literal-lang-tag js-date)))
+           (is (= "<http://www.w3.org/2001/XMLSchema#dateTime>"
+                  (p/-format-literal-lang-tag js-date))))))))
 
 (deftest axiom-default-test
   (testing "p/-valid-xxx? returns false."
