@@ -4,7 +4,7 @@ Reference: [4.1 RDF Term Syntax](https://www.w3.org/TR/sparql11-query/#syntaxTer
 
 This section discusses IRIs, variables, blank nodes, and literals in Flint and SPARQL. Many of the conventions here, including for prefixed IRIs, variables, and blank nodes, were borrowed from the [Datomic query and update grammar](https://docs.datomic.com/on-prem/query/query.html).
 
-**NOTE:** For simplicity, many terms in Flint only allow a subset of the characters that the SPARQL spec allows. For example, the latter often accepts Unicode characters, while Flint is ASCII-only outside of IRIs or string literals.
+**NOTE:** Flint supports most Unicode characters in symbols, keywords, etc. Exceptions include surrogate characters as well as supplemental characters due to limitations of how Java represents Unicode, as well as certain characters not allowed by the SPARQL grammar.
 
 ## IRIs
 
