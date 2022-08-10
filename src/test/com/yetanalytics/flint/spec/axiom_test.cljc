@@ -8,7 +8,7 @@
             [clojure.string :as cstr]
             [com.yetanalytics.flint.axiom.impl.validation :as v]
             [com.yetanalytics.flint.spec.axiom :as ax])
-  #?(:cljs (:require-macros [com.yetanalytics.flint.axiom.validation-test
+  #?(:cljs (:require-macros [com.yetanalytics.flint.spec.axiom-test
                              :refer [multilingual-test]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
