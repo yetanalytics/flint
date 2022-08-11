@@ -15,7 +15,7 @@
   (testing "Conforming query"
     ;; Ensure that re-ordering works
     (is (= '[:query/select
-             [[:prefixes [[:prologue/prefix [:foo [:ax/iri "<http://example.org/foo/>"]]]]]
+             [[:prefixes [[:prologue/prefix [[:ax/prefix :foo] [:ax/iri "<http://example.org/foo/>"]]]]]
               [:select [:select/var-or-exprs [[:ax/var ?x]]]]
               [:from [:ax/iri "<http://example.org/my-graph/>"]]
               [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
@@ -26,7 +26,7 @@
                             [:mod/asc-desc-expr [:expr/terminal [:ax/var ?y]]]]]]]
               [:values [:values/map
                         [[[:ax/var ?z]]
-                         [[[:ax/num-lit 1]]]]]]]]
+                         [[[:ax/literal 1]]]]]]]]
            (s/conform qs/query-spec select-query)))
     (testing "Cannot conform query with extra keys"
       (is (s/invalid?

@@ -42,6 +42,15 @@
         '+ '(+ :foo/bar)))
     (testing "branch nesting"
       (is (= [:path/branch
+              [[:path/op 'not]
+               [:path/paths
+                [[:path/branch
+                  [[:path/op 'alt]
+                   [:path/paths
+                    [[:path/terminal [:ax/prefix-iri :foo/bar]]
+                     [:path/terminal [:ax/prefix-iri :bar/baz]]]]]]]]]]
+             (s/conform ::ps/path '(not (alt :foo/bar :bar/baz)))))
+      (is (= [:path/branch
               [[:path/op 'alt]
                [:path/paths
                 [[:path/branch
@@ -62,17 +71,17 @@
 (deftest invalid-path-test
   (testing "Invalid paths"
     (is (= {::s/problems [{:path [:path/terminal :ax/iri]
-                           :pred `ax/iri?
+                           :pred `ax/iri-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
                           {:path [:path/terminal :ax/prefix-iri]
-                           :pred `ax/prefix-iri?
+                           :pred `ax/prefix-iri-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
                           {:path [:path/terminal :ax/rdf-type]
-                           :pred `ax/rdf-type?
+                           :pred `ax/rdf-type-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
@@ -89,11 +98,12 @@
                            :val  '(:foo :bar/baz)
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/branch]
-                           :pred `(comp symbol? first)
-                           :val  '(:foo :bar/baz)
-                           :via  [::ps/path]
-                           :in   []}]
+                          {:path   [:path/branch :foo]
+                           :pred   `ps/path-spec-mm
+                           :val    '(:foo :bar/baz)
+                           :reason "no method"
+                           :via    [::ps/path]
+                           :in     []}]
             ::s/spec ::ps/path
             ::s/value '(:foo :bar/baz)}
            (s/explain-data ::ps/path '(:foo :bar/baz))))
@@ -102,21 +112,12 @@
                            :val  '(foo :bar/baz)
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/branch :path/varardic :path/op]
-                           :pred '#{'cat 'alt}
-                           :val  'foo
-                           :via  [::ps/path]
-                           :in   [0]}
-                          {:path [:path/branch :path/unary :path/op]
-                           :pred '#{'inv '+ '* '?}
-                           :val  'foo
-                           :via  [::ps/path]
-                           :in   [0]}
-                          {:path [:path/branch :path/unary-neg :path/op]
-                           :pred '#{'not}
-                           :val  'foo
-                           :via  [::ps/path]
-                           :in   [0]}]
+                          {:path   [:path/branch 'foo]
+                           :pred   `ps/path-spec-mm
+                           :val    '(foo :bar/baz)
+                           :reason "no method"
+                           :via    [::ps/path]
+                           :in     []}]
             ::s/spec ::ps/path
             ::s/value '(foo :bar/baz)}
            (s/explain-data ::ps/path '(foo :bar/baz))))
@@ -125,26 +126,17 @@
                            :val  '(not (cat :foo/bar :bar/baz))
                            :via  [::ps/path]
                            :in   []}
-                          {:path [:path/branch :path/varardic :path/op]
-                           :pred '#{'cat 'alt}
-                           :val  'not
-                           :via  [::ps/path]
-                           :in   [0]}
-                          {:path [:path/branch :path/unary :path/op]
-                           :pred '#{'inv '+ '* '?}
-                           :val  'not
-                           :via  [::ps/path]
-                           :in   [0]}
-                          {:path [:path/branch :path/unary-neg :path/path :path/terminal]
-                           :pred `(comp not list?)
-                           :val  '(cat :foo/bar :bar/baz)
-                           :via  [::ps/path ::ps/path-neg ::ps/path-neg]
+                          {:path [:path/branch 'not :path/path :path/terminal],
+                           :pred `(comp not list?),
+                           :val  '(cat :foo/bar :bar/baz),
+                           :via  [::ps/path ::ps/path-neg ::ps/path-neg],
                            :in   [1]}
-                          {:path [:path/branch :path/unary-neg :path/path :path/branch :path/varardic :path/op]
-                           :pred '#{'alt}
-                           :val  'cat
-                           :via  [::ps/path ::ps/path-neg ::ps/path-neg]
-                           :in   [1 0]}]
+                          {:path   [:path/branch 'not :path/path :path/branch 'cat],
+                           :pred   `ps/path-neg-spec-mm,
+                           :val    '(cat :foo/bar :bar/baz),
+                           :reason "no method",
+                           :via    [::ps/path ::ps/path-neg ::ps/path-neg],
+                           :in     [1]}]
             ::s/spec ::ps/path
             ::s/value '(not (cat :foo/bar :bar/baz))}
            (s/explain-data ::ps/path '(not (cat :foo/bar :bar/baz)))))))

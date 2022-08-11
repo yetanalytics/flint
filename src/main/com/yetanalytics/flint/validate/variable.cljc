@@ -34,7 +34,7 @@
 (defmethod invalid-agg-expr-vars :default [_ _] [])
 
 (defmethod invalid-agg-expr-vars :expr/branch [valid-vars [_ [op-kv args-kv]]]
-  (let [[_ op] op-kv
+  (let [[_ op]   op-kv
         [_ args] args-kv]
     (if (or (es/aggregate-ops op)
             (not (symbol? op)))
@@ -132,6 +132,9 @@
   (get-scope-vars v))
 
 ;; Group
+
+(defmethod get-scope-vars :where/special [[_ vs]]
+  (get-scope-vars vs))
 
 (defmethod get-scope-vars :where/recurse [[_ vs]]
   (get-scope-vars vs))

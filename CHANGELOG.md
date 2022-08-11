@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.2.0
+
+- Rework IRI, variable, blank node and literal implementations and add support for additional Java(Script) types.
+  - Implement protocols to define validation and formatting behavior IRIs, variables, blank nodes and literals, and apply `extend-type`/`extend-protocol` to default types.
+  - Add support for `java.net.URI` and `js/URL` IRI instances.
+  - Add support for `java.time.Temporal` timestamps (e.g. `LocalDateTime` and `ZonedDateTime`).
+  - Refine datatypes for numeric literals, e.g. Clojure integers are associated with `xsd:long` by default.
+  - Refine datatypes for date- and time-only timestamps, e.g. `java.sql.Date` and `java.sql.Time` are now associated with `xsd:date` and `xsd:time`, respectively. **(Breaking!)**
+- Add `:force-iris?` optional arg in order to force datatype IRIs to be appended when formatting literals (with the exception of language-tagged strings).
+- Add support for Unicode characters and percent encoding.
+  - Unicode characters are now supported in symbols and keywords.
+  - Percent encoding is allowed in prefixed IRI keyword names.
+  - (Clojure-only) Optimize string validation.
+- Replace certain uses of `s/or` with multi-specs in order to simplify error messages.
+
 ## v0.1.2
 
 - Fix a bug where certain SPARQL Update clauses - `LOAD`, `CLEAR`, `CREATE`, and `DROP` - were not being correctly formatted.

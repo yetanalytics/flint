@@ -18,9 +18,9 @@
   (testing "Conforming prologues"
     (is (= [:ax/iri "<http://foo.org>"]
            (s/conform ::ps/base "<http://foo.org>")))
-    (is (= [[:prologue/prefix [:$   [:ax/iri "<http://default.org>"]]]
-            [:prologue/prefix [:foo [:ax/iri "<http://foo.org>"]]]
-            [:prologue/prefix [:bar [:ax/iri "<http://bar.org>"]]]]
+    (is (= [[:prologue/prefix [[:ax/prefix :$] [:ax/iri "<http://default.org>"]]]
+            [:prologue/prefix [[:ax/prefix :foo] [:ax/iri "<http://foo.org>"]]]
+            [:prologue/prefix [[:ax/prefix :bar] [:ax/iri "<http://bar.org>"]]]]
            (s/conform ::ps/prefixes
                       {:$   "<http://default.org>"
                        :foo "<http://foo.org>"

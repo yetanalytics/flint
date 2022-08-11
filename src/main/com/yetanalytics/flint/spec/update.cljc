@@ -71,25 +71,25 @@
 
 (def quad-spec
   (s/and (s/tuple #{:graph}
-                  ax/var-or-iri-spec
+                  ax/iri-or-var-spec
                   (s/or :triple/quad-triples triples-spec))
          (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def quad-novar-spec
   (s/and (s/tuple #{:graph}
-                  ax/var-or-iri-spec
+                  ax/iri-or-var-spec
                   (s/or :triple/quad-triples triples-novar-spec))
          (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def quad-noblank-spec
   (s/and (s/tuple #{:graph}
-                  ax/var-or-iri-spec
+                  ax/iri-or-var-spec
                   (s/or :triple/quad-triples triples-noblank-spec))
          (s/conformer (fn [[_ iri t]] [iri t]))))
 
 (def quad-novar-noblank-spec
   (s/and (s/tuple #{:graph}
-                  ax/var-or-iri-spec
+                  ax/iri-or-var-spec
                   (s/or :triple/quad-triples triples-novar-noblank-spec))
          (s/conformer (fn [[_ iri t]] [iri t]))))
 
@@ -128,7 +128,7 @@
 
 (def graph-spec
   ;; `s/or` used for conforming into AST node
-  (s/or :update/graph (s/tuple #{:graph} ax/iri-spec)))
+  (s/or :update/graph (s/tuple #{:graph} ax/iri-or-prefixed-spec)))
 
 (def graph-or-keyword-spec
   ;; Need to put keywords first or else Flint will think they're
@@ -136,13 +136,13 @@
   (s/or :update/default #{:default}
         :update/named   #{:named}
         :update/all     #{:all}
-        :update/graph   (s/tuple #{:graph} ax/iri-spec)))
+        :update/graph   (s/tuple #{:graph} ax/iri-or-prefixed-spec)))
 
 ;; LOAD
 
 (s/def ::into graph-spec)
 
-(s/def ::load ax/iri-spec)
+(s/def ::load ax/iri-or-prefixed-spec)
 (s/def ::load-silent ::load)
 
 (def load-update-spec
@@ -186,8 +186,8 @@
   ;; Need to put :default first or else Flint will think it's a
   ;; prefixed IRI
   (s/or :update/default     #{:default}
-        :update/graph-notag ax/iri-spec ; GRAPH keyword not required here
-        :update/graph       (s/tuple #{:graph} ax/iri-spec)))
+        :update/graph-notag ax/iri-or-prefixed-spec ; GRAPH keyword not required here
+        :update/graph       (s/tuple #{:graph} ax/iri-or-prefixed-spec)))
 
 (s/def ::to graph-or-default-spec)
 
@@ -248,11 +248,11 @@
 
 ;; DELETE/INSERT
 
-(s/def ::with ax/iri-spec)
+(s/def ::with ax/iri-or-prefixed-spec)
 
 (s/def ::using
-  (s/or :update/iri ax/iri-spec
-        :update/named-iri (s/tuple #{:named} ax/iri-spec)))
+  (s/or :update/iri ax/iri-or-prefixed-spec
+        :update/named-iri (s/tuple #{:named} ax/iri-or-prefixed-spec)))
 
 (s/def ::insert triple-or-quads-spec)
 (s/def ::delete triple-or-quads-noblank-spec)

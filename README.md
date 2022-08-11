@@ -14,7 +14,7 @@ A Clojure(Script) DSL for creating SPARQL query and update strings.
 Add the following to your `deps.edn` map.
 
 ```clojure
-com.yetanalytics/flint {:mvn/version "0.1.2"
+com.yetanalytics/flint {:mvn/version "0.2.0"
                         :exclusions [org.clojure/clojure
                                      org.clojure/clojurescript]}
 ```
@@ -53,6 +53,7 @@ Each function takes in the following keyword arguments:
 | `:pretty?` | If `true`, adds line breaks and indentation to the resulting SPARQL string. Default `false`.
 | `:validate?` | If `true`, validates that prefixed IRIs are expandable and that certain restrictions on variables and blank nodes are met. Default `true`.
 | `:spec-ed?` | If `true`, let the exception data map be the spec error data map (i.e. with `::s/problems`) upon conformance failure, instead of Flint's default error map. Spec error data maps can get quite large, hence this is default `false`.
+| `:force-iris?` | If `true`, let all literals be formatted with their datatype IRIs (e.g. `<http://www.w3.org/2001/XMLSchema#string>` for string literals); if `false` (the default), then string, numeric, and boolean literals will not have such IRIs appended. Language-tagged literals will never have an appended datatype IRI.
 
 ## Examples
 

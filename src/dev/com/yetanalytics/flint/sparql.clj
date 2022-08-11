@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.sparql
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [criterium.core :as crit])
   (:import [org.apache.jena.query QueryFactory]
            [org.apache.jena.update UpdateFactory]))
 
@@ -38,6 +39,10 @@
 ;; Query/Update writing sandbox
 
 (comment
+  (QueryFactory/create
+   "SELECT ((AVG(MAX(?x)) + 1) AS ?avg)
+    WHERE { ?x ?y ?z . }")
+  
   (QueryFactory/create
    "SELECT (SUM(?x + ?y) AS ?sum) (str(?sum) AS ?z2)
     WHERE {
@@ -149,3 +154,70 @@
     DROP SILENT DEFAULT;
     DROP SILENT NAMED;
     DROP SILENT ALL;"))
+
+(comment
+  (require '[com.yetanalytics.flint :as flint])
+
+  (crit/quick-bench
+   (flint/format-query
+    {:prefixes {:foo "<http://foo.com/>"}
+     :select ['?x]
+     :where [['?x :foo/bar "eleventy-six"]]}))
+
+  (dotimes [_ 10000]
+    (flint/format-query
+     {:prefixes {:foo "<http://foo.com/>"}
+      :select ['?x]
+      :where [['?x :foo/bar "eleventy-six"]]}))
+  
+  (crit/quick-bench
+   (flint/format-query
+    {:prefixes {:foo "<http://foo.com/>"}
+     :select ['?x]
+     :where [['?x :foo/oooooooooone "ONE"]
+             ['?x :foo/ttttttttttwo "TWO"]
+             ['?x :foo/ththththree "THREE"]
+             ['?x :foo/ffffffffour "FOUR"]
+             ['?x :foo/ffffffffive "FIVE"]
+             ['?x :foo/sssssssssix "SIX"]
+             ['?x :foo/ssssssseven "SEVEN"]
+             ['?x :foo/eiiiiiiight "EIGHT"]
+             ['?x :foo/niiiiiiiine "NINE"]
+             ['?x :foo/ttttttttten "TEN"]]}
+    :validate? false))
+  )
+
+(comment
+  (require '[com.yetanalytics.flint.axiom.impl.validation :as v])
+
+  ;; ASCII bench
+  (crit/quick-bench
+   (re-matches #"\?\w+" (name '?foo)))
+
+  (crit/quick-bench
+   (re-matches v/var-regex (name '?foo)))
+
+  (crit/quick-bench
+   (v/valid-var-symbol? '?foo))
+
+  ;; Non-ASCII bench
+  (crit/quick-bench
+   (re-matches v/var-regex (name '?我们去西安吃面)))
+
+  (crit/quick-bench
+   (v/valid-var-symbol? '?我们今天吃西安炒面))
+
+  ;; String literal bench
+  (crit/quick-bench
+   (re-matches v/literal-regex
+               "\\\"supercalifragilisticexpialidocious\\\""))
+
+  (crit/quick-bench
+   (v/valid-string-literal? "\\\"supercalifragilisticexpialidocious\\\""))
+
+  ;; Prefix name bench
+  (crit/bench
+   (re-matches v/prefix-name-regex (name :foo%80bar)))
+
+  (crit/bench
+   (v/valid-prefix-keyword? :foo%80bar)))
