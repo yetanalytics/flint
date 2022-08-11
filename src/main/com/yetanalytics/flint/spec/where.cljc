@@ -79,19 +79,19 @@
 
 (defmethod where-special-form-mm :graph [_]
   (s/& (s/cat :k #{:graph}
-              :v1 ax/var-or-iri-spec
+              :v1 ax/iri-or-var-spec
               :v2 ::where)
        (s/conformer (fn [{:keys [v1 v2]}] [:where/graph [v1 v2]]))))
 
 (defmethod where-special-form-mm :service [_]
   (s/& (s/cat :k #{:service}
-              :v1 ax/var-or-iri-spec
+              :v1 ax/iri-or-var-spec
               :v2 ::where)
        (s/conformer (fn [{:keys [v1 v2]}] [:where/service [v1 v2]]))))
 
 (defmethod where-special-form-mm :service-silent [_]
   (s/& (s/cat :k #{:service-silent}
-              :v1 ax/var-or-iri-spec
+              :v1 ax/iri-or-var-spec
               :v2 ::where)
        (s/conformer (fn [{:keys [v1 v2]}] [:where/service-silent [v1 v2]]))))
 

@@ -71,17 +71,17 @@
 (deftest invalid-path-test
   (testing "Invalid paths"
     (is (= {::s/problems [{:path [:path/terminal :ax/iri]
-                           :pred `ax/iri?
+                           :pred `ax/iri-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
                           {:path [:path/terminal :ax/prefix-iri]
-                           :pred `ax/prefix-iri?
+                           :pred `ax/prefix-iri-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}
                           {:path [:path/terminal :ax/rdf-type]
-                           :pred `ax/rdf-type?
+                           :pred `ax/rdf-type-spec
                            :val  2
                            :via  [::ps/path]
                            :in   []}

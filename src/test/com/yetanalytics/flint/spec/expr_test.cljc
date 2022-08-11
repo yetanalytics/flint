@@ -16,13 +16,13 @@
              (s/conform ::es/expr :foo/bar)))
       (is (= [:expr/terminal [:ax/var '?foo]]
              (s/conform ::es/expr '?foo)))
-      (is (= [:expr/terminal [:ax/dt-lit #inst "2022-01-19T22:20:49Z"]]
+      (is (= [:expr/terminal [:ax/literal #inst "2022-01-19T22:20:49Z"]]
              (s/conform ::es/expr #inst "2022-01-19T22:20:49Z")))
-      (is (= [:expr/terminal [:ax/num-lit 100]]
+      (is (= [:expr/terminal [:ax/literal 100]]
              (s/conform ::es/expr 100)))
-      (is (= [:expr/terminal [:ax/bool-lit true]]
+      (is (= [:expr/terminal [:ax/literal true]]
              (s/conform ::es/expr true)))
-      (is (= [:expr/terminal [:ax/str-lit "ok"]]
+      (is (= [:expr/terminal [:ax/literal "ok"]]
              (s/conform ::es/expr "ok"))))
     (is (= [:expr/branch [[:expr/op 'rand]
                           [:expr/args []]]]
@@ -46,29 +46,29 @@
                                                         [:ax/var ?o]]]]]]]]]
            (s/conform ::es/expr '(exists [[?s ?p ?o]]))))
     (is (= [:expr/branch [[:expr/op 'contains]
-                          [:expr/args [[:expr/terminal [:ax/str-lit "foo"]]
-                                       [:expr/terminal [:ax/str-lit "foobar"]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/literal "foo"]]
+                                       [:expr/terminal [:ax/literal "foobar"]]]]]]
            (s/conform ::es/expr '(contains "foo" "foobar"))))
     (is (= [:expr/branch [[:expr/op 'regex]
                           [:expr/args [[:expr/terminal [:ax/var '?foo]]
-                                       [:expr/terminal [:ax/str-lit "bar"]]
-                                       [:expr/terminal [:ax/str-lit "i"]]]]]]
+                                       [:expr/terminal [:ax/literal "bar"]]
+                                       [:expr/terminal [:ax/literal "i"]]]]]]
            (s/conform ::es/expr '(regex ?foo "bar" "i"))))
     (is (= [:expr/branch [[:expr/op 'if]
-                          [:expr/args [[:expr/terminal [:ax/bool-lit true]]
-                                       [:expr/terminal [:ax/num-lit 1]]
-                                       [:expr/terminal [:ax/num-lit 0]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/literal true]]
+                                       [:expr/terminal [:ax/literal 1]]
+                                       [:expr/terminal [:ax/literal 0]]]]]]
            (s/conform ::es/expr '(if true 1 0))))
     (is (= [:expr/branch [[:expr/op '+]
-                          [:expr/args [[:expr/terminal [:ax/num-lit 1]]
-                                       [:expr/terminal [:ax/num-lit 2]]
+                          [:expr/args [[:expr/terminal [:ax/literal 1]]
+                                       [:expr/terminal [:ax/literal 2]]
                                        [:expr/branch [[:expr/op '*]
-                                                      [:expr/args [[:expr/terminal [:ax/num-lit 3]]
-                                                                   [:expr/terminal [:ax/num-lit 4]]]]]]]]]]
+                                                      [:expr/args [[:expr/terminal [:ax/literal 3]]
+                                                                   [:expr/terminal [:ax/literal 4]]]]]]]]]]
            (s/conform ::es/expr '(+ 1 2 (* 3 4)))))
     (is (= [:expr/branch [[:expr/op [:ax/prefix-iri :foo/my-custom-fn]]
-                          [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                       [:expr/terminal [:ax/num-lit 2]]]]]]
+                          [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                       [:expr/terminal [:ax/literal 2]]]]]]
            (s/conform ::es/expr '(:foo/my-custom-fn 2 2))))
     (testing "aggregates"
       (is (= [:expr/branch [[:expr/op 'count]
@@ -189,14 +189,14 @@
   (testing "Conforming expr AS var clauses"
     (is (= '[:expr/as-var
              [[:expr/branch [[:expr/op +]
-                             [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                          [:expr/terminal [:ax/num-lit 2]]]]]]
+                             [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                          [:expr/terminal [:ax/literal 2]]]]]]
               [:ax/var ?foo]]]
            (s/conform ::es/expr-as-var '[(+ 2 2) ?foo])))
     (is (= '[:expr/as-var
              [[:expr/branch [[:expr/op concat]
                              [:expr/args [[:expr/terminal [:ax/var ?G]]
-                                          [:expr/terminal [:ax/str-lit " "]]
+                                          [:expr/terminal [:ax/literal " "]]
                                           [:expr/terminal [:ax/var ?S]]]]]]
               [:ax/var ?name]]]
            (s/conform ::es/expr-as-var '[(concat ?G " " ?S) ?name])))

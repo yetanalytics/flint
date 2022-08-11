@@ -11,7 +11,7 @@
              [[:ax/var ?x]
               [:ax/var ?y]
               [:select/expr-as-var [:expr/as-var
-                                    [[:expr/terminal [:ax/num-lit 2]]
+                                    [[:expr/terminal [:ax/literal 2]]
                                      [:ax/var ?z]]]]]]
            (s/conform ss/select-spec '[?x ?y [2 ?z]])))))
 

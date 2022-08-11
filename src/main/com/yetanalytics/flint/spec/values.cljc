@@ -3,12 +3,9 @@
             [com.yetanalytics.flint.spec.axiom :as ax]))
 
 (def value-spec
-  (s/or :ax/iri        ax/iri?
-        :ax/prefix-iri ax/prefix-iri?
-        :ax/num-lit    number?
-        :ax/bool-lit   boolean?
-        :ax/str-lit    ax/valid-string?
-        :ax/lmap-lit   ax/lang-map?
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/literal    ax/literal-spec
         :values/undef  nil?))
 
 (defn- matching-val-lengths*
@@ -43,13 +40,13 @@
   (s/and
    (s/or :values/sparql-format
          (s/and (s/map-of any? any? :min-count 1 :max-count 1)
-                (s/map-of (s/coll-of ax/variable?)
+                (s/map-of (s/coll-of ax/variable-spec)
                           (s/coll-of (s/coll-of value-spec)))
                 matching-val-lengths*
                 (s/conformer conform-vars))
          :values/clojure-format
          (s/and (s/map-of any? any? :min-count 1)
-                (s/map-of ax/variable? (s/coll-of value-spec))
+                (s/map-of ax/variable-spec (s/coll-of value-spec))
                 matching-val-lengths
                 (s/conformer clojure->sparql)
                 (s/conformer conform-vars)))

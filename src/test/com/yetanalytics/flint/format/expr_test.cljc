@@ -10,82 +10,82 @@
 (deftest format-expr-test
   (testing "Formatting expressions"
     (is (= ["2" "3"]
-           (->> [[:expr/terminal [:ax/num-lit 2]]
-                 [:expr/terminal [:ax/num-lit 3]]]
+           (->> [[:expr/terminal [:ax/literal 2]]
+                 [:expr/terminal [:ax/literal 3]]]
                 format-ast)))
     (is (= "foo:myCustomFunction(2, 3)"
            (->> [:expr/branch [[:expr/op [:ax/prefix-iri :foo/myCustomFunction]]
-                               [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                            [:expr/terminal [:ax/num-lit 3]]]]]]
+                               [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                            [:expr/terminal [:ax/literal 3]]]]]]
                 format-ast)))
     (is (= "!false"
            (->> '[:expr/branch [[:expr/op not]
-                                [:expr/args [[:expr/terminal [:ax/bool-lit false]]]]]]
+                                [:expr/args [[:expr/terminal [:ax/literal false]]]]]]
                 format-ast)))
     (is (= "!(!false)"
            (->> '[:expr/branch [[:expr/op not]
                                 [:expr/args [[:expr/branch [[:expr/op not]
-                                                            [:expr/args [[:expr/terminal [:ax/bool-lit false]]]]]]]]]]
+                                                            [:expr/args [[:expr/terminal [:ax/literal false]]]]]]]]]]
                 format-ast)))
     (is (= "!(-2)"
            (->> '[:expr/branch [[:expr/op not]
-                                [:expr/args [[:expr/terminal [:ax/num-lit -2]]]]]]
+                                [:expr/args [[:expr/terminal [:ax/literal -2]]]]]]
                 format-ast)))
     (is (= "(1 IN (1, 2, 3))"
            (->> '[:expr/branch [[:expr/op in]
-                                [:expr/args [[:expr/terminal [:ax/num-lit 1]]
-                                             [:expr/terminal [:ax/num-lit 1]]
-                                             [:expr/terminal [:ax/num-lit 2]]
-                                             [:expr/terminal [:ax/num-lit 3]]]]]]
+                                [:expr/args [[:expr/terminal [:ax/literal 1]]
+                                             [:expr/terminal [:ax/literal 1]]
+                                             [:expr/terminal [:ax/literal 2]]
+                                             [:expr/terminal [:ax/literal 3]]]]]]
                 format-ast)))
     (is (= "(1 NOT IN (2, 3, 4))"
            (->> '[:expr/branch [[:expr/op not-in]
-                                [:expr/args [[:expr/terminal [:ax/num-lit 1]]
-                                             [:expr/terminal [:ax/num-lit 2]]
-                                             [:expr/terminal [:ax/num-lit 3]]
-                                             [:expr/terminal [:ax/num-lit 4]]]]]]
+                                [:expr/args [[:expr/terminal [:ax/literal 1]]
+                                             [:expr/terminal [:ax/literal 2]]
+                                             [:expr/terminal [:ax/literal 3]]
+                                             [:expr/terminal [:ax/literal 4]]]]]]
                 format-ast)))
     (is (= "(2 = 2)"
            (->> '[:expr/branch [[:expr/op =]
-                                [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                             [:expr/terminal [:ax/num-lit 2]]]]]]
+                                [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                             [:expr/terminal [:ax/literal 2]]]]]]
                 format-ast)))
     (is (= "(2 != 3)"
            (->> '[:expr/branch [[:expr/op not=]
-                                [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                             [:expr/terminal [:ax/num-lit 3]]]]]]
+                                [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                             [:expr/terminal [:ax/literal 3]]]]]]
                 format-ast)))
     (is (= "(2 + 3)"
            (->> [:expr/branch [[:expr/op '+]
-                               [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                            [:expr/terminal [:ax/num-lit 3]]]]]]
+                               [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                            [:expr/terminal [:ax/literal 3]]]]]]
                 format-ast)))
     (is (= "(2 * (3 + 3))"
            (->> [:expr/branch
                  [[:expr/op '*]
-                  [:expr/args [[:expr/terminal [:ax/num-lit 2]]
+                  [:expr/args [[:expr/terminal [:ax/literal 2]]
                                [:expr/branch
                                 [[:expr/op '+]
-                                 [:expr/args [[:expr/terminal [:ax/num-lit 3]]
-                                              [:expr/terminal [:ax/num-lit 3]]]]]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal 3]]
+                                              [:expr/terminal [:ax/literal 3]]]]]]]]]]
                 format-ast)))
     (is (= "(2 - (6 - 2))" ; => -2
            (->> [:expr/branch
                  [[:expr/op '-]
-                  [:expr/args [[:expr/terminal [:ax/num-lit 2]]
+                  [:expr/args [[:expr/terminal [:ax/literal 2]]
                                [:expr/branch
                                 [[:expr/op '-]
-                                 [:expr/args [[:expr/terminal [:ax/num-lit 6]]
-                                              [:expr/terminal [:ax/num-lit 2]]]]]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal 6]]
+                                              [:expr/terminal [:ax/literal 2]]]]]]]]]]
                 format-ast)))
     (is (= "((2 - 6) - 2)" ; => -6
            (->> [:expr/branch
                  [[:expr/op '-]
                   [:expr/args [[:expr/branch
                                 [[:expr/op '-]
-                                 [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                              [:expr/terminal [:ax/num-lit 6]]]]]]
-                               [:expr/terminal [:ax/num-lit 2]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                              [:expr/terminal [:ax/literal 6]]]]]]
+                               [:expr/terminal [:ax/literal 2]]]]]]
                 format-ast)))
     (is (= "(((2 * 3) + 4) / 2)" ; (/ (+ (* 2 3) 4) 2)
            (->> [:expr/branch
@@ -94,53 +94,53 @@
                                 [[:expr/op '+]
                                  [:expr/args [[:expr/branch
                                                [[:expr/op '*]
-                                                [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                                             [:expr/terminal [:ax/num-lit 3]]]]]]
-                                              [:expr/terminal [:ax/num-lit 4]]]]]]
-                               [:expr/terminal [:ax/num-lit 2]]]]]]
+                                                [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                                             [:expr/terminal [:ax/literal 3]]]]]]
+                                              [:expr/terminal [:ax/literal 4]]]]]]
+                               [:expr/terminal [:ax/literal 2]]]]]]
                 format-ast)))
     (is (= "((2 * 3) + (4 / 2))" ; (+ (* 2 3) (/ 4 2))
            (->> [:expr/branch
                  [[:expr/op '+]
                   [:expr/args [[:expr/branch
                                 [[:expr/op '*]
-                                 [:expr/args [[:expr/terminal [:ax/num-lit 2]]
-                                              [:expr/terminal [:ax/num-lit 3]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal 2]]
+                                              [:expr/terminal [:ax/literal 3]]]]]]
                                [:expr/branch
                                 [[:expr/op '/]
-                                 [:expr/args [[:expr/terminal [:ax/num-lit 4]]
-                                              [:expr/terminal [:ax/num-lit 2]]]]]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal 4]]
+                                              [:expr/terminal [:ax/literal 2]]]]]]]]]]
                 format-ast)))
     (is (= "SUM(2, (3 - 3))"
            (->> [:expr/branch
                  [[:expr/op 'sum]
-                  [:expr/args [[:expr/terminal [:ax/num-lit 2]]
+                  [:expr/args [[:expr/terminal [:ax/literal 2]]
                                [:expr/branch
                                 [[:expr/op '-]
-                                 [:expr/args [[:expr/terminal [:ax/num-lit 3]]
-                                              [:expr/terminal [:ax/num-lit 3]]]]]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal 3]]
+                                              [:expr/terminal [:ax/literal 3]]]]]]]]]]
                 format-ast)))
     (is (= "((true || false) && !true)"
            (->> [:expr/branch
                  [[:expr/op 'and]
                   [:expr/args [[:expr/branch
                                 [[:expr/op 'or]
-                                 [:expr/args [[:expr/terminal [:ax/bool-lit true]]
-                                              [:expr/terminal [:ax/bool-lit false]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal true]]
+                                              [:expr/terminal [:ax/literal false]]]]]]
                                [:expr/branch
                                 [[:expr/op 'not]
-                                 [:expr/args [[:expr/terminal [:ax/bool-lit true]]]]]]]]]]
+                                 [:expr/args [[:expr/terminal [:ax/literal true]]]]]]]]]]
                 format-ast)))
     (is (= "(true || (false && !true))"
            (->> [:expr/branch
                  [[:expr/op 'or]
-                  [:expr/args [[:expr/terminal [:ax/bool-lit true]]
+                  [:expr/args [[:expr/terminal [:ax/literal true]]
                                [:expr/branch
                                 [[:expr/op 'and]
-                                 [:expr/args [[:expr/terminal [:ax/bool-lit false]]
+                                 [:expr/args [[:expr/terminal [:ax/literal false]]
                                               [:expr/branch
                                                [[:expr/op 'not]
-                                                [:expr/args [[:expr/terminal [:ax/bool-lit true]]]]]]]]]]]]]]
+                                                [:expr/args [[:expr/terminal [:ax/literal true]]]]]]]]]]]]]]
                 format-ast)))
     (is (= "GROUP_CONCAT(?foo)"
            (->> [:expr/branch [[:expr/op 'group-concat]
@@ -198,7 +198,7 @@
                   [[:expr/branch
                     [[:expr/op +]
                      [:expr/args
-                      [[:expr/terminal [:ax/num-lit 2]]
-                       [:expr/terminal [:ax/num-lit 2]]]]]]
+                      [[:expr/terminal [:ax/literal 2]]
+                       [:expr/terminal [:ax/literal 2]]]]]]
                    [:ax/var ?foo]]]
                 format-ast)))))

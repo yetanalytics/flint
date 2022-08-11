@@ -21,11 +21,10 @@
 
 (def select-spec
   (s/or :select/var-or-exprs
-        (s/and (s/* (s/alt :ax/var ax/variable?
+        (s/and (s/* (s/alt :ax/var ax/variable-spec
                            :select/expr-as-var ::es/agg-expr-as-var))
                no-duplicate-vars?)
-        :ax/wildcard
-        ax/wildcard?))
+        :ax/wildcard ax/wildcard-spec))
 
 (s/def ::select select-spec)
 (s/def ::select-distinct select-spec)

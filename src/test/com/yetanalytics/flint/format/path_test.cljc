@@ -49,12 +49,12 @@
     (is (= "^a"
            (->> '[:path/branch
                   [[:path/op inv]
-                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]
+                   [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]
                 format-ast)))
     (is (= "a?"
            (->> '[:path/branch
                   [[:path/op ?]
-                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]
+                   [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]
                 format-ast)))
     (is (= "((a?)*)+"
            (->> '[:path/branch
@@ -63,14 +63,14 @@
                                   [[:path/op *]
                                    [:path/paths [[:path/branch
                                                   [[:path/op ?]
-                                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
+                                                   [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]]]]]]]]]
                 format-ast)))
     (is (= "(!a)*"
            (->> '[:path/branch
                   [[:path/op *]
                    [:path/paths [[:path/branch
                                   [[:path/op not]
-                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]
+                                   [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]]]]]
                 format-ast)))
     (is (= "((!a)*)?"
            (->> '[:path/branch
@@ -79,7 +79,7 @@
                                   [[:path/op *]
                                    [:path/paths [[:path/branch
                                                   [[:path/op not]
-                                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
+                                                   [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]]]]]]]]]
                 format-ast)))
     (is (= "!(!(!a))"
            (->> '[:path/branch
@@ -88,7 +88,7 @@
                                   [[:path/op not]
                                    [:path/paths [[:path/branch
                                                   [[:path/op not]
-                                                   [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]]]]]]]]]
+                                                   [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]]]]]]]]]
                 format-ast)))))
 
 (deftest format-invalid-test
@@ -96,7 +96,7 @@
     (is (try (f/format-ast
               '[:path/branch
                 [[:path/op oh-no]
-                 [:path/paths [[:path/terminal [:ax/rdf-type 'a]]]]]]
+                 [:path/paths [[:path/terminal [:ax/rdf-type a]]]]]]
               {})
              (catch #?(:clj IllegalArgumentException
                        :cljs js/Error) _

@@ -63,23 +63,23 @@
                                [[:expr/op +]
                                 [:expr/args [[:expr/terminal [:ax/var ?a]]
                                              [:expr/terminal [:ax/var ?b]]]]]]]
-                             [:mod/expr-as-var [:expr/as-var [[:expr/terminal [:ax/num-lit 1]]
+                             [:mod/expr-as-var [:expr/as-var [[:expr/terminal [:ax/literal 1]]
                                                               [:ax/var ?foo]]]]
                              [:ax/var ?bar]]]
                 format-ast))))
   (testing "Formatting HAVING clauses"
     (is (= "HAVING (1) (!true)"
-           (->> '[:having [[:expr/terminal [:ax/num-lit 1]]
+           (->> '[:having [[:expr/terminal [:ax/literal 1]]
                            [:expr/branch
                             [[:expr/op not]
-                             [:expr/args [[:expr/terminal [:ax/bool-lit true]]]]]]
+                             [:expr/args [[:expr/terminal [:ax/literal true]]]]]]
                            ]]
                 format-ast))))
   (testing "Formatting LIMIT clauses"
     (is (= "LIMIT 10"
-           (->> '[:limit [:ax/num-lit 10]]
+           (->> '[:limit [:ax/literal 10]]
                 format-ast))))
   (testing "Formatting OFFSET clauses"
     (is (= "OFFSET 2"
-           (->> '[:offset [:ax/num-lit 2]]
+           (->> '[:offset [:ax/literal 2]]
                 format-ast)))))

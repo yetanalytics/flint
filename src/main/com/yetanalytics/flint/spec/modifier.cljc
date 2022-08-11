@@ -6,14 +6,14 @@
 ;; Technically a single variable is also an expression, but it's already
 ;; distinguished in the context-free grammar so why not also reflect that here.
 (s/def ::group-by
-  (s/coll-of (s/or :ax/var          ax/variable?
+  (s/coll-of (s/or :ax/var          ax/variable-spec
                    :mod/group-expr  ::es/expr
                    :mod/expr-as-var ::es/expr-as-var)
              :min-count 1
              :kind vector?))
 
 (s/def ::order-by
-  (s/coll-of (s/or :ax/var         ax/variable?
+  (s/coll-of (s/or :ax/var         ax/variable-spec
                    :mod/asc-desc   (s/& (s/cat :mod/op #{'asc 'desc}
                                                :mod/asc-desc-expr ::es/agg-expr)
                                         (s/conformer #(into [] %)))
@@ -28,6 +28,6 @@
 
 ;; single-branch `s/or`s are used to conform values
 
-(s/def ::limit (s/or :ax/num-lit nat-int?))
+(s/def ::limit (s/or :ax/numeric nat-int?))
 
-(s/def ::offset (s/or :ax/num-lit int?))
+(s/def ::offset (s/or :ax/numeric int?))

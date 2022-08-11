@@ -1,6 +1,7 @@
 (ns com.yetanalytics.flint
   (:require [clojure.spec.alpha :as s]
             [com.yetanalytics.flint.format.query]
+            [com.yetanalytics.flint.axiom.protocol     :as p]
             [com.yetanalytics.flint.spec.query         :as qs]
             [com.yetanalytics.flint.spec.update        :as us]
             [com.yetanalytics.flint.format             :as f]
@@ -12,23 +13,17 @@
             [com.yetanalytics.flint.validate.prefix    :as vp]
             [com.yetanalytics.flint.validate.scope     :as vs]))
 
-(def xsd-iri-prefix
-  "The XMLSchema IRI prefix used for datatype annotation of literals,
-   including dateTime timestamps."
-  "<http://www.w3.org/2001/XMLSchema#>")
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Conform Helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- get-xsd-prefix
-  [prefixes]
-  (reduce-kv (fn [_ k v]
-               (if (= xsd-iri-prefix v)
-                 (reduced (name k))
-                 nil))
-             nil
-             prefixes))
+(defn- reverse-prefix-map
+  [prefix-iri-m]
+  (reduce-kv (fn [m pre iri]
+               (let [inner-iri (p/-unwrap-iri iri)]
+                 (assoc m inner-iri pre)))
+             {}
+             prefix-iri-m))
 
 (defn- conform-sparql-err-map
   [error-kw error-loc-kws sparql]
@@ -170,21 +165,23 @@
 (defn format-query
   "Format `query` into a SPARQL Query string. Throws an exception if `query`
    does not conform to spec or otherwise fails validation."
-  [query & {:keys [pretty? validate? spec-ed?]
-            :or   {pretty?   false
-                   validate? true
-                   spec-ed?  false}}]
-  (let [ast      (conform-query spec-ed? query)
-        prefix-m (:prefixes query)
-        _        (when validate?
-                   (let [nodes-m (v/collect-nodes ast)]
-                     (assert-prefixes query ast nodes-m prefix-m)
-                     (assert-scoped-vars query ast nodes-m)
-                     (assert-aggregates query ast nodes-m)
-                     (assert-bnodes query ast nodes-m)))
-        ?xsd-pre (get-xsd-prefix prefix-m)
-        opt-m    (cond-> {:pretty? pretty?}
-                   ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
+  [query & {:keys [pretty? validate? spec-ed? force-iris?]
+            :or   {pretty?     false
+                   validate?   true
+                   spec-ed?    false
+                   force-iris? false}}]
+  (let [ast       (conform-query spec-ed? query)
+        prefix-m  (:prefixes query)
+        _         (when validate?
+                    (let [nodes-m (v/collect-nodes ast)]
+                      (assert-prefixes query ast nodes-m prefix-m)
+                      (assert-scoped-vars query ast nodes-m)
+                      (assert-aggregates query ast nodes-m)
+                      (assert-bnodes query ast nodes-m)))
+        iri-pre-m (reverse-prefix-map prefix-m)
+        opt-m     {:pretty?      pretty?
+                   :force-iri?   force-iris?
+                   :iri-prefix-m iri-pre-m}]
     (f/format-ast ast opt-m)))
 
 ;; `format-updates` is internally quite different from a simple coll
@@ -194,31 +191,34 @@
 (defn format-update
   "Format `update` into a SPARQL Update string. Throws an exception if `update`
    does not conform to spec or otherwise fails validation."
-  [update & {:keys [pretty? validate? spec-ed?]
-             :or   {pretty?   false
-                    validate? true
-                    spec-ed?  false}}]
-  (let [ast      (conform-update spec-ed? update)
-        prefix-m (:prefixes update)
-        _        (when validate?
-                   (let [nodes-m (v/collect-nodes ast)]
-                     (assert-prefixes update ast nodes-m prefix-m)
-                     (assert-scoped-vars update ast nodes-m)
-                     (assert-aggregates update ast nodes-m)
-                     (assert-bnodes update ast nodes-m)))
-        ?xsd-pre (get-xsd-prefix prefix-m)
-        opt-m    (cond-> {:pretty? pretty?}
-                   ?xsd-pre (assoc :xsd-prefix ?xsd-pre))]
+  [update & {:keys [pretty? validate? spec-ed? force-iris?]
+             :or   {pretty?     false
+                    validate?   true
+                    spec-ed?    false
+                    force-iris? false}}]
+  (let [ast       (conform-update spec-ed? update)
+        prefix-m  (:prefixes update)
+        _         (when validate?
+                    (let [nodes-m (v/collect-nodes ast)]
+                      (assert-prefixes update ast nodes-m prefix-m)
+                      (assert-scoped-vars update ast nodes-m)
+                      (assert-aggregates update ast nodes-m)
+                      (assert-bnodes update ast nodes-m)))
+        iri-pre-m (reverse-prefix-map prefix-m)
+        opt-m     {:pretty?      pretty?
+                   :force-iri?   force-iris?
+                   :iri-prefix-m iri-pre-m}]
     (f/format-ast ast opt-m)))
 
 (defn format-updates
   "Format the coll `updates` into a SPARQL Update Request string. Throws
    an exception if any update does not conform to spec or otherwise
    fails validation."
-  [updates & {:keys [pretty? validate? spec-ed?]
-              :or   {pretty?   false
-                     validate? true
-                     spec-ed?  false}}]
+  [updates & {:keys [pretty? validate? spec-ed? force-iris?]
+              :or   {pretty?     false
+                     validate?   true
+                     spec-ed?    false
+                     force-iris? false}}]
   (let [idxs     (-> updates count range)
         asts     (map (partial conform-update spec-ed?) updates idxs)
         pre-maps (reduce (fn [pm-coll {pm :prefixes :as _update}]
@@ -227,16 +227,17 @@
                              (conj pm-coll new-pm)))
                          []
                          updates)
+        iri-maps (map reverse-prefix-map pre-maps)
         _        (when validate?
                    (let [nodes-m-coll (map v/collect-nodes asts)]
                      (dorun (map assert-prefixes updates asts nodes-m-coll pre-maps idxs))
                      (dorun (map assert-scoped-vars updates asts nodes-m-coll idxs))
                      (dorun (map assert-aggregates updates asts nodes-m-coll idxs))
                      (assert-bnodes-coll updates asts nodes-m-coll)))
-        xsd-pres (map get-xsd-prefix pre-maps)
-        opt-maps (map (fn [?xsd-pre]
-                        (cond-> {:pretty? pretty?}
-                          ?xsd-pre (assoc :xsd-prefix ?xsd-pre)))
-                      xsd-pres)]
+        opt-maps (map (fn [iri-pre-m]
+                        {:pretty?      pretty?
+                         :force-iri?   force-iris?
+                         :iri-prefix-m iri-pre-m})
+                      iri-maps)]
     (-> (map f/format-ast asts opt-maps)
         (uf/join-updates pretty?))))

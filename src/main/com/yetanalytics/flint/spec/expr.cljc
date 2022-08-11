@@ -13,29 +13,26 @@
 (def expr-terminal-spec
   (s/and
    (comp not list?)
-   (s/or :ax/iri        ax/iri?
-         :ax/prefix-iri ax/prefix-iri?
-         :ax/var        ax/variable?
-         :ax/num-lit    number?
-         :ax/bool-lit   boolean?
-         :ax/str-lit    ax/valid-string?
-         :ax/lmap-lit   ax/lang-map?
-         :ax/dt-lit     inst?)))
+   (s/or :ax/iri        ax/iri-spec
+         :ax/prefix-iri ax/prefix-iri-spec
+         :ax/var        ax/variable-spec
+         :ax/literal    ax/literal-spec)))
 
 (def var-terminal-spec
-  (s/or :expr/terminal
-        (s/or :ax/var ax/variable?)))
+  (s/or :expr/terminal (s/or :ax/var ax/variable-spec)))
 
 (def wildcard-terminal-spec
-  (s/or :expr/terminal
-        (s/or :ax/wildcard ax/wildcard?)))
+  (s/or :expr/terminal (s/or :ax/wildcard ax/wildcard-spec)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Keyword Argument Specs and Helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::distinct? boolean?)
-(s/def ::separator ax/valid-string?)
+
+;; This will conform to `[:separator string-literal]`, which will be formatted
+;; as a plain string literal (i.e. does not get passed to `p/-format-literal`).
+(s/def ::separator (s/and string? ax/literal-spec))
 
 (defn- kvs->map [kvs]
   (reduce (fn [m {k :expr/k v :expr/v}] (assoc m k v))
@@ -234,11 +231,11 @@
 ;; Custom Expressions
 
 (def custom-fn-spec ; non-aggregates
-  (s/cat :expr/op ax/iri-spec
+  (s/cat :expr/op ax/iri-or-prefixed-spec
          :expr/vargs (s/* ::expr)))
 
 (def aggregate-custom-fn-spec
-  (s/cat :expr/op ax/iri-spec
+  (s/cat :expr/op ax/iri-or-prefixed-spec
          :expr/vargs (s/* ::agg-expr)
          :expr/kwargs (keyword-args ::distinct?)))
 
@@ -257,7 +254,7 @@
   (let [op (first expr-list)]
     (cond
       (symbol? op) op
-      (s/valid? ax/iri-spec op) :custom)))
+      (s/valid? ax/iri-or-prefixed-spec op) :custom)))
 
 ;; No Aggregate Expressions
 (defmulti expr-spec-mm
@@ -356,7 +353,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::expr-as-var
-  (s/or :expr/as-var (s/tuple ::expr (s/or :ax/var ax/variable?))))
+  (s/or :expr/as-var (s/tuple ::expr (s/or :ax/var ax/variable-spec))))
 
 (s/def ::agg-expr-as-var
-  (s/or :expr/as-var (s/tuple ::agg-expr (s/or :ax/var ax/variable?))))
+  (s/or :expr/as-var (s/tuple ::agg-expr (s/or :ax/var ax/variable-spec))))
