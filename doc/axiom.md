@@ -4,7 +4,9 @@ Reference: [4.1 RDF Term Syntax](https://www.w3.org/TR/sparql11-query/#syntaxTer
 
 This section discusses IRIs, variables, blank nodes, and literals in Flint and SPARQL. Many of the conventions here, including for prefixed IRIs, variables, and blank nodes, were borrowed from the [Datomic query and update grammar](https://docs.datomic.com/on-prem/query/query.html).
 
-**NOTE:** For simplicity, many terms in Flint only allow a subset of the characters that the SPARQL spec allows. For example, the latter often accepts Unicode characters, while Flint is ASCII-only outside of IRIs or string literals.
+**NOTE:** As of v0.2.0 Flint supports Unicode. Certain Unicode characters are forbidden by the SPARQL grammar in symbols and keywords (e.g. the Greek question mark and most mathematical symbols). For details on allowed characters, see the [SPARQL grammar section on literals](https://www.w3.org/TR/sparql11-query/#rIRIREF).
+
+Flint does not support non-Basic Multilingual Plane code points (i.e. those with a value above `0xFFFF`) in symbols and keywords, whether directly or as surrogate code points (the latter being disallowed in the SPARQL grammar).
 
 ## IRIs
 
@@ -27,7 +29,7 @@ Examples: `:my-prefix/foo`, `:bar`
 
 Prefixed IRIs in Flint are written as keywords of the form `:prefix/name`, where the prefix is optional. When translating to SPARQL, prefixed IRIs are transformed into the form `prefix:name`.
 
-Prefixed IRIs accept word characters and hyphens, with the exception of the first prefix char (which does not allow digits); periods can also be included in the middle of the prefix.
+**NOTE:** Digits not allowed as the first character of a prefix keyword namespace. The `.` character is not allowed as the first or last character of the keyword namespace or name.
 
 **NOTE:** Prefixed IRIs must have the prefix be an entry in the `:prefixes` map; otherwise, validation will fail (unless `:validate?` is set to `false`).
 
@@ -57,15 +59,15 @@ the `:where` triples are all equivalent.
 
 Examples: `?var`
 
-Variables are written as symbols prefixed with a question mark `?`. The characters after the question mark can be any word character. Translating to SPARQL does not change the variable other than stringifying it.
+Variables are written as symbols prefixed with a question mark `?`. Translating to SPARQL does not change the variable other than stringifying it.
 
 ## Blank Nodes
 
 Examples: `_`, `_b0`
 
-Blank nodes are written as symbols prefixed with an underscore `_`. When translating a blank node to SPARQL, a colon is added after the underscore, e.g. `_:b0`. The exception is `_`, which is rewritten as `[]` instead.
+Blank nodes are written as symbols prefixed with an underscore `_`. When translating a blank node to SPARQL, a colon is added after the underscore, e.g. `_:b0`. The exception if the symbol is a single `_` character; then it is rewritten as `[]` instead.
 
-The characters after the underscore can be written as any word character; periods are also allowed in the middle.
+**NOTE:** The `.` character is not permitted as the first or last character after the `_`.
 
 **NOTE:** Blank nodes have certain restrictions: they cannot be used in any delete-related clauses, nor can the same blank node be repeated across different [basic graph patterns](where.md) or SPARQL updates.
 
@@ -77,14 +79,20 @@ The wildcard is used in certain query clauses and expressions in order to "retur
 
 ## Literals
 
-Flint supports the following literals by default: simple strings, language-tagged strings, numbers, booleans, and dateTime timestamps.
+Flint supports the following literals by default: simple strings, language-tagged strings, numbers, booleans, and timestamps.
 
 During SPARQL translation, an IRI denoting the datatype is added as a suffix
 if `:force-iris?` is `true` or if it is not a primitive type (e.g. timestamps). For example, the following is a stringified `dateTime` timestamp with an appended datatype IRI:
 ```sparql
 "2022-01-01T10:10:10Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>
 ```
-If one includes an entry for the XMLSchema IRI prefix in their prefixes map, they can shorten the resulting string considerably; for example, if that IRI prefix is associated with `:xsd`, then the string becomes:
+
+The user can shorten the IRI string by including an entry for `<http://www.w3.org/2001/XMLSchema#>` in their prefixes map. For example, if the `:prefixes` map has the following:
+```clojure
+{:xsd "<http://www.w3.org/2001/XMLSchema#>"}
+```
+
+then that IRI prefix is associated with `:xsd` and the formatted literal becomes:
 ```sparql
 "2022-01-01T10:10:10Z"^^xsd:dateTime
 ```
@@ -95,7 +103,7 @@ Examples: `0`, `-2`, `3.14`
 
 Numbers cover both integers and doubles, which are represented as integer and double literals in SPARQL, respectively. In addition to primitive values, `java.math.BigInteger`, `java.math.BigDecimal`, and `clojure.lang.BigInt` classes are also supported in Clojure.
 
-Numbers are not transformed during SPARQL translation beyond stringification. Note that the datatype IRI will vary depending on whether it is a double or integer, as well the underlying representation (e.g. Clojure integers will have the datatype IRI `xsd:long` as they are Java long values by default).
+Numbers are not transformed during SPARQL translation beyond stringification. Note that the datatype IRI will vary on the numeric value's underlying type (e.g. Clojure integers, as Java `Long` values, will be associated with the IRI `xsd:long` by default).
 
 ### Booleans
 
@@ -124,7 +132,7 @@ Timestamp literal values include the following classes:
 - [`java.util.Date`](https://docs.oracle.com/javase/8/docs/api/java/util/Date.html) classes (Clojure). These include, in addition to that class itself, its `java.sql` package subclasses `Timestamp`, `Date`, and `Time`.
 - [`js/Date`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) (ClojureScript).
 
-As mentioned above, timestamps will be stringified (in the Clojure case, they will be stringified as `java.time.Instant` instances), and will have (depending on the class) one of the `xsd:dateTime`, `xsd:date`, or `xsd:time` IRIs appended regardless of the value of `:force-iris?`.
+As mentioned above, timestamps will be stringified as [ISO 8601 timestamps](https://en.wikipedia.org/wiki/ISO_8601) and will have (depending on the class) the `xsd:dateTime`, `xsd:date`, or `xsd:time` IRI appended, regardless of the value of `:force-iris?`.
 
 ### Custom Literals
 
