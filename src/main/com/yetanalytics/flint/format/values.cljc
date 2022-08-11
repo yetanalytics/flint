@@ -8,11 +8,11 @@
 
 (defmethod format-values-clause :values/single
   [var values pretty?]
-  (let [kstr     (first var)
-        vstrs    (map first values)
-        vstr     (-> vstrs
-                     (f/join-clauses pretty?)
-                     (f/wrap-in-braces pretty?))]
+  (let [kstr  (first var)
+        vstrs (map first values)
+        vstr  (-> vstrs
+                  (f/join-clauses pretty?)
+                  (f/wrap-in-braces pretty?))]
     (str kstr " " vstr)))
 
 (defmethod format-values-clause :values/default
