@@ -1,43 +1,60 @@
 (ns com.yetanalytics.flint.axiom.impl.format
   (:require [com.yetanalytics.flint.axiom.iri      :as iri]
-            [com.yetanalytics.flint.axiom.protocol :as p]
-            #?@(:cljs
-                [[goog.string :refer [format]]
-                 [goog.string.format]])))
+            [com.yetanalytics.flint.axiom.protocol :as p]))
 
 ;; IRIs, Vars, and Blank Nodes
 
-(defn unwrap-iri-string [s]
-  (->> s (re-matches #"<(.*)>") second))
+(defn unwrap-iri-string
+  "Given a string `s` of the form `<iri>`, return `iri`."
+  [^String s]
+  (.substring s 1 (dec (count s))))
 
-(defn format-prefix-keyword [k]
+(defn format-prefix-keyword
+  "Return the string of the keyword `k`, or the empty string if `k` is `:$`."
+  [k]
   (if (= :$ k) "" (name k)))
 
-(defn format-prefix-iri-keyword [k]
+(defn format-prefix-iri-keyword
+  "Given a potentially-qualified keyword `k`, return a prefixed IRI in the
+   form `prefix:name`."
+  [k]
   (let [kns   (namespace k)
         kname (name k)]
     (str kns ":" kname)))
 
-(defn format-var-symbol [v-sym]
+(defn format-var-symbol
+  "Return the var `v-sym` as a string of the form `?var`."
+  [v-sym]
   (name v-sym))
 
-(defn format-bnode-symbol [b-sym]
-  (if-some [suffix (second (re-matches #"_(.+)" (name b-sym)))]
-    (format "_:%s" suffix)
+(defn format-bnode-symbol
+  "Return the bnode `b-sym` as a string of the form `_:bnode`. Returns
+   `[]` if `b-sym` is a single underscore."
+  [b-sym]
+  (if (not= '_ b-sym)
+    (let [^String s  (name b-sym)
+          sub-string (.substring s 1 (count s))]
+      (str "_:" sub-string))
     "[]"))
 
 ;; Lang Map Literals
 
-(defn format-lang-map-tag [lang-map]
+(defn format-lang-map-tag
+  "Return the lang tag string from `lang-map`."
+  [lang-map]
   (-> lang-map keys first name))
 
-(defn format-lang-map-val [lang-map]
+(defn format-lang-map-val
+  "Return the string literal value from `lang-map`."
+  [lang-map]
   (-> lang-map vals first))
 
-(defn format-lang-map-literal [lang-map]
+(defn format-lang-map-literal
+  "Format `lang-map` into a string of the form `\"value\"@lang-tag`."
+  [lang-map]
   (let [ltag (format-lang-map-tag lang-map)
         lval (format-lang-map-val lang-map)]
-    (format "\"%s\"@%s" lval ltag)))
+    (str "\"" lval "\"@" ltag)))
 
 ;; Common format functions
 
@@ -48,15 +65,15 @@
    the XSD IRI prefix."
   [xsd-suffix {:keys [iri-prefix-m]}]
   (if-some [xsd-prefix (get iri-prefix-m iri/xsd-iri-prefix)]
-    (format "%s:%s" (name xsd-prefix) xsd-suffix)
-    (format "<%s%s>" iri/xsd-iri-prefix xsd-suffix)))
+    (str (name xsd-prefix) ":" xsd-suffix)
+    (str "<" iri/xsd-iri-prefix xsd-suffix ">")))
 
 (defn format-rdf-iri
   "Similar to `format-xsd-iri`, but for the RDF datatype IRI."
   [rdf-suffix {:keys [iri-prefix-m]}]
   (if-some [rdf-prefix (get iri-prefix-m iri/rdf-iri-prefix)]
-    (format "%s:%s" (name rdf-prefix) rdf-suffix)
-    (format "<%s%s>" iri/rdf-iri-prefix rdf-suffix)))
+    (str (name rdf-prefix) ":" rdf-suffix)
+    (str "<" iri/rdf-iri-prefix rdf-suffix ">")))
 
 ;; This could cause fowrard declaration problems, but in practice the impls
 ;; should have already been defined when `format-literal` is called.
@@ -69,7 +86,5 @@
   [literal {:keys [force-iri? _iri-prefix-m] :as opts}]
   (let [strval (p/-format-literal-strval literal)]
     (if force-iri?
-      (format "\"%s\"^^%s"
-              strval
-              (p/-format-literal-url literal opts))
+      (str "\"" strval "\"^^" (p/-format-literal-url literal opts)) 
       strval)))

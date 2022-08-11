@@ -8,14 +8,20 @@
   (testing "Formatting terminal AST nodes"
     (is (= "<http://example.org>"
            (f/format-ast-node {} [:ax/iri "<http://example.org>"])))
+    (is (= "foo"
+           (f/format-ast-node {} [:ax/prefix :foo])))
     (is (= "foo:bar"
            (f/format-ast-node {} [:ax/prefix-iri :foo/bar])))
+    (is (= ":bar"
+           (f/format-ast-node {} [:ax/prefix-iri :bar])))
     (is (= "?xyz"
            (f/format-ast-node {} [:ax/var '?xyz])))
     (is (= "_:b0"
            (f/format-ast-node {} [:ax/bnode '_b0])))
     (is (= "[]"
            (f/format-ast-node {} [:ax/bnode '_])))
+    (is (= "_:___"
+           (f/format-ast-node {} [:ax/bnode '____])))
     (is (= "*"
            (f/format-ast-node {} [:ax/wildcard '*])))
     (is (= "*"
