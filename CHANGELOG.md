@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1
+
+- Update GitHub Actions CI and CD to remove deprecation warnings.
+
 ## v0.2.0
 
 - Rework IRI, variable, blank node and literal implementations and add support for additional Java(Script) types.
