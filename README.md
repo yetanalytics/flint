@@ -11,6 +11,8 @@ _The fire i' the flint shows not till it be struck_
 
 A Clojure(Script) DSL for creating SPARQL query and update strings.
 
+If you are using Apache Jena, check out the [flint-jena](https://github.com/yetanalytics/flint-jena) companion library.
+
 ## Installation
 
 Add the following to your `deps.edn` map.
