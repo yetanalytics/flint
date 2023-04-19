@@ -1,6 +1,6 @@
 # flint
 
-<img src="logo/logo.svg" alt="Flint Logo"/>
+<img src="logo/logo.svg" alt="Flint Logo" width="250px"/>
 
 [![CI](https://github.com/yetanalytics/flint/actions/workflows/test.yml/badge.svg)](https://github.com/yetanalytics/flint/actions/workflows/test.yml)
 [![Clojars Project](https://img.shields.io/clojars/v/com.yetanalytics/flint.svg)](https://clojars.org/com.yetanalytics/flint)
