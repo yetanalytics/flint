@@ -1,5 +1,7 @@
 # flint
 
+<img src="logo/logo.svg" alt="Flint Logo" width="250px"/>
+
 [![CI](https://github.com/yetanalytics/flint/actions/workflows/test.yml/badge.svg)](https://github.com/yetanalytics/flint/actions/workflows/test.yml)
 [![Clojars Project](https://img.shields.io/clojars/v/com.yetanalytics/flint.svg)](https://clojars.org/com.yetanalytics/flint)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-5e0b73.svg)](CODE_OF_CONDUCT.md)
@@ -8,6 +10,8 @@ _The fire i' the flint shows not till it be struck_
 \- William Shakespeare, _Timon of Athens_, Act I, Scene 1
 
 A Clojure(Script) DSL for creating SPARQL query and update strings.
+
+If you are using Apache Jena, check out the [flint-jena](https://github.com/yetanalytics/flint-jena) companion library.
 
 ## Installation
 
@@ -48,11 +52,11 @@ The first two functions format a single SPARQL query or update, respectively, wh
 
 Each function takes in the following keyword arguments:
 
-| Argument | Description |
-| --- | --- |
-| `:pretty?` | If `true`, adds line breaks and indentation to the resulting SPARQL string. Default `false`.
-| `:validate?` | If `true`, validates that prefixed IRIs are expandable and that certain restrictions on variables and blank nodes are met. Default `true`.
-| `:spec-ed?` | If `true`, let the exception data map be the spec error data map (i.e. with `::s/problems`) upon conformance failure, instead of Flint's default error map. Spec error data maps can get quite large, hence this is default `false`.
+| Argument       | Description |
+| ---            | --- |
+| `:pretty?`     | If `true`, adds line breaks and indentation to the resulting SPARQL string. Default `false`.
+| `:validate?`   | If `true`, validates that prefixed IRIs are expandable and that certain restrictions on variables and blank nodes are met. Default `true`.
+| `:spec-ed?`    | If `true`, let the exception data map be the spec error data map (i.e. with `::s/problems`) upon conformance failure, instead of Flint's default error map. Spec error data maps can get quite large, hence this is default `false`.
 | `:force-iris?` | If `true`, let all literals be formatted with their datatype IRIs (e.g. `<http://www.w3.org/2001/XMLSchema#string>` for string literals); if `false` (the default), then string, numeric, and boolean literals will not have such IRIs appended. Language-tagged literals will never have an appended datatype IRI.
 
 ## Examples
@@ -130,6 +134,6 @@ WHERE {
 
 ## License
 
-Copyright © 2022 Yet Analytics, Inc.
+Copyright © 2022-2023 Yet Analytics, Inc.
 
 Distributed under the Apache License version 2.0.
