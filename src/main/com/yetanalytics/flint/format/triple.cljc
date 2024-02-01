@@ -4,6 +4,12 @@
             [com.yetanalytics.flint.format.axiom]
             [com.yetanalytics.flint.format.path]))
 
+(defmethod f/format-ast-node :triple/object [_ [_ object]]
+  object)
+
+(defmethod f/format-ast-node :triple/list [_ [_ list]]
+  (str "( " (cstr/join " " list) " )"))
+
 (defmethod f/format-ast-node :triple/path [_ [_ path]]
   path)
 

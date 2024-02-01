@@ -95,6 +95,12 @@
 
 ;; Basic Graph Pattern
 
+(defmethod get-scope-vars :triple/object [[_ object]]
+  (get-scope-vars object))
+
+(defmethod get-scope-vars :triple/list [[_ list]]
+  (mapcat get-scope-vars list))
+
 (defmethod get-scope-vars :triple/vec [[_ spo]]
   (mapcat get-scope-vars spo))
 
@@ -181,4 +187,3 @@
 
 (defmethod get-scope-vars :where/values [[_ [_ values]]]
   (mapcat get-scope-vars (first values)))
-

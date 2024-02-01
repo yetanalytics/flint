@@ -56,8 +56,8 @@
                   [:triple/nform
                    [:triple/spo [[[:ax/var ?s2]
                                   [:triple/po [[[:ax/var ?p2]
-                                                [:triple/o [[:ax/var ?o2a]
-                                                            [:ax/var ?o2b]]]]]]]]]]
+                                                [:triple/o [[:triple/object [:ax/var ?o2a]]
+                                                            [:triple/object [:ax/var ?o2b]]]]]]]]]]]
                   [:where/special
                    [:where/recurse
                     [:where-sub/where

@@ -12,8 +12,17 @@
       (-> loc    ; [:ax/bnode ...]
           zip/up ; [:triple/vec ...]
           )
-      :triple/o
+      :triple/list
       (-> loc    ; [:ax/bnode ...]
+          zip/up ; [:triple/list ...]
+          zip/up ; [:triple/o ...]
+          zip/up ; [:triple/po ...]
+          zip/up ; [:triple/spo ...]
+          zip/up ; [:triple/nform ...]
+          )
+      :triple/object
+      (-> loc    ; [:ax/bnode ...]
+          zip/up ; [:triple/object ...]
           zip/up ; [:triple/o ...]
           zip/up ; [:triple/po ...]
           zip/up ; [:triple/spo ...]

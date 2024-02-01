@@ -45,7 +45,7 @@
                 [:triple/spo
                  [[[:ax/var ?s]
                    [:triple/po [[[:ax/var ?p]
-                                 [:triple/o [[:ax/var ?o]]]]]]]]]])))
+                                 [:triple/o [[:triple/object [:ax/var ?o]]]]]]]]]]])))
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars
               '[:where-sub/where

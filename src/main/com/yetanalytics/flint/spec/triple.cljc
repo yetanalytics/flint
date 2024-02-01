@@ -135,17 +135,25 @@
 
 #?(:clj
    (defmacro make-obj-spec
-     [obj-spec]
-     `(s/or :triple/o (s/coll-of ~obj-spec
-                                 :min-count 1
-                                 :kind set?
-                                 :into []))))
+     ([obj-spec]
+      `(s/or :triple/o
+             (s/coll-of (s/or :triple/object ~obj-spec)
+                        :min-count 1
+                        :kind set?
+                        :into [])))
+     ([obj-spec obj-list-spec]
+      `(s/or :triple/o
+             (s/coll-of (s/or :triple/object ~obj-spec
+                              :triple/list ~obj-list-spec)
+                        :min-count 1
+                        :kind set?
+                        :into [])))))
 
 (def obj-set-spec
-  (make-obj-spec obj-spec))
+  (make-obj-spec obj-spec list-spec))
 
 (def obj-set-novar-spec
-  (make-obj-spec obj-novar-spec))
+  (make-obj-spec obj-novar-spec list-novar-spec))
 
 (def obj-set-noblank-spec
   (make-obj-spec obj-noblank-spec))

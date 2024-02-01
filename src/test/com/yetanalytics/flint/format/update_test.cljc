@@ -57,10 +57,10 @@
                      [:triple/nform
                       [:triple/spo [[[:ax/var ?i]
                                      [:triple/po [[[:ax/var ?j]
-                                                   [:triple/o [[:ax/var ?k]]]]]]]
+                                                   [:triple/o [[:triple/object [:ax/var ?k]]]]]]]]
                                     [[:ax/var ?s]
                                      [:triple/po [[[:ax/var ?p]
-                                                   [:triple/o [[:ax/var ?o]]]]]]]]]]
+                                                   [:triple/o [[:triple/object [:ax/var ?o]]]]]]]]]]]
                      [:triple/quads
                       [[:ax/iri "<http://example.org>"]
                        [:triple/quad-triples
@@ -105,10 +105,10 @@
                               [:triple/spo
                                [[[:ax/var ?x]
                                  [:triple/po [[[:ax/var ?y]
-                                               [:triple/o [[:ax/var ?z]]]]]]]
+                                               [:triple/o [[:triple/object [:ax/var ?z]]]]]]]]
                                 [[:ax/var ?a]
                                  [:triple/po [[[:ax/var ?b]
-                                               [:triple/o [[:ax/var ?c]]]]]]]]]]]]]]]
+                                               [:triple/o [[:triple/object [:ax/var ?c]]]]]]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting graph management updates"
     (testing "- LOAD"
