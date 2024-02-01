@@ -167,7 +167,6 @@
    (defmacro make-pred-objs-spec
      [pred-spec objs-spec]
      `(s/or :triple/po (s/map-of ~pred-spec ~objs-spec
-                                 :min-count 1
                                  :into []))))
 
 (def pred-objs-spec
@@ -189,19 +188,26 @@
 
 #?(:clj
    (defmacro make-nform-spec
-     [subj-spec pred-objs-spec]
-     `(s/or :triple/spo (s/map-of ~subj-spec ~pred-objs-spec
-                                  :conform-keys true
-                                  :into []))))
+     ([subj-spec pred-objs-spec]
+      `(s/or :triple/spo
+             (s/map-of ~subj-spec (s/and ~pred-objs-spec not-empty)
+                       :conform-keys true :into [])))
+     ([subj-spec subj-list-spec pred-objs-spec]
+      `(s/or :triple/spo
+             (s/map-of ~subj-spec (s/and ~pred-objs-spec not-empty)
+                       :conform-keys true :into [])
+             :triple/spo-list
+             (s/map-of ~subj-list-spec ~pred-objs-spec
+                       :conform-keys true :into [])))))
 
 (def normal-form-spec
-  (make-nform-spec subj-spec pred-objs-spec))
+  (make-nform-spec subj-spec list-spec pred-objs-spec))
 
 (def normal-form-nopath-spec
-  (make-nform-spec subj-spec pred-objs-nopath-spec))
+  (make-nform-spec subj-spec list-spec pred-objs-nopath-spec))
 
 (def normal-form-novar-spec
-  (make-nform-spec subj-novar-spec pred-objs-novar-spec))
+  (make-nform-spec subj-novar-spec list-novar-spec pred-objs-novar-spec))
 
 (def normal-form-noblank-spec
   (make-nform-spec subj-noblank-spec pred-objs-noblank-spec))

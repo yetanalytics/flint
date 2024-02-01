@@ -32,7 +32,13 @@
       (-> loc    ; [:ax/bnode ...]
           zip/up ; [:triple/spo ...]
           zip/up ; [:triple/nform ...]
-          ))))
+          )
+      :triple/spo-list
+      (-> loc    ; [:ax/bnode ...]
+          zip/up ; [:triple/spo-list ...]
+          zip/up ; [:triple/nform ...]
+          )
+      )))
 
 (defn- bgp-divider?
   [ast-node]

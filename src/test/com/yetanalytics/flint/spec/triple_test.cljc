@@ -57,5 +57,6 @@
       (is (->> '{?s {(cat :x/one :x/two) #{?o}}}
                (s/explain-data ts/normal-form-nopath-spec)
                ::s/problems
+               (filter #(-> % :path first (= :triple/spo)))
                (map :val)
                (every? (partial = '(cat :x/one :x/two))))))))

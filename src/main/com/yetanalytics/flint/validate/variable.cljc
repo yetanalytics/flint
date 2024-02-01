@@ -123,6 +123,14 @@
              []
              spo))
 
+(defmethod get-scope-vars :triple/spo-list [[_ spo]]
+  (reduce-kv (fn [acc s po] (apply concat
+                                   acc
+                                   (mapcat get-scope-vars s)
+                                   (map get-scope-vars po)))
+             []
+             spo))
+
 (defmethod get-scope-vars :triple/nform [[_ nform]]
   (get-scope-vars nform))
 
