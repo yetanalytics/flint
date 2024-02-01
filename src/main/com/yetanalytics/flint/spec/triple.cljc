@@ -14,14 +14,14 @@
 ;; Just paths banned in
 ;; - CONSTRUCT
 
+;; Variables (and paths) banned in
+;; - DELETE DATA
+;; - INSERT DATA
+
 ;; Blank nodes (and paths) banned in
 ;; - DELETE WHERE
 ;; - DELETE DATA
 ;; - DELETE
-
-;; Variables (and paths) banned in
-;; - DELETE DATA
-;; - INSERT DATA
 
 ;; Subjects
 
@@ -90,6 +90,37 @@
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/literal    ax/literal-spec))
+
+;; Lists
+
+;; List entries have the same spec as objects + `:triple/list`
+
+;; Since lists are constructed out of blank nodes, we do not allow list
+;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
+
+(declare list-spec)
+(declare list-novar-spec)
+
+(def list-entry-spec
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-spec))
+
+(def list-entry-novar-spec
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-novar-spec))
+
+(def list-spec
+  (s/coll-of list-entry-spec :kind list?))
+
+(def list-novar-spec
+  (s/coll-of list-entry-novar-spec :kind list?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Combo Specs
