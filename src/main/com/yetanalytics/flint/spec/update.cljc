@@ -46,78 +46,6 @@
     (- n1 n2)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Quad specs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def triples-spec
-  (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
-                   :triple/nform ts/normal-form-nopath-spec)
-             :kind vector?))
-
-(def triples-novar-spec
-  (s/coll-of (s/or :triple/vec ts/triple-vec-novar-spec
-                   :triple/nform ts/normal-form-novar-spec)
-             :kind vector?))
-
-(def triples-noblank-spec
-  (s/coll-of (s/or :triple/vec ts/triple-vec-noblank-spec
-                   :triple/nform ts/normal-form-noblank-spec)
-             :kind vector?))
-
-(def triples-novar-noblank-spec
-  (s/coll-of (s/or :triple/vec ts/triple-vec-novar-noblank-spec
-                   :triple/nform ts/normal-form-novar-noblank-spec)
-             :kind vector?))
-
-(def quad-spec
-  (s/and (s/tuple #{:graph}
-                  ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triples-spec))
-         (s/conformer (fn [[_ iri t]] [iri t]))))
-
-(def quad-novar-spec
-  (s/and (s/tuple #{:graph}
-                  ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triples-novar-spec))
-         (s/conformer (fn [[_ iri t]] [iri t]))))
-
-(def quad-noblank-spec
-  (s/and (s/tuple #{:graph}
-                  ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triples-noblank-spec))
-         (s/conformer (fn [[_ iri t]] [iri t]))))
-
-(def quad-novar-noblank-spec
-  (s/and (s/tuple #{:graph}
-                  ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triples-novar-noblank-spec))
-         (s/conformer (fn [[_ iri t]] [iri t]))))
-
-(def triple-or-quads-spec
-  (s/coll-of (s/or :triple/vec  ts/triple-vec-nopath-spec
-                   :triple/nform ts/normal-form-nopath-spec
-                   :triple/quads quad-spec)
-             :kind vector?))
-
-(def triple-or-quads-novar-spec
-  (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-spec
-                   :triple/nform ts/normal-form-novar-spec
-                   :triple/quads quad-novar-spec)
-             :kind vector?))
-
-(def triple-or-quads-noblank-spec
-  (s/coll-of (s/or :triple/vec  ts/triple-vec-noblank-spec
-                   :triple/nform ts/normal-form-noblank-spec
-                   :triple/quads quad-noblank-spec)
-             :kind vector?))
-
-(def triple-or-quads-novar-noblank-spec
-  (s/coll-of (s/or :triple/vec  ts/triple-vec-novar-noblank-spec
-                   :triple/nform ts/normal-form-novar-noblank-spec
-                   :triple/quads quad-novar-noblank-spec)
-             :kind vector?))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management specs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -221,7 +149,7 @@
 
 ;; INSERT DATA
 
-(s/def ::insert-data triple-or-quads-novar-spec)
+(s/def ::insert-data ts/quad-coll-novar-spec)
 
 (def insert-data-update-spec
   (sparql-keys :req-un [::insert-data]
@@ -230,7 +158,7 @@
 
 ;; DELETE DATA
 
-(s/def ::delete-data triple-or-quads-novar-noblank-spec)
+(s/def ::delete-data ts/quad-coll-novar-noblank-spec)
 
 (def delete-data-update-spec
   (sparql-keys :req-un [::delete-data]
@@ -239,7 +167,7 @@
 
 ;; DELETE WHERE
 
-(s/def ::delete-where triple-or-quads-noblank-spec)
+(s/def ::delete-where ts/quad-coll-noblank-spec)
 
 (def delete-where-update-spec
   (sparql-keys :req-un [::delete-where]
@@ -254,8 +182,8 @@
   (s/or :update/iri ax/iri-or-prefixed-spec
         :update/named-iri (s/tuple #{:named} ax/iri-or-prefixed-spec)))
 
-(s/def ::insert triple-or-quads-spec)
-(s/def ::delete triple-or-quads-noblank-spec)
+(s/def ::insert ts/quad-coll-nopath-spec)
+(s/def ::delete ts/quad-coll-noblank-spec)
 
 (def modify-update-spec
   (sparql-keys :req-un [(or ::delete ::insert)

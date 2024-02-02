@@ -231,3 +231,94 @@
 
 (def triple-vec-novar-noblank-spec
   (s/tuple subj-novar-noblank-spec pred-novar-spec obj-novar-noblank-spec))
+
+;; Triples
+
+(def triple-spec
+  (s/or :triple/vec   triple-vec-spec
+        :triple/nform normal-form-spec))
+
+(def triple-nopath-spec
+  (s/or :triple/vec   triple-vec-nopath-spec
+        :triple/nform normal-form-nopath-spec))
+
+(def triple-novar-spec
+  (s/or :triple/vec   triple-vec-novar-spec
+        :triple/nform normal-form-novar-spec))
+
+(def triple-noblank-spec
+  (s/or :triple/vec   triple-vec-noblank-spec
+        :triple/nform normal-form-noblank-spec))
+
+(def triple-novar-noblank-spec
+  (s/or :triple/vec   triple-vec-novar-noblank-spec
+        :triple/nform normal-form-novar-noblank-spec))
+
+;; Collection of Triples
+
+(def triple-coll-spec
+  (s/coll-of triple-spec :kind vector?))
+
+(def triple-coll-nopath-spec
+  (s/coll-of triple-nopath-spec :kind vector?))
+
+(def triple-coll-novar-spec
+  (s/coll-of triple-novar-spec :kind vector?))
+
+(def triple-coll-noblank-spec
+  (s/coll-of triple-noblank-spec :kind vector?))
+
+(def triple-coll-novar-noblank-spec
+  (s/coll-of triple-novar-noblank-spec :kind vector?))
+
+;; Quads (for UPDATE)
+
+(def quad-nopath-spec
+  (s/and (s/tuple #{:graph}
+                  ax/iri-or-var-spec
+                  (s/or :triple/quad-triples triple-coll-nopath-spec))
+         (s/conformer (fn [[_ iri triples]] [iri triples]))))
+
+(def quad-novar-spec
+  (s/and (s/tuple #{:graph}
+                  ax/iri-or-var-spec
+                  (s/or :triple/quad-triples triple-coll-novar-spec))
+         (s/conformer (fn [[_ iri triples]] [iri triples]))))
+
+(def quad-noblank-spec
+  (s/and (s/tuple #{:graph}
+                  ax/iri-or-var-spec
+                  (s/or :triple/quad-triples triple-coll-noblank-spec))
+         (s/conformer (fn [[_ iri triples]] [iri triples]))))
+
+(def quad-novar-noblank-spec
+  (s/and (s/tuple #{:graph}
+                  ax/iri-or-var-spec
+                  (s/or :triple/quad-triples triple-coll-novar-noblank-spec))
+         (s/conformer (fn [[_ iri triples]] [iri triples]))))
+
+;; Collection of Quads (for UPDATE)
+
+(def quad-coll-nopath-spec
+  (s/coll-of (s/or :triple/vec   triple-vec-nopath-spec
+                   :triple/nform normal-form-nopath-spec
+                   :triple/quads quad-nopath-spec)
+             :kind vector?))
+
+(def quad-coll-novar-spec
+  (s/coll-of (s/or :triple/vec   triple-vec-novar-spec
+                   :triple/nform normal-form-novar-spec
+                   :triple/quads quad-novar-spec)
+             :kind vector?))
+
+(def quad-coll-noblank-spec
+  (s/coll-of (s/or :triple/vec   triple-vec-noblank-spec
+                   :triple/nform normal-form-noblank-spec
+                   :triple/quads quad-noblank-spec)
+             :kind vector?))
+
+(def quad-coll-novar-noblank-spec
+  (s/coll-of (s/or :triple/vec   triple-vec-novar-noblank-spec
+                   :triple/nform normal-form-novar-noblank-spec
+                   :triple/quads quad-novar-noblank-spec)
+             :kind vector?))

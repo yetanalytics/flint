@@ -48,3 +48,16 @@
 
 (defmethod f/format-ast-node :triple/o [_ [_ o]]
   (->> o (cstr/join " , ")))
+
+(defn format-quads [quads pretty?]
+  (-> quads
+      (f/join-clauses pretty?)
+      (f/wrap-in-braces pretty?)))
+
+(defmethod f/format-ast-node :triple/quads
+  [_ [_ [var-or-iri triples-str]]]
+  (str "GRAPH " var-or-iri " " triples-str))
+
+(defmethod f/format-ast-node :triple/quad-triples
+  [{:keys [pretty?]} [_ triples]]
+  (format-quads triples pretty?))

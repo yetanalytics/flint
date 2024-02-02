@@ -75,13 +75,7 @@
                         ::vs/values]
                :key-comp-fn key-comp))
 
-(def triples-spec
-  (s/coll-of (s/or :triple/vec ts/triple-vec-nopath-spec
-                   :triple/nform ts/normal-form-nopath-spec)
-             :min-count 0
-             :kind vector?))
-
-(s/def ::construct triples-spec)
+(s/def ::construct ts/triple-coll-nopath-spec)
 
 (def construct-query-spec
   (sparql-keys :req-un [::construct ::ws/where]
