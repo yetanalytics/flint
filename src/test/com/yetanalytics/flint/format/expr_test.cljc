@@ -179,16 +179,18 @@
     (is (= "EXISTS {\n    ?x ?y ?z .\n}"
            (->> '[:expr/branch [[:expr/op exists]
                                 [:expr/args [[:where-sub/where
-                                              [[:triple/vec [[:ax/var ?x]
-                                                             [:ax/var ?y]
-                                                             [:ax/var ?z]]]]]]]]]
+                                              [:where/triple
+                                               [[:triple/vec [[:ax/var ?x]
+                                                              [:ax/var ?y]
+                                                              [:ax/var ?z]]]]]]]]]]
                 format-ast)))
     (is (= "NOT EXISTS {\n    ?x ?y ?z .\n}"
            (->> '[:expr/branch [[:expr/op not-exists]
                                 [:expr/args [[:where-sub/where
-                                              [[:triple/vec [[:ax/var ?x]
-                                                             [:ax/var ?y]
-                                                             [:ax/var ?z]]]]]]]]]
+                                              [[:where/triple
+                                                [:triple/vec [[:ax/var ?x]
+                                                              [:ax/var ?y]
+                                                              [:ax/var ?z]]]]]]]]]]
                 format-ast)))))
 
 (deftest format-expr-as-var-test

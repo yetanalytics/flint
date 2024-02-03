@@ -26,7 +26,7 @@
     (is (= [{:iri :bar
              :prefix :$
              :prefixes {:foo "<http://foo.org/>"}
-             :path [:query/select :where :where-sub/where :triple/vec :ax/prefix-iri]}]
+             :path [:query/select :where :where-sub/where :where/triple :triple/vec :ax/prefix-iri]}]
            (->> (assoc query :where '[[:bar :a ?y]])
                 (s/conform qs/query-spec)
                 v/collect-nodes
@@ -34,15 +34,15 @@
     (is (= [{:iri      :fee/bar
              :prefix   :fee
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :triple/vec :ax/prefix-iri]}
+             :path     [:query/select :where :where-sub/where :where/triple :triple/vec :ax/prefix-iri]}
             {:iri      :fii/bar
              :prefix   :fii
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :triple/vec :ax/prefix-iri]}
+             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :where/triple :triple/vec :ax/prefix-iri]}
             {:iri      :fum/bar
              :prefix   :fum
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :triple/vec :ax/prefix-iri]}]
+             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :where/triple :triple/vec :ax/prefix-iri]}]
            (->> query
                 (s/conform qs/query-spec)
                 v/collect-nodes

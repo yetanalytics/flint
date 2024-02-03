@@ -81,7 +81,8 @@
                     [:update/named-iri [:named [:ax/iri "<http://example.org/2>"]]]]
                    [:where
                     [:where-sub/where
-                     [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]]]]
+                     [[:where/triple
+                       [:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["WITH <http://example.org>"
                             "DELETE {"
@@ -101,14 +102,15 @@
                    [:insert [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
                    [:using [:update/iri [:ax/iri "<http://example.org/2>"]]]
                    [:where [:where-sub/where
-                            [[:triple/nform
-                              [:triple/spo
-                               [[[:ax/var ?x]
-                                 [:triple/po [[[:ax/var ?y]
-                                               [:triple/o [[:triple/object [:ax/var ?z]]]]]]]]
-                                [[:ax/var ?a]
-                                 [:triple/po [[[:ax/var ?b]
-                                               [:triple/o [[:triple/object [:ax/var ?c]]]]]]]]]]]]]]]]
+                            [[:where/triple
+                              [:triple/nform
+                               [:triple/spo
+                                [[[:ax/var ?x]
+                                  [:triple/po [[[:ax/var ?y]
+                                                [:triple/o [[:triple/object [:ax/var ?z]]]]]]]]
+                                 [[:ax/var ?a]
+                                  [:triple/po [[[:ax/var ?b]
+                                                [:triple/o [[:triple/object [:ax/var ?c]]]]]]]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting graph management updates"
     (testing "- LOAD"

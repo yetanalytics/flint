@@ -147,6 +147,9 @@
 
 ;; Group
 
+(defmethod get-scope-vars :where/triple [[_ vs]]
+  (get-scope-vars vs))
+
 (defmethod get-scope-vars :where/special [[_ vs]]
   (get-scope-vars vs))
 

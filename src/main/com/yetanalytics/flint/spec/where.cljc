@@ -110,19 +110,24 @@
               :v ::vs/values)
        (s/conformer (fn [{:keys [v]}] [:where/values v]))))
 
+(defmethod where-special-form-mm :default [_]
+  (constantly false))
+
 (def where-special-form-spec
   "Specs for special WHERE forms/graph patterns, which should be
    of the form `[:keyword ...]`."
-  (s/and vector? (s/multi-spec where-special-form-mm first)))
+  (s/and vector?
+         #(keyword? (first %))
+         (s/multi-spec where-special-form-mm first)))
+
+(def where-spec
+  (s/or :where/special where-special-form-spec
+        :where/triple  ts/triple-spec))
 
 (s/def ::where
   (s/or :where-sub/select
         ::select
         :where-sub/where
-        (s/coll-of (s/or :where/special where-special-form-spec
-                         :triple/vec    ts/triple-vec-spec
-                         :triple/nform  ts/normal-form-spec)
-                   :min-count 1
-                   :kind vector?)
+        (s/coll-of where-spec :min-count 1 :kind vector?)
         :where-sub/empty
         (s/and vector? empty?)))
