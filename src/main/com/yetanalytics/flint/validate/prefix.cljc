@@ -1,5 +1,5 @@
 (ns com.yetanalytics.flint.validate.prefix
-  (:require [clojure.zip :as zip]))
+  (:require [com.yetanalytics.flint.validate.util :as vu]))
 
 (defn- invalid-prefix?
   "Does the prefix of `prefix-iri` exist in the `prefixes` map/set?
@@ -14,7 +14,7 @@
   {:prefixes prefixes
    :iri      prefix-iri
    :prefix   (or (some->> prefix-iri namespace keyword) :$)
-   :path     (conj (->> loc zip/path (mapv first)) :ax/prefix-iri)})
+   :path     (conj (vu/zip-path loc) :ax/prefix-iri)})
 
 (defn validate-prefixes
   "Given `node-m` a map from nodes to zipper locs, check that each prefix

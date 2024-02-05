@@ -1,100 +1,6 @@
 (ns com.yetanalytics.flint.validate.bnode
   (:require [clojure.set :as cset]
-            [clojure.zip :as zip]))
-
-(defn- get-parent-loc
-  "Given a bnode's loc, return its parent (either a `:triple/vec`
-   or `:triple/nform` node)."
-  [loc]
-  (let [penultimate (-> loc zip/path last first)]
-    (case penultimate
-      :triple/vec
-      (-> loc    ; [:ax/bnode ...]
-          zip/up ; [:triple/vec ...]
-          )
-      :triple/list
-      (-> loc    ; [:ax/bnode ...]
-          zip/up ; [:triple/list ...]
-          zip/up ; [:triple/o ...]
-          zip/up ; [:triple/po ...]
-          zip/up ; [:triple/spo ...]
-          zip/up ; [:triple/nform ...]
-          )
-      :triple/object
-      (-> loc    ; [:ax/bnode ...]
-          zip/up ; [:triple/object ...]
-          zip/up ; [:triple/o ...]
-          zip/up ; [:triple/po ...]
-          zip/up ; [:triple/spo ...]
-          zip/up ; [:triple/nform ...]
-          )
-      :triple/spo
-      (-> loc    ; [:ax/bnode ...]
-          zip/up ; [:triple/spo ...]
-          zip/up ; [:triple/nform ...]
-          )
-      :triple/spo-list
-      (-> loc    ; [:ax/bnode ...]
-          zip/up ; [:triple/spo-list ...]
-          zip/up ; [:triple/nform ...]
-          )
-      )))
-
-(defn- bgp-divider?
-  [ast-node]
-  (and (-> ast-node (get-in [0]) (= :where/special))
-       (-> ast-node (get-in [1 0]) (not= :where/filter))))
-
-(defn- get-bgp-index
-  "The BGP path is the regular zip loc path appended with an index that
-   corresponds to that of the BGP in the WHERE vector. For example:
-   
-     [:triple/vec ...]       => 0
-     [:triple/nform ...]     => 0
-     [:where/special
-      [:where/filter ...]]   => 0 ; FILTERs don't divide BGPs
-     [:where/special
-      [:where/optional ...]] => X ; BGP divider
-     [:triple/nform ...]     => 1
-   
-   Note that this only works with locs that are immediate children
-   of `:where-sub/where` nodes.
-   "
-  [loc]
-  (let [lefts (zip/lefts loc)]
-    (count (filter bgp-divider? lefts))))
-
-(defn- get-where-index
-  [pnode nnode]
-  (let [indexed (map-indexed (fn [i x] [x i]) (second pnode))]
-    (some (fn [[x i]] (when (= x nnode) i)) indexed)))
-
-(defn- annotated-path
-  "Create a coll of AST keywords where all `:where-sub/where`s are
-   followed by indices, either the index in the WHERE vector or the
-   index of the BGP (for the very last one)."
-  [loc]
-  (let [parent-loc (get-parent-loc loc)]
-    (loop [zip-path (zip/path parent-loc)
-           res-path []]
-      (let [?pnode (first zip-path)
-            ?nnode (second zip-path)]
-        (cond
-          (and ?pnode
-               ?nnode
-               (= :where-sub/where (first ?pnode)))
-          (recur (rest zip-path)
-                 (conj res-path (first ?pnode) (get-where-index ?pnode ?nnode)))
-          (and ?pnode
-               (not ?nnode)
-               (= :where-sub/where (first ?pnode)))
-          (recur (rest zip-path)
-                 (conj res-path (first ?pnode) (get-bgp-index parent-loc)))
-          ?pnode
-          (recur (rest zip-path)
-                 (conj res-path (first ?pnode)))
-          :else
-          res-path)))))
+            [com.yetanalytics.flint.validate.util :as vu]))
 
 (defn- invalid-bnode?
   "Is the blank node that is associated with `bgp-loc-m` invalid? It is
@@ -106,7 +12,7 @@
 (defn- bnode-err-map
   [bnode loc]
   {:bnode bnode
-   :path  (annotated-path loc)})
+   :path  (vu/zip-path loc)})
 
 (defn- bnode-locs->err-map
   [bnode-locs]

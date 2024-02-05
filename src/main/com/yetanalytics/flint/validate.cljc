@@ -4,7 +4,21 @@
             [com.yetanalytics.flint.util :as u]))
 
 (defn- bgp-divider?
-  "Is `ast-node` a divider between BGPs?"
+  "Is `ast-node` a divider between BGPs? BGPs are divided by `:where/special`
+   clauses, with the exception of filters (unless they themselves have a
+   subquery):
+   
+     [:where/triple
+      [:triple/vec ...]]     => 0
+     [:where/triple
+      [:triple/nform ...]]   => 0
+     [:where/special
+      [:where/filter ...]]   => 0 ; FILTERs don't divide BGPs
+     [:where/special
+      [:where/optional ...]] => X ; BGP divider
+     [:where/triple
+      [:triple/nform ...]]   => 1
+   "
   [loc]
   (let [?left-node (some-> loc zip/left zip/node)
         ?curr-node (some-> loc zip/node)]
