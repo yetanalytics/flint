@@ -40,6 +40,31 @@
 
 (comment
   (QueryFactory/create
+   "CONSTRUCT { _:b0 ?pred _:b0 }
+    WHERE { _:b0 ?pred _:b0 .
+            OPTIONAL {
+              ?y ?pred2 _:b1
+            }
+            _:b0 ?question _:b0 . }")
+  
+  (QueryFactory/create
+   "SELECT ?x
+    WHERE {
+      { ?x <http://foo.org> _:1 . }
+      { ?y <http://bar.org> _:1 . }
+    }")
+  
+  (QueryFactory/create
+   "PREFIX foo: <http://foo.org>
+    SELECT ?x WHERE {
+      ?x foo:bar _:1 .
+      FILTER NOT EXISTS { ?z foo:baz ?w . }
+      ?y foo:qux _:1 .
+    }")
+  )
+
+(comment
+  (QueryFactory/create
    "SELECT ((AVG(MAX(?x)) + 1) AS ?avg)
     WHERE { ?x ?y ?z . }")
   

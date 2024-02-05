@@ -96,46 +96,16 @@
           :else
           res-path)))))
 
-(defn- valid-bnode-locs?
-  "Given `locs`, return `false` if `bnode` is duplicated across multiple
-   BGPs, `true` otherwise."
-  [[bnode locs]]
-  (if (<= (count locs) 1)
-    true ; Can't have dupe bnodes if there's only one instance :p
-    (let [loc-paths   (map (fn [loc] (mapv first (zip/path loc))) locs)
-          [wh non-wh] (split-with #(some #{:where-sub/where} %) loc-paths)
-          ?wheres     (not-empty wh)
-          ?non-wheres (not-empty non-wh)]
-      (cond
-        ;; Blank nodes only exist in a non-WHERE clause (e.g. CONSTRUCT,
-        ;; INSERT DATA, or INSERT). Since only one such clause may exist
-        ;; in a Query or Update, and since each counts as a single BGP,
-        ;; we are done.
-        (and (not ?wheres)
-             ?non-wheres)
-        true
-        ;; Blank nodes exist in both a WHERE and non-WHERE clause. Since
-        ;; those automatically count as two different BGPs, we are done.
-        (and ?wheres
-             ?non-wheres)
-        false
-        ;; Blank nodes only exist in WHERE clauses. They may all be in one
-        ;; or more BGP, so we need to investigate further.
-        (and ?wheres
-             (not ?non-wheres))
-        (let [bgp-paths (map annotated-path locs)]
-          (apply = bgp-paths))
-        :else
-        (throw (ex-info "Blank nodes located in invalid locations!"
-                        {:kind     ::invalid-bnode-loc
-                         :bnode    bnode
-                         :zip-locs locs}))))))
+(defn- invalid-bnode?
+  "Is the blank node that is associated with `bgp-loc-m` invalid? It is
+   if the map has more than one entry, indicating that the blank node is
+   located across multiple BGPs."
+  [bgp-loc-m]
+  (< 1 (count bgp-loc-m)))
 
 (defn- bnode-err-map
   [bnode loc]
   {:bnode bnode
-   ;; Rather wasteful to call `annotated-path` twice, but this only
-   ;; occurs during exn throwing so performance isn't a priority. 
    :path  (annotated-path loc)})
 
 (defn- bnode-locs->err-map
@@ -155,19 +125,22 @@
   ([node-m]
    (validate-bnodes #{} node-m))
   ([prev-bnodes node-m]
-   (let [bnode-locs  (->> (:ax/bnode node-m)
-                          (filter (fn [[bnode _]] (not= '_ bnode))))
-         new-bnodes  (set (keys bnode-locs))
+   (let [bnode-bgp-m (-> (:ax/bnode node-m) (dissoc '_))
+         new-bnodes  (set (keys bnode-bgp-m))
          bnode-union (cset/union prev-bnodes new-bnodes)]
-     (if-some [bad-bnode-locs (->> bnode-locs
-                                   (filter (comp prev-bnodes first))
+     (if-some [bad-bnode-locs (->> bnode-bgp-m
+                                   (keep (fn [[bnode bgp-loc-m]]
+                                           (when (contains? prev-bnodes bnode)
+                                             [bnode (apply concat (vals bgp-loc-m))])))
                                    not-empty)]
        [bnode-union
         {:kind        ::dupe-bnodes-update
          :errors      (bnode-locs->err-map bad-bnode-locs)
          :prev-bnodes prev-bnodes}]
-       (if-some [bad-bnode-locs (->> bnode-locs
-                                     (filter (comp not valid-bnode-locs?))
+       (if-some [bad-bnode-locs (->> bnode-bgp-m
+                                     (keep (fn [[bnode bgp-loc-m]]
+                                             (when (invalid-bnode? bgp-loc-m)
+                                               [bnode (apply concat (vals bgp-loc-m))])))
                                      not-empty)]
          [bnode-union
           {:kind   ::dupe-bnodes-bgp

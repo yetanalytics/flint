@@ -9,7 +9,7 @@
 ;; just a variable, those variables may be projected from the level.
 
 ;; GOOD:
-;;   SELECT (2 AS ?two) WHER { ?x ?y ?z }
+;;   SELECT (2 AS ?two) WHERE { ?x ?y ?z }
 ;;   SELECT (SUM(?x) AS ?sum) WHERE { ?x ?y ?z }
 ;;   SELECT ?x WHERE { ?x ?y ?z } GROUP BY ?x
 
