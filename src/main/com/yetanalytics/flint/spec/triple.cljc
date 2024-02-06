@@ -127,8 +127,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; NOTE: Subjects can be non-IRIs in SPARQL, but not in RDF
-;; NOTE: RDF collections not supported (yet?)
-
 ;; single-branch `s/or`s are used to conform values
 
 ;; Object
@@ -187,33 +185,43 @@
 ;; Subject Predicate Object
 
 #?(:clj
-   (defmacro make-nform-spec
-     ([subj-spec pred-objs-spec]
-      `(s/or :triple/spo
-             (s/map-of ~subj-spec (s/and ~pred-objs-spec not-empty)
-                       :conform-keys true :into [])))
-     ([subj-spec subj-list-spec pred-objs-spec]
-      `(s/or :triple/spo
-             (s/map-of ~subj-spec (s/and ~pred-objs-spec not-empty)
-                       :conform-keys true :into [])
-             :triple/spo-list
-             (s/map-of ~subj-list-spec ~pred-objs-spec
-                       :conform-keys true :into [])))))
+   (defmacro make-nform-spec [subj-spec pred-objs-spec]
+     `(s/or :triple/spo
+            (s/map-of ~subj-spec (s/and ~pred-objs-spec not-empty)
+                      :conform-keys true :into []))))
 
 (def normal-form-spec
-  (make-nform-spec subj-spec list-spec pred-objs-spec))
+  (make-nform-spec subj-spec pred-objs-spec))
 
 (def normal-form-nopath-spec
-  (make-nform-spec subj-spec list-spec pred-objs-nopath-spec))
+  (make-nform-spec subj-spec pred-objs-nopath-spec))
 
 (def normal-form-novar-spec
-  (make-nform-spec subj-novar-spec list-novar-spec pred-objs-novar-spec))
+  (make-nform-spec subj-novar-spec pred-objs-novar-spec))
 
 (def normal-form-noblank-spec
   (make-nform-spec subj-noblank-spec pred-objs-noblank-spec))
 
 (def normal-form-novar-noblank-spec
   (make-nform-spec subj-novar-noblank-spec pred-objs-novar-noblank-spec))
+
+;; Subject Predicate Object (List)
+
+#?(:clj
+   (defmacro make-nform-list-spec
+     [subj-list-spec pred-objs-spec]
+     `(s/or :triple/spo-list
+            (s/map-of ~subj-list-spec ~pred-objs-spec
+                      :conform-keys true :into []))))
+
+(def normal-form-list-spec
+  (make-nform-list-spec list-spec pred-objs-spec))
+
+(def normal-form-list-nopath-spec
+  (make-nform-list-spec list-spec pred-objs-nopath-spec))
+
+(def normal-form-list-novar-spec
+  (make-nform-list-spec list-spec pred-objs-novar-spec))
 
 ;; Triple Vectors
 
@@ -235,16 +243,19 @@
 ;; Triples
 
 (def triple-spec
-  (s/or :triple/vec   triple-vec-spec
-        :triple/nform normal-form-spec))
+  (s/or :triple/vec        triple-vec-spec
+        :triple/nform      normal-form-spec
+        :triple/nform-list normal-form-list-spec))
 
 (def triple-nopath-spec
-  (s/or :triple/vec   triple-vec-nopath-spec
-        :triple/nform normal-form-nopath-spec))
+  (s/or :triple/vec        triple-vec-nopath-spec
+        :triple/nform      normal-form-nopath-spec
+        :triple/nform-list normal-form-list-nopath-spec))
 
 (def triple-novar-spec
-  (s/or :triple/vec   triple-vec-novar-spec
-        :triple/nform normal-form-novar-spec))
+  (s/or :triple/vec        triple-vec-novar-spec
+        :triple/nform      normal-form-novar-spec
+        :triple/nform-list normal-form-list-nopath-spec))
 
 (def triple-noblank-spec
   (s/or :triple/vec   triple-vec-noblank-spec
@@ -300,15 +311,17 @@
 ;; Collection of Quads (for UPDATE)
 
 (def quad-coll-nopath-spec
-  (s/coll-of (s/or :triple/vec   triple-vec-nopath-spec
-                   :triple/nform normal-form-nopath-spec
-                   :triple/quads quad-nopath-spec)
+  (s/coll-of (s/or :triple/vec        triple-vec-nopath-spec
+                   :triple/nform      normal-form-nopath-spec
+                   :triple/nform-list normal-form-list-nopath-spec
+                   :triple/quads      quad-nopath-spec)
              :kind vector?))
 
 (def quad-coll-novar-spec
-  (s/coll-of (s/or :triple/vec   triple-vec-novar-spec
-                   :triple/nform normal-form-novar-spec
-                   :triple/quads quad-novar-spec)
+  (s/coll-of (s/or :triple/vec        triple-vec-novar-spec
+                   :triple/nform      normal-form-novar-spec
+                   :triple/nform-list normal-form-list-novar-spec
+                   :triple/quads      quad-novar-spec)
              :kind vector?))
 
 (def quad-coll-noblank-spec
