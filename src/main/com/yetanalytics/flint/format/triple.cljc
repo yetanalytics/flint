@@ -10,10 +10,12 @@
 (defmethod f/format-ast-node :triple/list [_ [_ list]]
   (str "( " (cstr/join " " list) " )"))
 
-(defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ bnodes]]
-  (let [join-sep   (if pretty? " ;\n " " ; ")
-        bnode-strs (map (fn [[pred obj]] (str pred " " obj)) bnodes)]
-    (str "[ " (cstr/join join-sep bnode-strs) " ]")))
+(defmethod f/format-ast-node :triple/bnode-pair [_ [_ [p o]]]
+  (str p " " o))
+
+(defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ po-strs]]
+  (let [join-sep (if pretty? " ;\n " " ; ")]
+    (str "[ " (cstr/join join-sep po-strs) " ]")))
 
 (defmethod f/format-ast-node :triple.vec/spo [_ [_ [s-str p-str o-str]]]
   (str s-str " " p-str " " o-str " ."))

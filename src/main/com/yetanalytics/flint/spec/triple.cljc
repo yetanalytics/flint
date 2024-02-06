@@ -136,45 +136,20 @@
 ;; Since lists are constructed out of blank nodes, we do not allow list
 ;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
 
-(s/def ::list-entry
-  (s/or :ax/var        ax/variable-spec
-        :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   ::list
-        :triple/bnodes ::bnodes))
-
-(s/def ::list-entry-nopath
-  (s/or :ax/var        ax/variable-spec
-        :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   ::list-nopath
-        :triple/bnodes ::bnodes-nopath))
-
-(s/def ::list-entry-novar
-  (s/or :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   ::list-novar
-        :triple/bnodes ::bnodes-novar))
-
 (s/def ::list
-  (s/coll-of ::list-entry :kind list? :into []))
+  (s/coll-of ::object :kind list? :into []))
 
 (s/def ::list-nopath
-  (s/coll-of ::list-entry-nopath :kind list? :into []))
+  (s/coll-of ::object-nopath :kind list? :into []))
 
 (s/def ::list-novar
-  (s/coll-of ::list-entry-novar :kind list? :into []))
+  (s/coll-of ::object-novar :kind list? :into []))
 
 ;; Blank Node Vectors
 
 (defn- conform-pred-obj-pairs [po-pairs]
-  (mapv (fn [{:keys [pred obj]}] [pred obj]) po-pairs))
+  (mapv (fn [{:keys [pred obj]}] [:triple/bnode-pair [pred obj]])
+        po-pairs))
 
 (s/def ::bnodes
   (s/and vector?
