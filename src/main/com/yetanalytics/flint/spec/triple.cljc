@@ -54,6 +54,33 @@
 (def list-novar-spec
   (s/coll-of list-entry-novar-spec :kind list?))
 
+;; Blank Node Vectors
+
+(declare pred-spec)
+(declare pred-nopath-spec)
+(declare pred-novar-spec)
+
+(declare obj-spec)
+(declare obj-novar-spec)
+
+(defn- conform-pred-obj-pairs [po-pairs]
+  (mapv (fn [{:keys [pred obj]}] [pred obj]) po-pairs))
+
+(def bnode-vec-spec
+  (s/and vector?
+         (s/* (s/cat :pred pred-spec :obj obj-spec))
+         (s/conformer conform-pred-obj-pairs)))
+
+(def bnode-vec-nopath-spec
+  (s/and vector?
+         (s/* (s/cat :pred pred-nopath-spec :obj obj-spec))
+         (s/conformer conform-pred-obj-pairs)))
+
+(def bnode-vec-novar-spec
+  (s/and vector?
+         (s/* (s/cat :pred pred-novar-spec :obj obj-novar-spec))
+         (s/conformer conform-pred-obj-pairs)))
+
 ;; Subjects
 
 (def subj-spec
@@ -61,19 +88,35 @@
         :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
-        :triple/list   list-spec))
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-spec))
 
-(def subj-list-spec
-  (s/or :triple/list list-spec))
+(def subj-coll-spec
+  (s/or :triple/list   list-spec
+        :triple/bnodes bnode-vec-spec))
+
+(def subj-nopath-spec
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-nopath-spec))
+
+(def subj-coll-nopath-spec
+  (s/or :triple/list   list-spec
+        :triple/bnodes bnode-vec-nopath-spec))
 
 (def subj-novar-spec
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
-        :triple/list   list-spec))
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-novar-spec))
 
-(def subj-list-novar-spec
-  (s/or :triple/list list-novar-spec))
+(def subj-coll-novar-spec
+  (s/or :triple/list   list-novar-spec
+        :triple/bnodes bnode-vec-novar-spec))
 
 (def subj-noblank-spec
   (s/or :ax/var        ax/variable-spec
@@ -112,14 +155,25 @@
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
         :ax/literal    ax/literal-spec
-        :triple/list   list-spec))
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-spec))
+
+(def obj-nopath-spec
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-nopath-spec))
 
 (def obj-novar-spec
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
         :ax/literal    ax/literal-spec
-        :triple/list   list-novar-spec))
+        :triple/list   list-novar-spec
+        :triple/bnodes bnode-vec-novar-spec))
 
 (def obj-noblank-spec
   (s/or :ax/var        ax/variable-spec
@@ -149,6 +203,9 @@
 (def obj-set-spec
   (make-obj-spec obj-spec))
 
+(def obj-set-nopath-spec
+  (make-obj-spec obj-nopath-spec))
+
 (def obj-set-novar-spec
   (make-obj-spec obj-novar-spec))
 
@@ -171,7 +228,7 @@
   (make-pred-objs-spec pred-spec obj-set-spec))
 
 (def pred-objs-nopath-spec
-  (make-pred-objs-spec pred-nopath-spec obj-set-spec))
+  (make-pred-objs-spec pred-nopath-spec obj-set-nopath-spec))
 
 (def pred-objs-novar-spec
   (make-pred-objs-spec pred-novar-spec obj-set-novar-spec))
@@ -193,7 +250,7 @@
   (make-nform-spec subj-spec pred-objs-spec))
 
 (def normal-form-nopath-spec
-  (make-nform-spec subj-spec pred-objs-nopath-spec))
+  (make-nform-spec subj-nopath-spec pred-objs-nopath-spec))
 
 (def normal-form-novar-spec
   (make-nform-spec subj-novar-spec pred-objs-novar-spec))
@@ -215,13 +272,13 @@
                 :conform-keys true :into [])))
 
 (def normal-form-no-po-spec
-  (make-nform-no-po-spec subj-list-spec))
+  (make-nform-no-po-spec subj-coll-spec))
 
 (def normal-form-no-po-nopath-spec
-  (make-nform-no-po-spec subj-list-spec))
+  (make-nform-no-po-spec subj-coll-nopath-spec))
 
 (def normal-form-no-po-novar-spec
-  (make-nform-no-po-spec subj-list-novar-spec))
+  (make-nform-no-po-spec subj-coll-novar-spec))
 
 ;; Triple Vectors
 
@@ -243,13 +300,13 @@
 ;; Triple Vectors (List, no predicates + objects)
 
 (def triple-vec-no-po-spec
-  (s/tuple subj-list-spec))
+  (s/tuple subj-coll-spec))
 
 (def triple-vec-no-po-nopath-spec
-  (s/tuple subj-list-spec))
+  (s/tuple subj-coll-spec))
 
 (def triple-vec-no-po-novar-spec
-  (s/tuple subj-list-novar-spec))
+  (s/tuple subj-coll-novar-spec))
 
 ;; Triples
 

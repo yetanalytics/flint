@@ -4,11 +4,16 @@
             [com.yetanalytics.flint.format.axiom]
             [com.yetanalytics.flint.format.path]))
 
+(defmethod f/format-ast-node :triple/path [_ [_ path]]
+  path)
+
 (defmethod f/format-ast-node :triple/list [_ [_ list]]
   (str "( " (cstr/join " " list) " )"))
 
-(defmethod f/format-ast-node :triple/path [_ [_ path]]
-  path)
+(defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ bnodes]]
+  (let [join-sep   (if pretty? " ;\n " " ; ")
+        bnode-strs (map (fn [[pred obj]] (str pred " " obj)) bnodes)]
+    (str "[ " (cstr/join join-sep bnode-strs) " ]")))
 
 (defmethod f/format-ast-node :triple.vec/spo [_ [_ [s-str p-str o-str]]]
   (str s-str " " p-str " " o-str " ."))
