@@ -64,13 +64,13 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}]}]
            (->> '{:select [?x]
                   :where  [[:where [{?x {:foo/bar #{_1}
                                          :baz/qux #{_1}}}]]
@@ -81,17 +81,17 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1 '_2} {:kind ::vb/dupe-bnodes-bgp
                         :errors [{:bnode '_2
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo]}
                                  {:bnode '_2
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}]}]
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}]}]
            (->> '{:select [?x]
                   :where  [[:where [{_2 {:foo/bar #{_1}
                                          :baz/qux #{_1}}}]]

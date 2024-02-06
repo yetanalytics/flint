@@ -54,13 +54,15 @@
                   [[:delete-where
                     [[:triple/vec
                       [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
-                     [:triple/nform
-                      [:triple/spo [[[:ax/var ?i]
-                                     [:triple/po [[[:ax/var ?j]
-                                                   [:triple/o [[:triple/object [:ax/var ?k]]]]]]]]
-                                    [[:ax/var ?s]
-                                     [:triple/po [[[:ax/var ?p]
-                                                   [:triple/o [[:triple/object [:ax/var ?o]]]]]]]]]]]
+                     [:triple.nform/spo
+                      [[[:ax/var ?i]
+                        [:triple.nform/po
+                         [[[:ax/var ?j]
+                           [:triple.nform/o [[:ax/var ?k]]]]]]]
+                       [[:ax/var ?s]
+                        [:triple.nform/po
+                         [[[:ax/var ?p]
+                           [:triple.nform/o [[:ax/var ?o]]]]]]]]]
                      [:triple/quads
                       [[:ax/iri "<http://example.org>"]
                        [:triple/quad-triples
@@ -103,14 +105,15 @@
                    [:using [:update/iri [:ax/iri "<http://example.org/2>"]]]
                    [:where [:where-sub/where
                             [[:where/triple
-                              [:triple/nform
-                               [:triple/spo
-                                [[[:ax/var ?x]
-                                  [:triple/po [[[:ax/var ?y]
-                                                [:triple/o [[:triple/object [:ax/var ?z]]]]]]]]
-                                 [[:ax/var ?a]
-                                  [:triple/po [[[:ax/var ?b]
-                                                [:triple/o [[:triple/object [:ax/var ?c]]]]]]]]]]]]]]]]]
+                              [:triple.nform/spo
+                               [[[:ax/var ?x]
+                                 [:triple.nform/po
+                                  [[[:ax/var ?y]
+                                    [:triple.nform/o [[:ax/var ?z]]]]]]]
+                                [[:ax/var ?a]
+                                 [:triple.nform/po
+                                  [[[:ax/var ?b]
+                                    [:triple.nform/o [[:ax/var ?c]]]]]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting graph management updates"
     (testing "- LOAD"

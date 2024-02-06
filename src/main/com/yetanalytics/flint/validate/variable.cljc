@@ -101,10 +101,10 @@
 (defmethod get-scope-vars :triple/vec [[_ spo]]
   (mapcat get-scope-vars spo))
 
-(defmethod get-scope-vars :triple/o [[_ o]]
+(defmethod get-scope-vars :triple.nform/o [[_ o]]
   (mapcat get-scope-vars o))
 
-(defmethod get-scope-vars :triple/po [[_ po]]
+(defmethod get-scope-vars :triple.nform/po [[_ po]]
   (reduce-kv (fn [acc p o] (apply concat
                                   acc
                                   (get-scope-vars p)
@@ -112,7 +112,7 @@
              []
              po))
 
-(defmethod get-scope-vars :triple/spo [[_ spo]]
+(defmethod get-scope-vars :triple.nform/spo [[_ spo]]
   (reduce-kv (fn [acc s po] (apply concat
                                    acc
                                    (get-scope-vars s)
@@ -120,16 +120,8 @@
              []
              spo))
 
-(defmethod get-scope-vars :triple/spo-list [[_ spo]]
-  (reduce-kv (fn [acc s po] (apply concat
-                                   acc
-                                   (mapcat get-scope-vars s)
-                                   (map get-scope-vars po)))
-             []
-             spo))
-
-(defmethod get-scope-vars :triple/nform [[_ nform]]
-  (get-scope-vars nform))
+(defmethod get-scope-vars :triple.nform/s [[_ s]]
+  (get-scope-vars s))
 
 ;; Path
 

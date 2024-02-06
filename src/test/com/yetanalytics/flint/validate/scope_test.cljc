@@ -41,11 +41,11 @@
                              [:ax/var ?z]]])))
       (is (= '[?s ?p ?o]
              (vv/get-scope-vars
-              '[:triple/nform
-                [:triple/spo
-                 [[[:ax/var ?s]
-                   [:triple/po [[[:ax/var ?p]
-                                 [:triple/o [[:triple/object [:ax/var ?o]]]]]]]]]]])))
+              '[:triple.nform/spo
+               [[[:ax/var ?s]
+                 [:triple.nform/po
+                  [[[:ax/var ?p]
+                    [:triple.nform/o [[:ax/var ?o]]]]]]]]])))
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars
               '[:where-sub/where

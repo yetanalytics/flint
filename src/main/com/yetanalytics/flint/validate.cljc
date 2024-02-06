@@ -11,13 +11,13 @@
      [:where/triple
       [:triple/vec ...]]     => 0
      [:where/triple
-      [:triple/nform ...]]   => 0
+      [:triple.nform/spo ...]]   => 0
      [:where/special
       [:where/filter ...]]   => 0 ; FILTERs don't divide BGPs
      [:where/special
       [:where/optional ...]] => X ; BGP divider
      [:where/triple
-      [:triple/nform ...]]   => 1
+      [:triple.nform/spo ...]]   => 1
    "
   [loc]
   (let [?left-node (some-> loc zip/left zip/node)
@@ -49,7 +49,7 @@
 (defn- ast-children
   [[k children]]
   (cond
-    (#{:triple/spo :triple/po} k)
+    (#{:triple.nform/spo :triple.nform/po} k)
     (apply concat children)
     (or (and (vector? children)
              (keyword? (first children)))
