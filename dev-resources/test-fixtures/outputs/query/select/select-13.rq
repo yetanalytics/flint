@@ -1,0 +1,9 @@
+PREFIX :     <http://foo.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+SELECT ?x ?name
+WHERE {
+    [ :p1 "v" ] :q1 "w" .
+    :x :q2 [ :p2 "v" ] .
+    [ foaf:name ?name ;
+      foaf:mbox <mailto:bar@example.com> ] .
+}
