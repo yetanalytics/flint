@@ -14,9 +14,9 @@
            (s/conform us/insert-data-update-spec
                       '{:insert-data [[:foo/x :dc/title "Title"]
                                       [:foo/y :a "MyType"]]})))
-    (is (= '[[:delete-data [[:triple/quads
+    (is (= '[[:delete-data [[:triple.quad/gspo
                              [[:ax/iri "<http://example.org>"]
-                              [:triple/quad-triples
+                              [:triple.quad/spo
                                [[:triple.vec/spo [[:ax/prefix-iri :foo/x]
                                                   [:ax/prefix-iri :dc/title]
                                                   [:ax/literal "Title"]]]

@@ -301,25 +301,25 @@
 (def quad-nopath-spec
   (s/and (s/tuple #{:graph}
                   ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triple-coll-nopath-spec))
+                  (s/or :triple.quad/spo triple-coll-nopath-spec))
          (s/conformer (fn [[_ iri triples]] [iri triples]))))
 
 (def quad-novar-spec
   (s/and (s/tuple #{:graph}
                   ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triple-coll-novar-spec))
+                  (s/or :triple.quad/spo triple-coll-novar-spec))
          (s/conformer (fn [[_ iri triples]] [iri triples]))))
 
 (def quad-noblank-spec
   (s/and (s/tuple #{:graph}
                   ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triple-coll-noblank-spec))
+                  (s/or :triple.quad/spo triple-coll-noblank-spec))
          (s/conformer (fn [[_ iri triples]] [iri triples]))))
 
 (def quad-novar-noblank-spec
   (s/and (s/tuple #{:graph}
                   ax/iri-or-var-spec
-                  (s/or :triple/quad-triples triple-coll-novar-noblank-spec))
+                  (s/or :triple.quad/spo triple-coll-novar-noblank-spec))
          (s/conformer (fn [[_ iri triples]] [iri triples]))))
 
 ;; Collection of Quads (for UPDATE)
@@ -329,7 +329,7 @@
                    :triple.vec/s     triple-vec-no-po-nopath-spec
                    :triple.nform/spo normal-form-nopath-spec
                    :triple.nform/s   normal-form-no-po-nopath-spec
-                   :triple/quads     quad-nopath-spec)
+                   :triple.quad/gspo quad-nopath-spec)
              :kind vector?))
 
 (def quad-coll-novar-spec
@@ -337,17 +337,17 @@
                    :triple.vec/s     triple-vec-no-po-novar-spec
                    :triple.nform/spo normal-form-novar-spec
                    :triple.nform/s   normal-form-no-po-novar-spec
-                   :triple/quads     quad-novar-spec)
+                   :triple.quad/gspo quad-novar-spec)
              :kind vector?))
 
 (def quad-coll-noblank-spec
   (s/coll-of (s/or :triple.vec/spo   triple-vec-noblank-spec
                    :triple.nform/spo normal-form-noblank-spec
-                   :triple/quads     quad-noblank-spec)
+                   :triple.quad/gspo quad-noblank-spec)
              :kind vector?))
 
 (def quad-coll-novar-noblank-spec
   (s/coll-of (s/or :triple.vec/spo   triple-vec-novar-noblank-spec
                    :triple.nform/spo normal-form-novar-noblank-spec
-                   :triple/quads     quad-novar-noblank-spec)
+                   :triple.quad/gspo quad-novar-noblank-spec)
              :kind vector?))

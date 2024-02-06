@@ -25,9 +25,9 @@
                             "}"])
            (->> '[:update/delete-data
                   [[:delete-data
-                    [[:triple/quads
+                    [[:triple.quad/gspo
                       [[:ax/iri "<http://example.org>"]
-                       [:triple/quad-triples
+                       [:triple.quad/spo
                         [[:triple.vec/spo [[:ax/prefix-iri :foo/x]
                                            [:ax/prefix-iri :dc/title]
                                            [:ax/literal "Title"]]]]]]]]]]]
@@ -63,9 +63,9 @@
                         [:triple.nform/po
                          [[[:ax/var ?p]
                            [:triple.nform/o [[:ax/var ?o]]]]]]]]]
-                     [:triple/quads
+                     [:triple.quad/gspo
                       [[:ax/iri "<http://example.org>"]
-                       [:triple/quad-triples
+                       [:triple.quad/spo
                         [[:triple.vec/spo [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE...INSERT clauses"

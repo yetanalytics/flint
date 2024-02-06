@@ -50,11 +50,11 @@
     (is (= [{:iri :baz/Qux
              :prefix :baz
              :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
-             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple.nform/spo :triple.nform/po :triple.nform/o :ax/prefix-iri]}
+             :path [:update/insert-data :insert-data :triple.quad/gspo :triple.quad/spo :triple.nform/spo :triple.nform/po :triple.nform/o :ax/prefix-iri]}
             {:iri :baz/Quu
              :prefix :baz
              :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
-             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple.vec/spo :ax/prefix-iri]}]
+             :path [:update/insert-data :insert-data :triple.quad/gspo :triple.quad/spo :triple.vec/spo :ax/prefix-iri]}]
            (->> {:prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
                  :insert-data [[:graph "<http://foo.org>"
                                 [{"<http://bar.org>" {:rdf/type #{:baz/Qux}}}
