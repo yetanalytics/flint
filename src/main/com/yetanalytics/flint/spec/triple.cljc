@@ -5,7 +5,8 @@
   #?(:cljs (:require-macros [com.yetanalytics.flint.spec.triple
                              :refer [make-obj-spec
                                      make-pred-objs-spec
-                                     make-nform-spec]])))
+                                     make-nform-spec
+                                     make-nform-no-po-spec]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subj/Pred/Obj Specs
