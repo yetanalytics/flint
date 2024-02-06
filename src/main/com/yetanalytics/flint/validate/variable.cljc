@@ -95,9 +95,6 @@
 
 ;; Basic Graph Pattern
 
-(defmethod get-scope-vars :triple/object [[_ object]]
-  (get-scope-vars object))
-
 (defmethod get-scope-vars :triple/list [[_ list]]
   (mapcat get-scope-vars list))
 
