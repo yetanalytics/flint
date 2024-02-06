@@ -60,18 +60,20 @@
   (s/or :ax/var        ax/variable-spec
         :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec))
+        :ax/bnode      ax/bnode-spec
+        :triple/list   list-spec))
 
 (def subj-list-spec
-  (s/or :triple/list   list-spec))
+  (s/or :triple/list list-spec))
 
 (def subj-novar-spec
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec))
+        :ax/bnode      ax/bnode-spec
+        :triple/list   list-spec))
 
 (def subj-list-novar-spec
-  (s/or :triple/list   list-novar-spec))
+  (s/or :triple/list list-novar-spec))
 
 (def subj-noblank-spec
   (s/or :ax/var        ax/variable-spec
@@ -102,7 +104,7 @@
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/rdf-type   ax/rdf-type-spec))
 
-;; Objects
+;; Objects (includes Lists)
 
 (def obj-spec
   (s/or :ax/var        ax/variable-spec
@@ -165,7 +167,8 @@
    (defmacro make-pred-objs-spec
      [pred-spec objs-spec]
      `(s/or :triple/po (s/map-of ~pred-spec ~objs-spec
-                                 :into []))))
+                                 :into []
+                                 :min-count 1))))
 
 (def pred-objs-spec
   (make-pred-objs-spec pred-spec obj-set-spec))
@@ -187,7 +190,7 @@
 #?(:clj
    (defmacro make-nform-spec [subj-spec pred-objs-spec]
      `(s/or :triple/spo
-            (s/map-of ~subj-spec (s/and ~pred-objs-spec not-empty)
+            (s/map-of ~subj-spec ~pred-objs-spec
                       :conform-keys true :into []))))
 
 (def normal-form-spec
@@ -207,20 +210,27 @@
 
 ;; Subject Predicate Object (List)
 
+(def empty-map-spec
+  (s/map-of any? any? :max-count 0 :conform-keys true :into []))
+
 #?(:clj
-   (defmacro make-nform-list-spec [subj-list-spec pred-objs-spec]
-     `(s/or :triple/spo-list
-            (s/map-of ~subj-list-spec ~pred-objs-spec
+   (defmacro make-nform-no-po-spec [subj-list-spec]
+     `(s/or :triple/spo
+            (s/map-of ~subj-list-spec empty-map-spec
                       :conform-keys true :into []))))
 
-(def normal-form-list-spec
-  (make-nform-list-spec subj-list-spec pred-objs-spec))
+(def normal-form-no-po-spec
+  (make-nform-no-po-spec subj-list-spec))
 
-(def normal-form-list-nopath-spec
-  (make-nform-list-spec subj-list-spec pred-objs-nopath-spec))
+(def normal-form-no-po-nopath-spec
+  (make-nform-no-po-spec subj-list-spec))
 
-(def normal-form-list-novar-spec
-  (make-nform-list-spec subj-list-novar-spec pred-objs-novar-spec))
+(def normal-form-no-po-novar-spec
+  (make-nform-no-po-spec subj-list-novar-spec))
+
+(comment
+  (s/conform normal-form-no-po-spec
+             {'(?x ?y ?z) {}}))
 
 ;; Triple Vectors
 
@@ -239,22 +249,36 @@
 (def triple-vec-novar-noblank-spec
   (s/tuple subj-novar-noblank-spec pred-novar-spec obj-novar-noblank-spec))
 
+;; Triple Vectors (List, no predicates + objects)
+
+(def triple-vec-no-po-spec
+  (s/tuple subj-list-spec))
+
+(def triple-vec-no-po-nopath-spec
+  (s/tuple subj-list-spec))
+
+(def triple-vec-no-po-novar-spec
+  (s/tuple subj-list-novar-spec))
+
 ;; Triples
 
 (def triple-spec
-  (s/or :triple/vec        triple-vec-spec
-        :triple/nform      normal-form-spec
-        :triple/nform-list normal-form-list-spec))
+  (s/or :triple/vec         triple-vec-spec
+        :triple/vec-no-po   triple-vec-no-po-spec
+        :triple/nform       normal-form-spec
+        :triple/nform-no-po normal-form-no-po-spec))
 
 (def triple-nopath-spec
-  (s/or :triple/vec        triple-vec-nopath-spec
-        :triple/nform      normal-form-nopath-spec
-        :triple/nform-list normal-form-list-nopath-spec))
+  (s/or :triple/vec         triple-vec-nopath-spec
+        :triple/vec-no-po   triple-vec-no-po-nopath-spec
+        :triple/nform       normal-form-nopath-spec
+        :triple/nform-no-po normal-form-no-po-nopath-spec))
 
 (def triple-novar-spec
-  (s/or :triple/vec        triple-vec-novar-spec
-        :triple/nform      normal-form-novar-spec
-        :triple/nform-list normal-form-list-nopath-spec))
+  (s/or :triple/vec         triple-vec-novar-spec
+        :triple/vec-no-po   triple-vec-no-po-novar-spec
+        :triple/nform       normal-form-novar-spec
+        :triple/nform-no-po normal-form-no-po-nopath-spec))
 
 (def triple-noblank-spec
   (s/or :triple/vec   triple-vec-noblank-spec
@@ -310,16 +334,18 @@
 ;; Collection of Quads (for UPDATE)
 
 (def quad-coll-nopath-spec
-  (s/coll-of (s/or :triple/vec        triple-vec-nopath-spec
-                   :triple/nform      normal-form-nopath-spec
-                   :triple/nform-list normal-form-list-nopath-spec
-                   :triple/quads      quad-nopath-spec)
+  (s/coll-of (s/or :triple/vec         triple-vec-nopath-spec
+                   :triple/vec-no-po   triple-vec-no-po-nopath-spec
+                   :triple/nform       normal-form-nopath-spec
+                   :triple/nform-no-po normal-form-no-po-nopath-spec
+                   :triple/quads       quad-nopath-spec)
              :kind vector?))
 
 (def quad-coll-novar-spec
   (s/coll-of (s/or :triple/vec        triple-vec-novar-spec
+                   :triple/vec-no-po  triple-vec-no-po-novar-spec
                    :triple/nform      normal-form-novar-spec
-                   :triple/nform-list normal-form-list-novar-spec
+                   :triple/nform-list normal-form-no-po-novar-spec
                    :triple/quads      quad-novar-spec)
              :kind vector?))
 

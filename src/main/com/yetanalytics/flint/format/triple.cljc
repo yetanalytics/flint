@@ -16,7 +16,13 @@
 (defmethod f/format-ast-node :triple/vec [_ [_ [s p o]]]
   (str s " " p " " o " ."))
 
+(defmethod f/format-ast-node :triple/vec-no-po [_ [_ [s]]]
+  (str s " ."))
+
 (defmethod f/format-ast-node :triple/nform [_ [_ nform]]
+  nform)
+
+(defmethod f/format-ast-node :triple/nform-no-po [_ [_ nform]]
   nform)
 
 (defn- format-spo-map [spo pretty?]
@@ -35,9 +41,6 @@
          " .")))
 
 (defmethod f/format-ast-node :triple/spo [{:keys [pretty?]} [_ spo]]
-  (format-spo-map spo pretty?))
-
-(defmethod f/format-ast-node :triple/spo-list [{:keys [pretty?]} [_ spo]]
   (format-spo-map spo pretty?))
 
 (defmethod f/format-ast-node :triple/po [{:keys [pretty?]} [_ po]]
