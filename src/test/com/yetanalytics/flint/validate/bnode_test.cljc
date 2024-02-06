@@ -64,13 +64,13 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}]}]
            (->> '{:select [?x]
                   :where  [[:where [{?x {:foo/bar #{_1}
                                          :baz/qux #{_1}}}]]
@@ -85,13 +85,13 @@
                                  {:bnode '_2
                                   :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}
                                  {:bnode '_1
-                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o :triple/object]}]}]
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple/nform :triple/spo :triple/po :triple/o]}]}]
            (->> '{:select [?x]
                   :where  [[:where [{_2 {:foo/bar #{_1}
                                          :baz/qux #{_1}}}]]

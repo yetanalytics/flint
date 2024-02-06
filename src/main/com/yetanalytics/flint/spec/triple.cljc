@@ -23,6 +23,37 @@
 ;; - DELETE DATA
 ;; - DELETE
 
+;; Lists
+
+;; List entries have the same spec as objects + `:triple/list`
+
+;; Since lists are constructed out of blank nodes, we do not allow list
+;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
+
+(declare list-spec)
+(declare list-novar-spec)
+
+(def list-entry-spec
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-spec))
+
+(def list-entry-novar-spec
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-novar-spec))
+
+(def list-spec
+  (s/coll-of list-entry-spec :kind list?))
+
+(def list-novar-spec
+  (s/coll-of list-entry-novar-spec :kind list?))
+
 ;; Subjects
 
 (def subj-spec
@@ -31,10 +62,16 @@
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec))
 
+(def subj-list-spec
+  (s/or :triple/list   list-spec))
+
 (def subj-novar-spec
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec))
+
+(def subj-list-novar-spec
+  (s/or :triple/list   list-novar-spec))
 
 (def subj-noblank-spec
   (s/or :ax/var        ax/variable-spec
@@ -72,13 +109,15 @@
         :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec))
+        :ax/literal    ax/literal-spec
+        :triple/list   list-spec))
 
 (def obj-novar-spec
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec))
+        :ax/literal    ax/literal-spec
+        :triple/list   list-novar-spec))
 
 (def obj-noblank-spec
   (s/or :ax/var        ax/variable-spec
@@ -90,37 +129,6 @@
   (s/or :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/literal    ax/literal-spec))
-
-;; Lists
-
-;; List entries have the same spec as objects + `:triple/list`
-
-;; Since lists are constructed out of blank nodes, we do not allow list
-;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
-
-(declare list-spec)
-(declare list-novar-spec)
-
-(def list-entry-spec
-  (s/or :ax/var        ax/variable-spec
-        :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   list-spec))
-
-(def list-entry-novar-spec
-  (s/or :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   list-novar-spec))
-
-(def list-spec
-  (s/coll-of list-entry-spec :kind list?))
-
-(def list-novar-spec
-  (s/coll-of list-entry-novar-spec :kind list?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Combo Specs
@@ -134,24 +142,16 @@
 #?(:clj
    (defmacro make-obj-spec
      ([obj-spec]
-      `(s/or :triple/o
-             (s/coll-of (s/or :triple/object ~obj-spec)
-                        :min-count 1
-                        :kind set?
-                        :into [])))
-     ([obj-spec obj-list-spec]
-      `(s/or :triple/o
-             (s/coll-of (s/or :triple/object ~obj-spec
-                              :triple/list ~obj-list-spec)
-                        :min-count 1
-                        :kind set?
-                        :into [])))))
+      `(s/or :triple/o (s/coll-of ~obj-spec
+                                  :min-count 1
+                                  :kind set?
+                                  :into [])))))
 
 (def obj-set-spec
-  (make-obj-spec obj-spec list-spec))
+  (make-obj-spec obj-spec))
 
 (def obj-set-novar-spec
-  (make-obj-spec obj-novar-spec list-novar-spec))
+  (make-obj-spec obj-novar-spec))
 
 (def obj-set-noblank-spec
   (make-obj-spec obj-noblank-spec))
@@ -208,20 +208,19 @@
 ;; Subject Predicate Object (List)
 
 #?(:clj
-   (defmacro make-nform-list-spec
-     [subj-list-spec pred-objs-spec]
+   (defmacro make-nform-list-spec [subj-list-spec pred-objs-spec]
      `(s/or :triple/spo-list
             (s/map-of ~subj-list-spec ~pred-objs-spec
                       :conform-keys true :into []))))
 
 (def normal-form-list-spec
-  (make-nform-list-spec list-spec pred-objs-spec))
+  (make-nform-list-spec subj-list-spec pred-objs-spec))
 
 (def normal-form-list-nopath-spec
-  (make-nform-list-spec list-spec pred-objs-nopath-spec))
+  (make-nform-list-spec subj-list-spec pred-objs-nopath-spec))
 
 (def normal-form-list-novar-spec
-  (make-nform-list-spec list-spec pred-objs-novar-spec))
+  (make-nform-list-spec subj-list-novar-spec pred-objs-novar-spec))
 
 ;; Triple Vectors
 

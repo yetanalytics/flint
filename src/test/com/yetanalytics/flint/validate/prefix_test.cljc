@@ -50,7 +50,7 @@
     (is (= [{:iri :baz/Qux
              :prefix :baz
              :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
-             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple/nform :triple/spo :triple/po :triple/o :triple/object :ax/prefix-iri]}
+             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple/nform :triple/spo :triple/po :triple/o :ax/prefix-iri]}
             {:iri :baz/Quu
              :prefix :baz
              :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
