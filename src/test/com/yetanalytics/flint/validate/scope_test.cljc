@@ -69,7 +69,20 @@
                                  [:path/paths
                                   [[:path/terminal [:ax/var ?ya]]
                                    [:path/terminal [:ax/var ?yb]]]]]]]
-                 [:ax/var ?z]]]))))
+                 [:ax/var ?z]]])))
+      (is (= '[?x1 ?x2 ?y ?z1 ?z2]
+             (vv/get-scope-vars
+              '[:triple.vec/spo [[:triple/list [[:ax/var ?x1] [:ax/var ?x2]]]
+                                 [:ax/var ?y]
+                                 [:triple/bnodes [[[:ax/var ?z1] [:ax/var ?z2]]]]]])))
+      (is (= '[?x1 ?x2 ?y ?z1 ?z2]
+             (vv/get-scope-vars
+              '[:triple.nform/spo
+                [[[:triple/list [[:ax/var ?x1] [:ax/var ?x2]]]
+                  [:triple.nform/po
+                   [[[:ax/var ?y]
+                     [:triple.nform/o
+                      [[:triple/bnodes [[[:ax/var ?z1] [:ax/var ?z2]]]]]]]]]]]]))))
     (testing "in sub-SELECT queries"
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars

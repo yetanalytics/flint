@@ -98,30 +98,37 @@
 (defmethod get-scope-vars :triple/list [[_ list]]
   (mapcat get-scope-vars list))
 
+(defmethod get-scope-vars :triple/bnodes [[_ po-pairs]]
+  (mapcat (fn [[p o]] (concat (get-scope-vars p)
+                              (get-scope-vars o)))
+          po-pairs))
+
+(mapcat get-scope-vars '[[[:ax/var ?z1] [:ax/var ?z2]]])
+
 (defmethod get-scope-vars :triple.vec/spo [[_ spo]]
   (mapcat get-scope-vars spo))
 
 (defmethod get-scope-vars :triple.vec/s [[_ s]]
   (get-scope-vars s))
 
-(defmethod get-scope-vars :triple.nform/o [[_ o]]
-  (mapcat get-scope-vars o))
+(defmethod get-scope-vars :triple.nform/o [[_ o-coll]]
+  (mapcat get-scope-vars o-coll))
 
-(defmethod get-scope-vars :triple.nform/po [[_ po]]
-  (reduce-kv (fn [acc p o] (apply concat
-                                  acc
-                                  (get-scope-vars p)
-                                  (map get-scope-vars o)))
+(defmethod get-scope-vars :triple.nform/po [[_ po-pairs]]
+  (reduce-kv (fn [acc p o-coll] (apply concat
+                                       acc
+                                       (get-scope-vars p)
+                                       (map get-scope-vars o-coll)))
              []
-             po))
+             po-pairs))
 
-(defmethod get-scope-vars :triple.nform/spo [[_ spo]]
+(defmethod get-scope-vars :triple.nform/spo [[_ spo-pairs]]
   (reduce-kv (fn [acc s po] (apply concat
                                    acc
                                    (get-scope-vars s)
                                    (map get-scope-vars po)))
              []
-             spo))
+             spo-pairs))
 
 (defmethod get-scope-vars :triple.nform/s [[_ s]]
   (get-scope-vars s))

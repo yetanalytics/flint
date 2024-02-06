@@ -49,6 +49,12 @@
                            [:where [[?y :baz/qux _]]]]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
+                vb/validate-bnodes)))
+    (is (= [#{} nil]
+           (->> '{:select [?p]
+                  :where  [[?x ?y] ?p (?z ?w)]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
                 vb/validate-bnodes))))
   (testing "invalid blank nodes"
     (is (= [#{'_1} {:kind   ::vb/dupe-bnodes-bgp

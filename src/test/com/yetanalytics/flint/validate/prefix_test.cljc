@@ -23,11 +23,24 @@
                    v/collect-nodes
                    (vp/validate-prefixes (assoc (:prefixes query)
                                                 :$ "<http://default.org>")))))
-    (is (= [{:iri :bar
-             :prefix :$
+    (is (= [{:iri      :bar
+             :prefix   :$
              :prefixes {:foo "<http://foo.org/>"}
-             :path [:query/select :where :where-sub/where :where/triple :triple.vec/spo :ax/prefix-iri]}]
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :ax/prefix-iri]}]
            (->> (assoc query :where '[[:bar :a ?y]])
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                (vp/validate-prefixes (:prefixes query)))))
+    (is (= [{:iri      :bar
+             :prefix   :$
+             :prefixes {:foo "<http://foo.org/>"}
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :triple/bnodes :ax/prefix-iri]}
+            {:iri      :bee
+             :prefix   :$
+             :prefixes {:foo "<http://foo.org/>"}
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :triple/bnodes :ax/prefix-iri]}]
+           (->> (assoc query :where '[[[:bar ?x] :a ?y]
+                                      [?z :a [:bee ?w]]])
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 (vp/validate-prefixes (:prefixes query)))))
