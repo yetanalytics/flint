@@ -61,6 +61,11 @@
       FILTER NOT EXISTS { ?z foo:baz ?w . }
       ?y foo:qux _:1 .
     }")
+  
+  (QueryFactory/create
+   "SELECT ?x WHERE {
+      [<http://bar.org#1> [<http://bar.org#2> ?x]] <http://foo.org> \"w\"
+   }")
   )
 
 (comment
