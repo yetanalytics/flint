@@ -61,6 +61,13 @@
                               [:ax/literal 2]
                               [:triple/list [[:ax/literal 3]]]]]]]
             {:pretty? true})))
+    (is (= "\"v\" :p () ."
+           (f/format-ast
+            '[:triple.vec/spo
+              [[:ax/literal "v"]
+               [:ax/prefix-iri :p]
+               [:triple/list []]]]
+            {:pretty? true})))
     (is (= "[ foaf:name ?name ;\n  foaf:mbox <mailto:foo@example.com> ] :q \"w\" ."
            (f/format-ast
             '[:triple.vec/spo

@@ -8,7 +8,9 @@
   path)
 
 (defmethod f/format-ast-node :triple/list [_ [_ list]]
-  (str "( " (cstr/join " " list) " )"))
+  (if (empty? list)
+    "()" ; Special case for empty lists
+    (str "( " (cstr/join " " list) " )")))
 
 (defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ po-pairs]]
   (if (empty? po-pairs)
