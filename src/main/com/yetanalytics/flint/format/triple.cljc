@@ -11,9 +11,11 @@
   (str "( " (cstr/join " " list) " )"))
 
 (defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ po-pairs]]
-  (let [join-sep (if pretty? " ;\n  " " ; ")
-        po-strs  (mapv (fn [[p-str o-str]] (str p-str " " o-str)) po-pairs)]
-    (str "[ " (cstr/join join-sep po-strs) " ]")))
+  (if (empty? po-pairs)
+    "[]" ; Treat as a scalar blank node
+    (let [join-sep (if pretty? " ;\n  " " ; ")
+          po-strs  (mapv (fn [[p-str o-str]] (str p-str " " o-str)) po-pairs)]
+      (str "[ " (cstr/join join-sep po-strs) " ]"))))
 
 (defmethod f/format-ast-node :triple.vec/spo [_ [_ [s-str p-str o-str]]]
   (str s-str " " p-str " " o-str " ."))

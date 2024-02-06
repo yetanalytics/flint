@@ -104,4 +104,11 @@
                                  [:triple/bnodes
                                   [[[:ax/prefix-iri :foaf/mbox]
                                     [:ax/iri "<mailto:foo@example.com>"]]]]]]]]]
+            {:pretty? false})))
+    (is (= "[] ?p ?o ."
+           (f/format-ast
+            '[:triple.vec/spo
+              [[:triple/bnodes []]
+               [:ax/var ?p]
+               [:ax/var ?o]]]
             {:pretty? false})))))
