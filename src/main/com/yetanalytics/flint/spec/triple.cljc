@@ -23,37 +23,6 @@
 ;; - DELETE DATA
 ;; - DELETE
 
-;; Lists
-
-;; List entries have the same spec as objects + `:triple/list`
-
-;; Since lists are constructed out of blank nodes, we do not allow list
-;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
-
-(declare list-spec)
-(declare list-novar-spec)
-
-(def list-entry-spec
-  (s/or :ax/var        ax/variable-spec
-        :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   list-spec))
-
-(def list-entry-novar-spec
-  (s/or :ax/iri        ax/iri-spec
-        :ax/prefix-iri ax/prefix-iri-spec
-        :ax/bnode      ax/bnode-spec
-        :ax/literal    ax/literal-spec
-        :triple/list   list-novar-spec))
-
-(def list-spec
-  (s/coll-of list-entry-spec :kind list?))
-
-(def list-novar-spec
-  (s/coll-of list-entry-novar-spec :kind list?))
-
 ;; Blank Node Vectors
 
 (declare pred-spec)
@@ -81,6 +50,51 @@
          (s/* (s/cat :pred pred-novar-spec :obj obj-novar-spec))
          (s/conformer conform-pred-obj-pairs)))
 
+;; Lists
+
+;; List entries have the same spec as objects + `:triple/list`
+
+;; Since lists are constructed out of blank nodes, we do not allow list
+;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
+
+(declare list-spec)
+(declare list-novar-spec)
+
+(def list-entry-spec
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-spec))
+
+(def list-entry-nopath-spec
+  (s/or :ax/var        ax/variable-spec
+        :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-spec
+        :triple/bnodes bnode-vec-nopath-spec))
+
+(def list-entry-novar-spec
+  (s/or :ax/iri        ax/iri-spec
+        :ax/prefix-iri ax/prefix-iri-spec
+        :ax/bnode      ax/bnode-spec
+        :ax/literal    ax/literal-spec
+        :triple/list   list-novar-spec
+        :triple/bnodes bnode-vec-novar-spec))
+
+(def list-spec
+  (s/coll-of list-entry-spec :kind list? :into []))
+
+(def list-nopath-spec
+  (s/coll-of list-entry-nopath-spec :kind list? :into []))
+
+(def list-novar-spec
+  (s/coll-of list-entry-novar-spec :kind list? :into []))
+
 ;; Subjects
 
 (def subj-spec
@@ -100,11 +114,11 @@
         :ax/iri        ax/iri-spec
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
-        :triple/list   list-spec
+        :triple/list   list-nopath-spec
         :triple/bnodes bnode-vec-nopath-spec))
 
 (def subj-coll-nopath-spec
-  (s/or :triple/list   list-spec
+  (s/or :triple/list   list-nopath-spec
         :triple/bnodes bnode-vec-nopath-spec))
 
 (def subj-novar-spec
@@ -164,7 +178,7 @@
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
         :ax/literal    ax/literal-spec
-        :triple/list   list-spec
+        :triple/list   list-nopath-spec
         :triple/bnodes bnode-vec-nopath-spec))
 
 (def obj-novar-spec
