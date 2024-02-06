@@ -17,19 +17,19 @@
               [:triple/spo [[[:ax/iri "<http://example.org/supercalifragilisticexpialidocious>"]
                              [:triple/po
                               [[[:ax/var ?p1]
-                                [:triple/o [[:triple/object [:ax/var ?o1]]
-                                            [:triple/object [:ax/var ?o2]]]]]
+                                [:triple/o [[:ax/var ?o1]
+                                            [:ax/var ?o2]]]]
                                [[:ax/var ?p2]
-                                [:triple/o [[:triple/object [:ax/var ?o1]]
-                                            [:triple/object [:ax/var ?o2]]]]]]]]
+                                [:triple/o [[:ax/var ?o1]
+                                            [:ax/var ?o2]]]]]]]
                             [[:ax/var ?s2]
                              [:triple/po
                               [[[:ax/var ?p1]
-                                [:triple/o [[:triple/object [:ax/var ?o1]]
-                                            [:triple/object [:ax/var ?o2]]]]]
+                                [:triple/o [[:ax/var ?o1]
+                                            [:ax/var ?o2]]]]
                                [[:ax/var ?p2]
-                                [:triple/o [[:triple/object [:ax/var ?o1]]
-                                            [:triple/object [:ax/var ?o2]]]]]]]]]]]
+                                [:triple/o [[:ax/var ?o1]
+                                            [:ax/var ?o2]]]]]]]]]]
             {:pretty? true})))
     (is (= "?s ?p ?o ."
            (f/format-ast
