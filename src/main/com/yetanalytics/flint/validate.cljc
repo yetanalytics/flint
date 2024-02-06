@@ -9,7 +9,7 @@
    subquery):
    
      [:where/triple
-      [:triple/vec ...]]     => 0
+      [:triple.vec/spo ...]]     => 0
      [:where/triple
       [:triple.nform/spo ...]]   => 0
      [:where/special

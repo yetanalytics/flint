@@ -32,7 +32,7 @@
                                             ?p2 #{?o1 ?o2}}
                                        ?s2 {?p1 #{?o1 ?o2}
                                             ?p2 #{?o1 ?o2}}})))
-    (is (= '[:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]
+    (is (= '[:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]
            (s/conform ts/triple-spec '[?s ?p ?o])))
     (testing "with and without paths"
       (is (= '[:triple.nform/spo
@@ -46,7 +46,7 @@
                     [:triple.nform/o [[:ax/var ?o]]]]]]]]]
              (s/conform ts/triple-spec
                         '{?s {(cat :x/one :x/two) #{?o}}})))
-      (is (= '[:triple/vec
+      (is (= '[:triple.vec/spo
                [[:ax/var ?s]
                 [:triple/path
                  [:path/branch [[:path/op cat]

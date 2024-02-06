@@ -19,9 +19,9 @@
               [:select [:select/var-or-exprs [[:ax/var ?x]]]]
               [:from [:ax/iri "<http://example.org/my-graph/>"]]
               [:where [:where-sub/where [[:where/triple
-                                          [:triple/vec [[:ax/var ?x]
-                                                        [:ax/var ?y]
-                                                        [:ax/var ?z]]]]]]]
+                                          [:triple.vec/spo [[:ax/var ?x]
+                                                            [:ax/var ?y]
+                                                            [:ax/var ?z]]]]]]]
               [:order-by [[:mod/asc-desc
                            [[:mod/op asc]
                             [:mod/asc-desc-expr [:expr/terminal [:ax/var ?y]]]]]]]

@@ -98,8 +98,11 @@
 (defmethod get-scope-vars :triple/list [[_ list]]
   (mapcat get-scope-vars list))
 
-(defmethod get-scope-vars :triple/vec [[_ spo]]
+(defmethod get-scope-vars :triple.vec/spo [[_ spo]]
   (mapcat get-scope-vars spo))
+
+(defmethod get-scope-vars :triple.vec/s [[_ s]]
+  (get-scope-vars s))
 
 (defmethod get-scope-vars :triple.nform/o [[_ o]]
   (mapcat get-scope-vars o))

@@ -223,10 +223,6 @@
 (def normal-form-no-po-novar-spec
   (make-nform-no-po-spec subj-list-novar-spec))
 
-(comment
-  (s/conform normal-form-no-po-spec
-             {'(?x ?y ?z) {}}))
-
 ;; Triple Vectors
 
 (def triple-vec-spec
@@ -258,29 +254,29 @@
 ;; Triples
 
 (def triple-spec
-  (s/or :triple/vec       triple-vec-spec
-        :triple/vec-no-po triple-vec-no-po-spec
+  (s/or :triple.vec/spo   triple-vec-spec
+        :triple.vec/s     triple-vec-no-po-spec
         :triple.nform/spo normal-form-spec
         :triple.nform/s   normal-form-no-po-spec))
 
 (def triple-nopath-spec
-  (s/or :triple/vec       triple-vec-nopath-spec
-        :triple/vec-no-po triple-vec-no-po-nopath-spec
+  (s/or :triple.vec/spo   triple-vec-nopath-spec
+        :triple.vec/s     triple-vec-no-po-nopath-spec
         :triple.nform/spo normal-form-nopath-spec
         :triple.nform/s   normal-form-no-po-nopath-spec))
 
 (def triple-novar-spec
-  (s/or :triple/vec       triple-vec-novar-spec
-        :triple/vec-no-po triple-vec-no-po-novar-spec
+  (s/or :triple.vec/spo   triple-vec-novar-spec
+        :triple.vec/s     triple-vec-no-po-novar-spec
         :triple.nform/spo normal-form-novar-spec
         :triple.nform/s   normal-form-no-po-nopath-spec))
 
 (def triple-noblank-spec
-  (s/or :triple/vec       triple-vec-noblank-spec
+  (s/or :triple.vec/spo   triple-vec-noblank-spec
         :triple.nform/spo normal-form-noblank-spec))
 
 (def triple-novar-noblank-spec
-  (s/or :triple/vec       triple-vec-novar-noblank-spec
+  (s/or :triple.vec/spo   triple-vec-novar-noblank-spec
         :triple.nform/spo normal-form-novar-noblank-spec))
 
 ;; Collection of Triples
@@ -329,29 +325,29 @@
 ;; Collection of Quads (for UPDATE)
 
 (def quad-coll-nopath-spec
-  (s/coll-of (s/or :triple/vec       triple-vec-nopath-spec
-                   :triple/vec-no-po triple-vec-no-po-nopath-spec
+  (s/coll-of (s/or :triple.vec/spo   triple-vec-nopath-spec
+                   :triple.vec/s     triple-vec-no-po-nopath-spec
                    :triple.nform/spo normal-form-nopath-spec
                    :triple.nform/s   normal-form-no-po-nopath-spec
                    :triple/quads     quad-nopath-spec)
              :kind vector?))
 
 (def quad-coll-novar-spec
-  (s/coll-of (s/or :triple/vec        triple-vec-novar-spec
-                   :triple/vec-no-po  triple-vec-no-po-novar-spec
-                   :triple.nform/spo      normal-form-novar-spec
-                   :triple.nform/s normal-form-no-po-novar-spec
-                   :triple/quads      quad-novar-spec)
+  (s/coll-of (s/or :triple.vec/spo   triple-vec-novar-spec
+                   :triple.vec/s     triple-vec-no-po-novar-spec
+                   :triple.nform/spo normal-form-novar-spec
+                   :triple.nform/s   normal-form-no-po-novar-spec
+                   :triple/quads     quad-novar-spec)
              :kind vector?))
 
 (def quad-coll-noblank-spec
-  (s/coll-of (s/or :triple/vec   triple-vec-noblank-spec
+  (s/coll-of (s/or :triple.vec/spo   triple-vec-noblank-spec
                    :triple.nform/spo normal-form-noblank-spec
-                   :triple/quads quad-noblank-spec)
+                   :triple/quads     quad-noblank-spec)
              :kind vector?))
 
 (def quad-coll-novar-noblank-spec
-  (s/coll-of (s/or :triple/vec   triple-vec-novar-noblank-spec
+  (s/coll-of (s/or :triple.vec/spo   triple-vec-novar-noblank-spec
                    :triple.nform/spo normal-form-novar-noblank-spec
-                   :triple/quads quad-novar-noblank-spec)
+                   :triple/quads     quad-novar-noblank-spec)
              :kind vector?))

@@ -33,5 +33,5 @@
             {:pretty? true})))
     (is (= "?s ?p ?o ."
            (f/format-ast
-            '[:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]
+            '[:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]
             {:pretty? true})))))

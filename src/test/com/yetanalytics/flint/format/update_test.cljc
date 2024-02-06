@@ -13,9 +13,9 @@
                             "    foo:x dc:title \"Title\" ."
                             "}"])
            (->> '[:update/insert-data
-                  [[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                                [:ax/prefix-iri :dc/title]
-                                                [:ax/literal "Title"]]]]]]]
+                  [[:insert-data [[:triple.vec/spo [[:ax/prefix-iri :foo/x]
+                                                    [:ax/prefix-iri :dc/title]
+                                                    [:ax/literal "Title"]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE DATA clauses"
     (is (= (cstr/join "\n" ["DELETE DATA {"
@@ -28,9 +28,9 @@
                     [[:triple/quads
                       [[:ax/iri "<http://example.org>"]
                        [:triple/quad-triples
-                        [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                       [:ax/prefix-iri :dc/title]
-                                       [:ax/literal "Title"]]]]]]]]]]]
+                        [[:triple.vec/spo [[:ax/prefix-iri :foo/x]
+                                           [:ax/prefix-iri :dc/title]
+                                           [:ax/literal "Title"]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE WHERE clauses"
     (is (= (cstr/join "\n" ["DELETE WHERE {"
@@ -39,8 +39,8 @@
                             "}"])
            (->> '[:update/delete-where
                   [[:delete-where
-                    [[:triple/vec [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
-                     [:triple/vec [[:ax/var ?i] [:ax/var ?j] [:ax/var ?k]]]]]]]
+                    [[:triple.vec/spo [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
+                     [:triple.vec/spo [[:ax/var ?i] [:ax/var ?j] [:ax/var ?k]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["DELETE WHERE {"
                             "    ?x ?y ?z ."
@@ -52,7 +52,7 @@
                             "}"])
            (->> '[:update/delete-where
                   [[:delete-where
-                    [[:triple/vec
+                    [[:triple.vec/spo
                       [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
                      [:triple.nform/spo
                       [[[:ax/var ?i]
@@ -66,7 +66,7 @@
                      [:triple/quads
                       [[:ax/iri "<http://example.org>"]
                        [:triple/quad-triples
-                        [[:triple/vec [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]]
+                        [[:triple.vec/spo [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE...INSERT clauses"
     (is (= (cstr/join "\n" ["INSERT {"
@@ -78,13 +78,13 @@
                             "}"])
            (->> '[:update/modify
                   [[:insert
-                    [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
+                    [[:triple.vec/spo [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
                    [:using
                     [:update/named-iri [:named [:ax/iri "<http://example.org/2>"]]]]
                    [:where
                     [:where-sub/where
                      [[:where/triple
-                       [:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]]]]]
+                       [:triple.vec/spo [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["WITH <http://example.org>"
                             "DELETE {"
@@ -100,8 +100,8 @@
                             "}"])
            (->> '[:update/modify
                   [[:with [:ax/iri "<http://example.org>"]]
-                   [:delete [[:triple/vec [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]]]
-                   [:insert [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
+                   [:delete [[:triple.vec/spo [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]]]
+                   [:insert [[:triple.vec/spo [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
                    [:using [:update/iri [:ax/iri "<http://example.org/2>"]]]
                    [:where [:where-sub/where
                             [[:where/triple

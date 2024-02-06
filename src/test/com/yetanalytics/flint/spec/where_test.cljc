@@ -8,17 +8,17 @@
     (is (= '[:where-sub/select
              [[:select [:select/var-or-exprs [[:ax/var ?s]]]]
               [:where [:where-sub/where [[:where/triple
-                                          [:triple/vec [[:ax/var ?s]
-                                                        [:ax/var ?p]
-                                                        [:ax/var ?o]]]]]]]]]
+                                          [:triple.vec/spo [[:ax/var ?s]
+                                                            [:ax/var ?p]
+                                                            [:ax/var ?o]]]]]]]]]
            (s/conform ::ws/where '{:where [[?s ?p ?o]]
                                    :select [?s]})))
     (is (= '[:where-sub/select
              [[:select [:select/var-or-exprs [[:ax/var ?s]]]]
               [:where [:where-sub/where [[:where/triple
-                                          [:triple/vec [[:ax/var ?s]
-                                                        [:ax/var ?p]
-                                                        [:ax/var ?o]]]]]]]
+                                          [:triple.vec/spo [[:ax/var ?s]
+                                                            [:ax/var ?p]
+                                                            [:ax/var ?o]]]]]]]
               [:group-by [[:mod/expr-as-var
                            [:expr/as-var
                             [[:expr/branch
@@ -33,43 +33,43 @@
              [[:where/special
                [:where/union
                 [[:where-sub/where
-                  [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]
-                   [:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]
+                  [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]
+                   [:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]
                  [:where-sub/where
-                  [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
+                  [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
            (s/conform ::ws/where '[[:union [[?s ?p ?o] [?s ?p ?o]] [[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/special
                [:where/optional
                 [:where-sub/where
-                 [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]
+                 [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]
            (s/conform ::ws/where [[:optional '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/special
                [:where/minus
                 [:where-sub/where
-                 [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]
+                 [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]
            (s/conform ::ws/where [[:minus '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/special
                [:where/graph
                 [[:ax/prefix-iri :foo/my-graph]
                  [:where-sub/where
-                  [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
+                  [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
            (s/conform ::ws/where [[:graph :foo/my-graph '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/special
                [:where/service
                 [[:ax/prefix-iri :foo/my-uri]
                  [:where-sub/where
-                  [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
+                  [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
            (s/conform ::ws/where [[:service :foo/my-uri '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/special
                [:where/service-silent
                 [[:ax/prefix-iri :foo/my-uri]
                  [:where-sub/where
-                  [[:where/triple [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
+                  [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]]]]]]
            (s/conform ::ws/where [[:service-silent :foo/my-uri '[[?s ?p ?o]]]])))
     (is (= '[:where-sub/where
              [[:where/special
@@ -100,9 +100,9 @@
     ;; This is not a special form since it does not conform to the UNION
     ;; spec (or any other special form spec really)
     (is (= '[:where-sub/where
-             [[:where/triple [:triple/vec [[:ax/prefix-iri :union]
-                                           [:ax/prefix-iri :foo/bar]
-                                           [:ax/prefix-iri :baz/qux]]]]]]
+             [[:where/triple [:triple.vec/spo [[:ax/prefix-iri :union]
+                                               [:ax/prefix-iri :foo/bar]
+                                               [:ax/prefix-iri :baz/qux]]]]]]
            (s/conform ::ws/where '[[:union :foo/bar :baz/qux]])))))
 
 (deftest invalid-where-test

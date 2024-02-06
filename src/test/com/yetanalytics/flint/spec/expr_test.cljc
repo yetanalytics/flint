@@ -42,9 +42,9 @@
     (is (= [:expr/branch [[:expr/op 'exists]
                           [:expr/args [[:where-sub/where
                                         [[:where/triple
-                                          [:triple/vec '[[:ax/var ?s]
-                                                         [:ax/var ?p]
-                                                         [:ax/var ?o]]]]]]]]]]
+                                          [:triple.vec/spo '[[:ax/var ?s]
+                                                             [:ax/var ?p]
+                                                             [:ax/var ?o]]]]]]]]]]
            (s/conform ::es/expr '(exists [[?s ?p ?o]]))))
     (is (= [:expr/branch [[:expr/op 'contains]
                           [:expr/args [[:expr/terminal [:ax/literal "foo"]]

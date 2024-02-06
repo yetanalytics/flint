@@ -10,10 +10,10 @@
 (defmethod f/format-ast-node :triple/path [_ [_ path]]
   path)
 
-(defmethod f/format-ast-node :triple/vec [_ [_ [s p o]]]
+(defmethod f/format-ast-node :triple.vec/spo [_ [_ [s p o]]]
   (str s " " p " " o " ."))
 
-(defmethod f/format-ast-node :triple/vec-no-po [_ [_ [s]]]
+(defmethod f/format-ast-node :triple.vec/s [_ [_ [s]]]
   (str s " ."))
 
 (defn- format-spo-map [spo pretty?]
