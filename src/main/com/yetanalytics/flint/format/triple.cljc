@@ -10,11 +10,9 @@
 (defmethod f/format-ast-node :triple/list [_ [_ list]]
   (str "( " (cstr/join " " list) " )"))
 
-(defmethod f/format-ast-node :triple/bnode-pair [_ [_ [p o]]]
-  (str p " " o))
-
-(defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ po-strs]]
-  (let [join-sep (if pretty? " ;\n " " ; ")]
+(defmethod f/format-ast-node :triple/bnodes [{:keys [pretty?]} [_ po-pairs]]
+  (let [join-sep (if pretty? " ;\n  " " ; ")
+        po-strs  (mapv (fn [[p-str o-str]] (str p-str " " o-str)) po-pairs)]
     (str "[ " (cstr/join join-sep po-strs) " ]")))
 
 (defmethod f/format-ast-node :triple.vec/spo [_ [_ [s-str p-str o-str]]]
@@ -23,26 +21,25 @@
 (defmethod f/format-ast-node :triple.vec/s [_ [_ [s-str]]]
   (str s-str " ."))
 
-(defn- format-spo-map [spo pretty?]
+(defmethod f/format-ast-node :triple.nform/spo [{:keys [pretty?]} [_ spo-pairs]]
   (if pretty?
-    (str (->> spo
-              (map (fn [[s po]]
-                     (let [indent (->> (repeat (inc (count s)) " ")
+    (str (->> spo-pairs
+              (map (fn [[s-str po-str]]
+                     (let [indent (->> (repeat (inc (count s-str)) " ")
                                        (cstr/join "")
                                        (str "\n"))]
-                       (str s " " (cstr/replace po #"\n" indent)))))
+                       (str s-str " " (cstr/replace po-str #"\n" indent)))))
               (cstr/join " .\n"))
          " .")
-    (str (->> spo
-              (map (fn [[s po]] (str s " " po)))
+    (str (->> spo-pairs
+              (map (fn [[s-str po-str]] (str s-str " " po-str)))
               (cstr/join " . "))
          " .")))
 
-(defmethod f/format-ast-node :triple.nform/spo [{:keys [pretty?]} [_ spo-strs]]
-  (format-spo-map spo-strs pretty?))
-
-(defmethod f/format-ast-node :triple.nform/s [{:keys [pretty?]} [_ s-str]]
-  (format-spo-map s-str pretty?))
+(defmethod f/format-ast-node :triple.nform/s [{:keys [pretty?]} [_ s-pairs]]
+  (let [join-sep (if pretty? " .\n" " . ")]
+    (str (->> s-pairs (map (fn [[s-str _]] s-str)) (cstr/join join-sep))
+         " .")))
 
 (defmethod f/format-ast-node :triple.nform/po [{:keys [pretty?]} [_ po-strs]]
   (let [join-sep (if pretty? " ;\n" " ; ")]

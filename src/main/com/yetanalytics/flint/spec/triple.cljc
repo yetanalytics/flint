@@ -148,8 +148,7 @@
 ;; Blank Node Vectors
 
 (defn- conform-pred-obj-pairs [po-pairs]
-  (mapv (fn [{:keys [pred obj]}] [:triple/bnode-pair [pred obj]])
-        po-pairs))
+  (mapv (fn [{:keys [pred obj]}] [pred obj]) po-pairs))
 
 (s/def ::bnodes
   (s/and vector?

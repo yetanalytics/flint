@@ -49,8 +49,8 @@
 (defn- ast-children
   [[k children]]
   (cond
-    ;; These values are colls of colls
-    (#{:triple.nform/spo :triple.nform/po} k)
+    ;; These values are colls of non-AST colls
+    (#{:triple/bnodes :triple.nform/spo :triple.nform/po} k)
     (apply concat children)
     ;; These values are either AST nodes or scalars
     (or (and (vector? children)
