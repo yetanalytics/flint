@@ -276,7 +276,7 @@
   (s/tuple ::subject-coll))
 
 (def triple-vec-no-po-nopath-spec
-  (s/tuple ::subject-coll))
+  (s/tuple ::subject-coll-nopath))
 
 (def triple-vec-no-po-novar-spec
   (s/tuple ::subject-coll-novar))
