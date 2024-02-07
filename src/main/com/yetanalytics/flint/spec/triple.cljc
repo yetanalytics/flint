@@ -197,11 +197,9 @@
 ;; Predicate Object
 
 #?(:clj
-   (defmacro make-pred-objs-spec
-     [pred-spec objs-spec]
+   (defmacro make-pred-objs-spec [pred-spec objs-spec]
      `(s/map-of ~pred-spec (s/or :triple.nform/o ~objs-spec)
-                :into []
-                :min-count 1)))
+                :min-count 1 :conform-keys true :into [])))
 
 (def pred-objs-spec
   (make-pred-objs-spec ::predicate obj-set-spec))
@@ -220,10 +218,24 @@
 
 ;; Subject Predicate Object
 
+(def empty-map-spec
+  (s/map-of any? any? :count 0 :conform-keys true :into []))
+
+#?(:clj
+   (defn- valid-conformed-spo? [spo-pairs]
+     (every?
+      (fn [[s po]]
+        (or (#{:triple/list :triple/bnodes} (first s))
+            (#{:triple.nform/po} (first po))))
+      spo-pairs)))
+
 #?(:clj
    (defmacro make-nform-spec [subj-spec pred-objs-spec]
-     `(s/map-of ~subj-spec (s/or :triple.nform/po ~pred-objs-spec)
-                :conform-keys true :into [])))
+     `(s/and (s/map-of ~subj-spec
+                       (s/or :triple.nform/po ~pred-objs-spec
+                             :triple.nform/po-empty empty-map-spec)
+                       :conform-keys true :into [])
+             valid-conformed-spo?)))
 
 (def normal-form-spec
   (make-nform-spec ::subject pred-objs-spec))
@@ -239,25 +251,6 @@
 
 (def normal-form-novar-noblank-spec
   (make-nform-spec ::subject-novar-noblank pred-objs-novar-noblank-spec))
-
-;; Subject Predicate Object (List)
-
-(def empty-map-spec
-  (s/map-of any? any? :max-count 0 :conform-keys true :into []))
-
-#?(:clj
-   (defmacro make-nform-no-po-spec [subj-list-spec]
-     `(s/map-of ~subj-list-spec empty-map-spec
-                :conform-keys true :into [])))
-
-(def normal-form-no-po-spec
-  (make-nform-no-po-spec ::subject-coll))
-
-(def normal-form-no-po-nopath-spec
-  (make-nform-no-po-spec ::subject-coll-nopath))
-
-(def normal-form-no-po-novar-spec
-  (make-nform-no-po-spec ::subject-coll-novar))
 
 ;; Triple Vectors
 
@@ -276,7 +269,7 @@
 (def triple-vec-novar-noblank-spec
   (s/tuple ::subject-novar-noblank ::predicate-novar ::object-novar-noblank))
 
-;; Triple Vectors (List, no predicates + objects)
+;; Triple Vectors (Coll, no predicates + objects)
 
 (def triple-vec-no-po-spec
   (s/tuple ::subject-coll))
@@ -292,20 +285,17 @@
 (def triple-spec
   (s/or :triple.vec/spo   triple-vec-spec
         :triple.vec/s     triple-vec-no-po-spec
-        :triple.nform/spo normal-form-spec
-        :triple.nform/s   normal-form-no-po-spec))
+        :triple.nform/spo normal-form-spec))
 
 (def triple-nopath-spec
   (s/or :triple.vec/spo   triple-vec-nopath-spec
         :triple.vec/s     triple-vec-no-po-nopath-spec
-        :triple.nform/spo normal-form-nopath-spec
-        :triple.nform/s   normal-form-no-po-nopath-spec))
+        :triple.nform/spo normal-form-nopath-spec))
 
 (def triple-novar-spec
   (s/or :triple.vec/spo   triple-vec-novar-spec
         :triple.vec/s     triple-vec-no-po-novar-spec
-        :triple.nform/spo normal-form-novar-spec
-        :triple.nform/s   normal-form-no-po-nopath-spec))
+        :triple.nform/spo normal-form-novar-spec))
 
 (def triple-noblank-spec
   (s/or :triple.vec/spo   triple-vec-noblank-spec
@@ -364,7 +354,6 @@
   (s/coll-of (s/or :triple.vec/spo   triple-vec-nopath-spec
                    :triple.vec/s     triple-vec-no-po-nopath-spec
                    :triple.nform/spo normal-form-nopath-spec
-                   :triple.nform/s   normal-form-no-po-nopath-spec
                    :triple.quad/gspo quad-nopath-spec)
              :kind vector?))
 
@@ -372,7 +361,6 @@
   (s/coll-of (s/or :triple.vec/spo   triple-vec-novar-spec
                    :triple.vec/s     triple-vec-no-po-novar-spec
                    :triple.nform/spo normal-form-novar-spec
-                   :triple.nform/s   normal-form-no-po-novar-spec
                    :triple.quad/gspo quad-novar-spec)
              :kind vector?))
 

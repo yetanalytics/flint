@@ -1,4 +1,5 @@
 ;; SELECT with both lists and blank node vectors
 {:prefixes {:$ "<http://foo.org/>"}
  :select   [?x]
- :where    [{(1 [:p :q] (2 ?x)) {}}]}
+ :where    [{(1 [:p :q] (2 ?x)) {}
+             () {:r #{[]}}}]}

@@ -49,8 +49,9 @@
             {:pretty? true})))
     (is (= "( ?x ?y ) ."
            (f/format-ast
-            '[:triple.nform/s
-              [[[:triple/list [[:ax/var ?x] [:ax/var ?y]]] []]]]
+            '[:triple.nform/spo
+              [[[:triple/list [[:ax/var ?x] [:ax/var ?y]]]
+                [:triple.nform/po-empty []]]]]
             {:pretty? true})))
     (is (= "\"v\" :p ( 1 2 ( 3 ) ) ."
            (f/format-ast

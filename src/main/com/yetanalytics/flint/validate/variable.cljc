@@ -130,9 +130,6 @@
              []
              spo-pairs))
 
-(defmethod get-scope-vars :triple.nform/s [[_ s]]
-  (get-scope-vars s))
-
 ;; Path
 
 (defmethod get-scope-vars :triple/path [[_ p]]

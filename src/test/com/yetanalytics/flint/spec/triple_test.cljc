@@ -61,7 +61,7 @@
       (is (->> '{?s {(cat :x/one :x/two) #{?o}}}
                (s/explain-data ts/triple-nopath-spec)
                ::s/problems
-               (filter #(-> % :path first (= :triple.nform/spo)))
+               (filter #(-> % :path butlast (= [:triple.nform/spo 1 :triple.nform/po 0])))
                (map :val)
                (every? (partial = '(cat :x/one :x/two))))))
     (testing "with list and blank nodes"
@@ -106,11 +106,11 @@
                                [:triple/list [[:ax/literal 2]]]]]]]
              (s/conform ts/triple-spec
                         '[(1 ?x (2))])))
-      (is (= '[:triple.nform/s
+      (is (= '[:triple.nform/spo
                [[[:triple/list [[:ax/literal 1]
                                 [:ax/var ?x]
                                 [:triple/list [[:ax/literal 2]]]]]
-                 []]]]
+                 [:triple.nform/po-empty []]]]]
              (s/conform ts/triple-spec
                         '{(1 ?x (2)) {}})))
       (is (= '[:triple.vec/s

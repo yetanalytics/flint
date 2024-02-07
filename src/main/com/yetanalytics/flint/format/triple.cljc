@@ -25,24 +25,22 @@
 (defmethod f/format-ast-node :triple.vec/s [_ [_ [s-str]]]
   (str s-str " ."))
 
+(defn- format-spo-pretty [s-str po-str]
+  (let [indent (->> (repeat (inc (count s-str)) " ")
+                    (cstr/join "")
+                    (str "\n"))]
+    (str s-str " " (cstr/replace po-str #"\n" indent))))
+
+(defn- format-spo [s-str po-str]
+  (str s-str " " po-str))
+
 (defmethod f/format-ast-node :triple.nform/spo [{:keys [pretty?]} [_ spo-pairs]]
-  (if pretty?
+  (let [format-spo (if pretty? format-spo-pretty format-spo)
+        join-sep   (if pretty? " .\n" " . ")]
     (str (->> spo-pairs
               (map (fn [[s-str po-str]]
-                     (let [indent (->> (repeat (inc (count s-str)) " ")
-                                       (cstr/join "")
-                                       (str "\n"))]
-                       (str s-str " " (cstr/replace po-str #"\n" indent)))))
-              (cstr/join " .\n"))
-         " .")
-    (str (->> spo-pairs
-              (map (fn [[s-str po-str]] (str s-str " " po-str)))
-              (cstr/join " . "))
-         " .")))
-
-(defmethod f/format-ast-node :triple.nform/s [{:keys [pretty?]} [_ s-pairs]]
-  (let [join-sep (if pretty? " .\n" " . ")]
-    (str (->> s-pairs (map (fn [[s-str _]] s-str)) (cstr/join join-sep))
+                     (if (empty? po-str) s-str (format-spo s-str po-str))))
+              (cstr/join join-sep))
          " .")))
 
 (defmethod f/format-ast-node :triple.nform/po [{:keys [pretty?]} [_ po-strs]]
@@ -50,6 +48,9 @@
     (->> po-strs
          (map (fn [[p o]] (str p " " o)))
          (cstr/join join-sep))))
+
+(defmethod f/format-ast-node :triple.nform/po-empty [_ _]
+  "")
 
 (defmethod f/format-ast-node :triple.nform/o [_ [_ o-strs]]
   (->> o-strs (cstr/join " , ")))

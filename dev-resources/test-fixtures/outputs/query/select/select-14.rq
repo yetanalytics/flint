@@ -2,4 +2,5 @@ PREFIX : <http://foo.org/>
 SELECT ?x
 WHERE {
     ( 1 [ :p :q ] ( 2 ?x ) ) .
+    () :r [] .
 }
