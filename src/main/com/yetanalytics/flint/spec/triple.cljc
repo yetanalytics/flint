@@ -131,8 +131,6 @@
 
 ;; Lists
 
-;; List entries have the same spec as objects + `:triple/list`
-
 ;; Since lists are constructed out of blank nodes, we do not allow list
 ;; syntactic sugar (i.e. `:triple/list`) where blank nodes are banned.
 
@@ -146,6 +144,9 @@
   (s/coll-of ::object-novar :kind list? :into []))
 
 ;; Blank Node Vectors
+
+;; For obvious reasons, we don't allow bnode vectors to exist where blank
+;; nodes are banned.
 
 (defn- conform-pred-obj-pairs [po-pairs]
   (mapv (fn [{:keys [pred obj]}] [pred obj]) po-pairs))
