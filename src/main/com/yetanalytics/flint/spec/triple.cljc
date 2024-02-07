@@ -5,8 +5,7 @@
   #?(:cljs (:require-macros [com.yetanalytics.flint.spec.triple
                              :refer [make-obj-spec
                                      make-pred-objs-spec
-                                     make-nform-spec
-                                     make-nform-no-po-spec]])))
+                                     make-nform-spec]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subj/Pred/Obj Specs
@@ -228,13 +227,14 @@
 (def empty-map-spec
   (s/map-of any? any? :count 0 :conform-keys true :into []))
 
-#?(:clj
-   (defn- valid-conformed-spo? [spo-pairs]
-     (every?
-      (fn [[s po]]
-        (or (#{:triple/list :triple/bnodes} (first s))
-            (#{:triple.nform/po} (first po))))
-      spo-pairs)))
+;; cljs-specific ignore is needed since this fn is called in a macro.
+#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-private-var])}
+(defn- valid-conformed-spo? [spo-pairs]
+  (every?
+   (fn [[s po]]
+     (or (#{:triple/list :triple/bnodes} (first s))
+         (#{:triple.nform/po} (first po))))
+   spo-pairs))
 
 #?(:clj
    (defmacro make-nform-spec [subj-spec pred-objs-spec]
