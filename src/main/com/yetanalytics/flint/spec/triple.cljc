@@ -90,6 +90,12 @@
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/rdf-type   ax/rdf-type-spec))
 
+(s/def ::predicate-noblank
+  ::predicate-nopath)
+
+(s/def ::predicate-novar-noblank
+  ::predicate-novar)
+
 ;; Objects (includes Lists)
 
 (s/def ::object
@@ -115,8 +121,8 @@
         :ax/prefix-iri ax/prefix-iri-spec
         :ax/bnode      ax/bnode-spec
         :ax/literal    ax/literal-spec
-        :triple/list   ::list-nopath
-        :triple/bnodes ::bnodes-nopath))
+        :triple/list   ::list-novar
+        :triple/bnodes ::bnodes-novar))
 
 (s/def ::object-noblank
   (s/or :ax/var        ax/variable-spec
@@ -212,10 +218,10 @@
   (make-pred-objs-spec ::predicate-novar obj-set-novar-spec))
 
 (def pred-objs-noblank-spec
-  (make-pred-objs-spec ::predicate-nopath obj-set-noblank-spec))
+  (make-pred-objs-spec ::predicate-noblank obj-set-noblank-spec))
 
 (def pred-objs-novar-noblank-spec
-  (make-pred-objs-spec ::predicate-novar obj-set-novar-noblank-spec))
+  (make-pred-objs-spec ::predicate-novar-noblank obj-set-novar-noblank-spec))
 
 ;; Subject Predicate Object
 
@@ -259,16 +265,16 @@
   (s/tuple ::subject ::predicate ::object))
 
 (def triple-vec-nopath-spec
-  (s/tuple ::subject ::predicate-nopath ::object))
+  (s/tuple ::subject-nopath ::predicate-nopath ::object-nopath))
 
 (def triple-vec-novar-spec
   (s/tuple ::subject-novar ::predicate-novar ::object-novar))
 
 (def triple-vec-noblank-spec
-  (s/tuple ::subject-noblank ::predicate-nopath ::object-noblank))
+  (s/tuple ::subject-noblank ::predicate-noblank ::object-noblank))
 
 (def triple-vec-novar-noblank-spec
-  (s/tuple ::subject-novar-noblank ::predicate-novar ::object-novar-noblank))
+  (s/tuple ::subject-novar-noblank ::predicate-novar-noblank ::object-novar-noblank))
 
 ;; Triple Vectors (Coll, no predicates + objects)
 

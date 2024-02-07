@@ -178,4 +178,126 @@
                 [:ax/prefix-iri :q]
                 [:ax/literal "w"]]]
              (s/conform ts/triple-spec
-                        '[[:p1 ?x1 :p2 ?x2] :q "w"]))))))
+                        '[[:p1 ?x1 :p2 ?x2] :q "w"])))
+      (testing "and path + var in subject"
+        (is (= '[:triple.vec/spo
+                 [[:triple/bnodes
+                   [[[:triple/path
+                      [:path/branch
+                       [[:path/op cat]
+                        [:path/paths
+                         [[:path/terminal [:ax/prefix-iri :p1]]
+                          [:path/terminal [:ax/prefix-iri :p2]]]]]]]
+                     [:ax/var ?x]]]]
+                  [:ax/prefix-iri :q]
+                  [:ax/literal "w"]]]
+               (s/conform ts/triple-spec
+                          '[[(cat :p1 :p2) ?x] :q "w"])))
+        (is (= '[:triple.nform/spo
+                 [[[:triple/bnodes
+                     [[[:triple/path
+                        [:path/branch
+                         [[:path/op cat]
+                          [:path/paths
+                           [[:path/terminal [:ax/prefix-iri :p1]]
+                            [:path/terminal [:ax/prefix-iri :p2]]]]]]]
+                       [:ax/var ?x]]]]
+                   [:triple.nform/po
+                    [[[:ax/prefix-iri :q]
+                      [:triple.nform/o
+                       [[:ax/literal "w"]]]]]]]]]
+               (s/conform ts/triple-spec
+                          '{[(cat :p1 :p2) ?x] {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-nopath-spec
+                           '[[(cat :p1 :p2) ?x] :q "w"])))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '[[(cat :p1 :p2) ?x] :q "w"])))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '[[(cat :p1 :p2) ?x] :q "w"])))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '[[(cat :p1 :p2) ?x] :q "w"])))
+        (is (not (s/valid? ts/triple-nopath-spec
+                           '[[(cat :p1 :p2) ?x]])))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '[[(cat :p1 :p2) ?x]])))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '[[(cat :p1 :p2) ?x]])))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '[[(cat :p1 :p2) ?x]])))
+        (is (not (s/valid? ts/triple-nopath-spec
+                           '{[(cat :p1 :p2) ?x] {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '{[(cat :p1 :p2) ?x] {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '{[(cat :p1 :p2) ?x] {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '{[(cat :p1 :p2) ?x] {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '[(?x ?y) :q "w"])))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '[(?x ?y) :q "w"])))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '[(?x ?y) :q "w"])))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '{(?x ?y) {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '{(?x ?y) {:q #{"w"}}})))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '{(?x ?y) {:q #{"w"}}}))))
+      (testing "and path + var in object"
+        (is (= '[:triple.vec/spo
+                 [[:ax/prefix-iri :x]
+                  [:ax/prefix-iri :q]
+                  [:triple/bnodes
+                   [[[:triple/path
+                      [:path/branch
+                       [[:path/op cat]
+                        [:path/paths
+                         [[:path/terminal [:ax/prefix-iri :r1]]
+                          [:path/terminal [:ax/prefix-iri :r2]]]]]]]
+                     [:ax/literal "v"]]]]]]
+               (s/conform ts/triple-spec
+                          '[:x :q [(cat :r1 :r2) "v"]])))
+        (is (= '[:triple.nform/spo
+                 [[[:ax/prefix-iri :x]
+                   [:triple.nform/po
+                    [[[:ax/prefix-iri :q]
+                      [:triple.nform/o
+                       [[:triple/bnodes
+                         [[[:triple/path
+                            [:path/branch
+                             [[:path/op cat]
+                              [:path/paths
+                               [[:path/terminal [:ax/prefix-iri :r1]]
+                                [:path/terminal [:ax/prefix-iri :r2]]]]]]]
+                           [:ax/literal "v"]]]]]]]]]]]]
+               (s/conform ts/triple-spec
+                          '{:x {:q #{[(cat :r1 :r2) "v"]}}})))
+        (is (not (s/valid? ts/triple-nopath-spec
+                           '[:x :q [(cat :r1 :r2) "v"]])))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '[:x :q [:r ?v]])))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '[:x :q [:r ?v]])))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '[:x :q [:r ?v]])))
+        (is (not (s/valid? ts/triple-nopath-spec
+                           '{:x {:q #{[(cat :r1 :r2) "v"]}}})))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '{:x {:q #{[:r ?v]}}})))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '{:x {:q #{[:r ?v]}}})))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '{:x {:q #{[:r ?v]}}})))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '[:x :q (?w ?v)])))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '[:x :q (?w ?v)])))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '[:x :q (?w ?v)])))
+        (is (not (s/valid? ts/triple-novar-spec
+                           '{:x {:q #{(?w ?v)}}})))
+        (is (not (s/valid? ts/triple-noblank-spec
+                           '{:x {:q #{(?w ?v)}}})))
+        (is (not (s/valid? ts/triple-novar-noblank-spec
+                           '{:x {:q #{(?w ?v)}}})))))))
