@@ -110,8 +110,6 @@ Objects can be one of the following:
 
 **NOTE:** Technically literals are allowed in subject position according to the SPARQL spec, but no RDF implementation accepts that, so Flint does not allow for subject literals either (unless they are in an RDF list as described below).
 
-**NOTE:** SPARQL has [syntactic sugar](https://www.w3.org/TR/sparql11-query/#collections) for easy writing of RDF lists, but for simplicity that is not implemented in Flint.
-
 ## RDF Lists
 
 Flint supports SPARQL's [syntactic sugar](https://www.w3.org/TR/sparql11-query/#collections) for easy writing of RDF lists. For example:
