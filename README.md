@@ -18,7 +18,7 @@ If you are using Apache Jena, check out the [flint-jena](https://github.com/yeta
 Add the following to your `deps.edn` map.
 
 ```clojure
-com.yetanalytics/flint {:mvn/version "0.2.1"
+com.yetanalytics/flint {:mvn/version "0.3.0"
                         :exclusions [org.clojure/clojure
                                      org.clojure/clojurescript]}
 ```

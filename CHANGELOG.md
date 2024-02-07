@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.0
+
+- Add support for RDF List syntactic sugar.
+- Add support for blank node vector syntactic sugar.
+- Modify the AST tree for triples to support the new features and to remove redundant nodes in the tree.
+- Rework blank node validation to make the implementation simpler (this results in minor changes to the error output).
+
 ## v0.2.1
 
 - Update GitHub Actions CI and CD to remove deprecation warnings.
