@@ -2,7 +2,12 @@
   (:require [clojure.test :refer [deftest testing is]]
             [com.yetanalytics.flint.axiom.iri :as iri]
             [com.yetanalytics.flint.format :as f]
-            [com.yetanalytics.flint.format.axiom]))
+            [com.yetanalytics.flint.format.axiom])
+  #?(:clj (:import [java.time
+                    Instant
+                    LocalDate LocalTime LocalDateTime
+                    OffsetTime OffsetDateTime
+                    ZonedDateTime])))
 
 (deftest axiom-format
   (testing "Formatting terminal AST nodes"
@@ -56,18 +61,49 @@
                   ts-str-2 "\"1970-01-01T00:00:00Z\"^^xsd:dateTime"
                   ts-str-3 "\"1970-01-01\"^^xsd:date"
                   ts-str-4 "\"00:00:00Z\"^^xsd:time"
-                  literal  #inst "2022-01-20T16:22:19Z"
-                  instant  (java.time.Instant/parse "2022-01-20T16:22:19Z")
-                  date     (java.util.Date/from instant)
+                  literal-1 #inst "2022-01-20T16:22:19Z"
+                  literal-2 #inst "1970-01-01T00:00:00Z"
+                  instant-1 (Instant/parse "2022-01-20T16:22:19Z")
+                  instant-2 (Instant/parse "1970-01-01T00:00:00Z")
+                  date     (java.util.Date/from instant-1)
                   fmt-ts   (fn [ts] (f/format-ast-node
                                      {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
                                      [:ax/literal ts]))]
-              (is (= ts-str-1 (fmt-ts literal)))
-              (is (= ts-str-1 (fmt-ts instant)))
+              (is (= ts-str-1 (fmt-ts literal-1)))
+              (is (= ts-str-2 (fmt-ts literal-2)))
+              (is (= ts-str-1 (fmt-ts instant-1)))
+              (is (= ts-str-2 (fmt-ts instant-2)))
               (is (= ts-str-1 (fmt-ts date)))
               (is (= ts-str-2 (fmt-ts (java.sql.Timestamp. 0))))
               (is (= ts-str-3 (fmt-ts (java.sql.Date. 0))))
               (is (= ts-str-4 (fmt-ts (java.sql.Time. 0)))))
        :cljs (is (string?
                   (f/format-ast-node {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
-                                     [:ax/literal (js/Date.)]))))))
+                                     [:ax/literal (js/Date.)])))))
+  #?(:clj
+     (testing "DateTime formatting work on all java.time instances"
+       ;; Note that here, zeroed-out seconds are preserved
+       (is (= "\"2022-01-20T16:22:00\"^^xsd:dateTime"
+              (f/format-ast-node
+               {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
+               [:ax/literal (LocalDateTime/parse "2022-01-20T16:22:00")])))
+       (is (= "\"2022-01-20T16:22:00-05:00\"^^xsd:dateTime"
+              (f/format-ast-node
+               {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
+               [:ax/literal (ZonedDateTime/parse "2022-01-20T16:22:00-05:00")])))
+       (is (= "\"2022-01-20T16:22:00-05:00\"^^xsd:dateTime"
+              (f/format-ast-node
+               {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
+               [:ax/literal (OffsetDateTime/parse "2022-01-20T16:22:00-05:00")])))
+       (is (= "\"16:22:00\"^^xsd:time"
+              (f/format-ast-node
+               {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
+               [:ax/literal (LocalTime/parse "16:22:00")])))
+       (is (= "\"16:22:00-05:00\"^^xsd:time"
+              (f/format-ast-node
+               {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
+               [:ax/literal (OffsetTime/parse "16:22:00-05:00")])))
+       (is (= "\"2022-01-20\"^^xsd:date"
+              (f/format-ast-node
+               {:iri-prefix-m {iri/xsd-iri-prefix "xsd"}}
+               [:ax/literal (LocalDate/parse "2022-01-20")]))))))
