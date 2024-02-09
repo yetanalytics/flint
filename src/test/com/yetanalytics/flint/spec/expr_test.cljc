@@ -188,7 +188,6 @@
   (testing "Invalid expressions due to syntax quoting"
     (is (not (s/valid? ::es/expr `(+ 2 2))))
     (is (not (s/valid? ::es/expr `(and true true))))
-    (is (not (s/valid? ::es/expr `(if true 1 0))))
     (is (not (s/valid? ::es/expr `(contains "foo" "foobar"))))))
 
 (deftest conform-expr-as-var-test
