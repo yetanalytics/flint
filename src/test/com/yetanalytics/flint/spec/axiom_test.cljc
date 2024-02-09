@@ -240,11 +240,14 @@
   (testing "variables"
     (is (s/valid? ax/variable-spec '?foo))
     (is (not (s/valid? ax/variable-spec "?foo")))
-    (is (not (s/valid? ax/variable-spec 'foo))))
+    (is (not (s/valid? ax/variable-spec 'foo)))
+    (is (not (s/valid? ax/variable-spec `?foo))))
   (testing "blank nodes"
     (is (s/valid? ax/bnode-spec '_))
     (is (s/valid? ax/bnode-spec '_foo))
-    (is (not (s/valid? ax/bnode-spec 'foo))))
+    (is (not (s/valid? ax/bnode-spec 'foo)))
+    (is (not (s/valid? ax/bnode-spec `_)))
+    (is (not (s/valid? ax/bnode-spec `_foo))))
   (testing "string literals"
     (is (s/valid? ax/literal-spec "foo bar"))
     (is (s/valid? ax/literal-spec "\\\"\\n\\r\\t\\\""))

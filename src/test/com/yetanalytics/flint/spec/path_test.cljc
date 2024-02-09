@@ -139,4 +139,12 @@
                            :in     [1]}]
             ::s/spec ::ps/path
             ::s/value '(not (cat :foo/bar :bar/baz))}
-           (s/explain-data ::ps/path '(not (cat :foo/bar :bar/baz)))))))
+           (s/explain-data ::ps/path '(not (cat :foo/bar :bar/baz)))))
+    (testing "Invalid expressions due to syntax quoting"
+      (is (not (s/valid? ::ps/path `(alt :foo/bar :baz/qux))))
+      (is (not (s/valid? ::ps/path `(cat :foo/bar :baz/qux))))
+      (is (not (s/valid? ::ps/path `(inv :foo/bar))))
+      (is (not (s/valid? ::ps/path `(not :foo/bar))))
+      (is (not (s/valid? ::ps/path `(? :foo/bar))))
+      (is (not (s/valid? ::ps/path `(* :foo/bar))))
+      (is (not (s/valid? ::ps/path `(+ :foo/bar)))))))
