@@ -65,7 +65,7 @@
    (defmacro extend-xsd-literal
      "Macro that expands into a basic `extend-type` over the Literal protocol.
       If `force-iri?` is true, then the resulting literal always has the XSD
-      datatype IRI appended; `strval-fn` overrides the default `.toString` call.
+      datatype IRI appended; `strval-fn` overrides the default call to `str`.
       Without any kwargs, `(extend-xsd-literal t iri-suffix)` expands into:
       
       ```
@@ -76,7 +76,7 @@
           ([n] (p/-format-literal n {}))
           ([n opts] (fmt-impl/format-literal n opts)))
         (-format-literal-strval
-          [n] (.toString n))
+          [n] (str n))
         (-format-literal-lang-tag
           [n] nil)
         (-format-literal-url
@@ -84,7 +84,8 @@
           ([n opts] (fmt-impl/format-xsd-iri iri-suffix opts))))
       ```"
      [t iri-suffix & {:keys [force-iri?
-                             strval-fn]}]
+                             strval-fn]
+                      :or {strval-fn str}}]
      `(extend-type ~t
         p/Literal
         (~'-valid-literal? [~'_] true)
@@ -95,9 +96,7 @@
               `(fmt-impl/format-literal ~'n (assoc ~'opts :force-iri? true))
               `(fmt-impl/format-literal ~'n ~'opts))))
         (~'-format-literal-strval [~'n]
-          ~(if (some? strval-fn)
-             `(~strval-fn ~'n)
-             `(.toString ~'n)))
+          (~strval-fn ~'n))
         (~'-format-literal-lang-tag [~'_] nil)
         (~'-format-literal-url
           ([~'n] (p/-format-literal-url ~'n {}))
