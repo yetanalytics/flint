@@ -26,7 +26,7 @@
 
 (defn- op->str
   [op]
-  (let [op-name (name op)]
+  (let [op-name (str op)]
     (case op-name
       "-"      "-" ; Otherwise will be removed below
       "not="   "!="

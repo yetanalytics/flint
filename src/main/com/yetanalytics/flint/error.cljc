@@ -160,7 +160,7 @@
                      (->> nots (mapcat :variables) distinct sort)
                      (->> ins (map :variable) distinct sort))
         var-count  (->> var-coll count)
-        var-strs   (->> var-coll (map name))
+        var-strs   (->> var-coll (map str))
         var-str    (join-str-coll var-strs)]
     (fmt "%d variable%s%s in %d `expr AS var` clause%s %s %s defined in scope: %s!'"
          var-count
@@ -197,7 +197,7 @@
              (plural-has wild-count)))
       (let [var-coll (->> errs (mapcat :variables) distinct sort)
             var-count (->> var-coll count)
-            var-strs  (->> var-coll (map name))
+            var-strs  (->> var-coll (map str))
             var-str   (join-str-coll var-strs)]
         (fmt "%d variable%s%s %s illegally used in SELECTs with aggregates: %s!"
              var-count
@@ -220,7 +220,7 @@
   [bnode-err-m index-str]
   (let [bnode-coll  (->> bnode-err-m :errors (map :bnode) distinct)
         bnode-count (count bnode-coll)
-        bnode-strs  (->> bnode-coll (map name))
+        bnode-strs  (->> bnode-coll (map str))
         bnode-str   (if (= 1 bnode-count)
                       (first bnode-strs)
                       (fmt "%s and %s"

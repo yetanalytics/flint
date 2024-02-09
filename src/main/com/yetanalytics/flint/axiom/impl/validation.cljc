@@ -580,13 +580,13 @@
 (defn valid-var-symbol?
   "Is `var-sym` a symbol that starts with `?`?"
   [var-sym]
-  (valid-var-str? (name var-sym)))
+  (valid-var-str? (str var-sym)))
 
 (defn valid-bnode-symbol?
   "Is `bnode-sym` a symbol that starts with `_` and has zero or more
    trailing chars?"
   [bnode-sym]
-  (valid-bnode-str? (name bnode-sym)))
+  (valid-bnode-str? (str bnode-sym)))
 
 ;; Literals
 
@@ -617,4 +617,3 @@
                   (string? lval)
                   (valid-lang-tag-str? (name ltag))
                   (valid-literal-str? lval)))))
-

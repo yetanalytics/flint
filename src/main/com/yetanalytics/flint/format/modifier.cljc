@@ -3,7 +3,7 @@
             [com.yetanalytics.flint.format :as f]))
 
 (defmethod f/format-ast-node :mod/op [_ [_ op]]
-  (name op))
+  (str op))
 
 (defmethod f/format-ast-node :mod/asc-desc [_ [_ [op sub-expr]]]
   (let [op-name (cstr/upper-case op)]
