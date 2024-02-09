@@ -7,6 +7,7 @@
 - Modify the AST tree for triples to support the new features and to remove redundant nodes in the tree.
 - Rework blank node validation to make the implementation simpler (this results in minor changes to the error output).
 - Disallow syntax-quoting for symbols.
+- Fix bug where timestamps with zeroed-out seconds have the seconds omitted.
 
 ## v0.2.1
 
