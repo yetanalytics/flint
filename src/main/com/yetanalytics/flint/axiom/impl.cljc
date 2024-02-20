@@ -65,9 +65,10 @@
    (defmacro extend-xsd-literal
      "Macro that expands into a basic `extend-type` over the Literal protocol.
       If `force-iri?` is true, then the resulting literal always has the XSD
-      datatype IRI appended; `strval-fn` overrides the default `.toString` call.
+      datatype IRI appended; `strval-fn` overrides the default call to `str`.
       Without any kwargs, `(extend-xsd-literal t iri-suffix)` expands into:
       
+      ```
       (extend-type t p/Literal
         (-valid-literal?
           [_] true)
@@ -75,14 +76,16 @@
           ([n] (p/-format-literal n {}))
           ([n opts] (fmt-impl/format-literal n opts)))
         (-format-literal-strval
-          [n] (.toString n))
+          [n] (str n))
         (-format-literal-lang-tag
           [n] nil)
         (-format-literal-url
           ([n] (p/-format-literal-url n {}))
-          ([n opts] (fmt-impl/format-xsd-iri iri-suffix opts))))"
+          ([n opts] (fmt-impl/format-xsd-iri iri-suffix opts))))
+      ```"
      [t iri-suffix & {:keys [force-iri?
-                             strval-fn]}]
+                             strval-fn]
+                      :or {strval-fn str}}]
      `(extend-type ~t
         p/Literal
         (~'-valid-literal? [~'_] true)
@@ -93,9 +96,7 @@
               `(fmt-impl/format-literal ~'n (assoc ~'opts :force-iri? true))
               `(fmt-impl/format-literal ~'n ~'opts))))
         (~'-format-literal-strval [~'n]
-          ~(if (some? strval-fn)
-             `(~strval-fn ~'n)
-             `(.toString ~'n)))
+          (~strval-fn ~'n))
         (~'-format-literal-lang-tag [~'_] nil)
         (~'-format-literal-url
           ([~'n] (p/-format-literal-url ~'n {}))
@@ -297,9 +298,40 @@
 ;; exceptions if `.toInstant` is directly called on them.
 
 #?(:clj
+   (defn- local-ts->local-str
+     [^java.time.LocalDateTime local-ts]
+     (.format java.time.format.DateTimeFormatter/ISO_LOCAL_DATE_TIME
+              local-ts)))
+
+#?(:clj
    (defn- zoned-ts->offset-str
      [^java.time.ZonedDateTime zoned-ts]
-     (.toString (.toOffsetDateTime zoned-ts))))
+     (.format java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME
+              (.toOffsetDateTime zoned-ts))))
+
+#?(:clj
+   (defn- offset-ts->offset-str
+     [^java.time.OffsetDateTime offset-ts]
+     (.format java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME
+              offset-ts)))
+
+#?(:clj
+   (defn- local-time->local-str
+     [^java.time.LocalTime local-time]
+     (.format java.time.format.DateTimeFormatter/ISO_LOCAL_TIME
+              local-time)))
+
+#?(:clj
+   (defn- offset-time->offset-str
+     [^java.time.OffsetTime offset-time]
+     (.format java.time.format.DateTimeFormatter/ISO_OFFSET_TIME
+              offset-time)))
+
+#?(:clj
+   (defn- local-date->local-str
+     [^java.time.LocalDate local-date]
+     (.format java.time.format.DateTimeFormatter/ISO_LOCAL_DATE
+              local-date)))
 
 #?(:clj
    (defn- date->inst-str
@@ -333,14 +365,19 @@
                          :strval-fn zoned-ts->offset-str
                          :force-iri? true)
      (extend-xsd-literal java.time.OffsetDateTime "dateTime"
+                         :strval-fn offset-ts->offset-str
                          :force-iri? true)
      (extend-xsd-literal java.time.OffsetTime "time"
+                         :strval-fn offset-time->offset-str
                          :force-iri? true)
      (extend-xsd-literal java.time.LocalDateTime "dateTime"
+                         :strval-fn local-ts->local-str
                          :force-iri? true)
      (extend-xsd-literal java.time.LocalDate "date"
+                         :strval-fn local-date->local-str
                          :force-iri? true)
      (extend-xsd-literal java.time.LocalTime "time"
+                         :strval-fn local-time->local-str
                          :force-iri? true)
      ;; java.util.Date classes
      (extend-xsd-literal java.util.Date "dateTime"
