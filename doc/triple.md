@@ -108,9 +108,65 @@ Objects can be one of the following:
 
 **NOTE:** Variables are not allowed in triples in `DELETE DATA` OR `INSERT DATA` clauses.
 
-**NOTE:** Technically literals are allowed in subject position according to the SPARQL spec, but no RDF implementation accepts that, so Flint does not allow for subject literals either.
+**NOTE:** Technically literals are allowed in subject position according to the SPARQL spec, but no RDF implementation accepts that, so Flint does not allow for subject literals either (unless they are in an RDF list as described below).
 
-**NOTE:** SPARQL has [syntactic sugar](https://www.w3.org/TR/sparql11-query/#collections) for easy writing of RDF lists, but for simplicity that is not implemented in Flint.
+## RDF Lists
+
+Flint supports SPARQL's [syntactic sugar](https://www.w3.org/TR/sparql11-query/#collections) for easy writing of RDF lists. For example:
+```clojure
+{:select [?x]
+ :where  [[(1 ?x 3 4) ?p ?o]]}
+```
+
+becomes
+```sparql
+SELECT ?x
+WHERE {
+    (1 ?x 3 4) ?p ?o
+}
+```
+which should then expanded out into an RDF list by your SPARQL query engine.
+
+RDF lists be placed in both subject and object position. If they are placed in subject position, then predicates and objects are optional (which is not usually the case). The predicate-object map can be left empty in normal form representation:
+```clojure
+{:select [?x]
+ :where  [{(1 ?x 3 4) {}}]}
+```
+
+and can be left out entirely in triple representation:
+```clojure
+{:select [?x]
+ :where  [[(1 ?x 3 4)]]}
+```
+
+RDF lists can also be nested, both with themselves and with blank node vectors (see below):
+```clojure
+{:select [?x]
+ :where  [[(1 [:p :q] (2))]]}
+```
+
+## Blank Node Vectors
+
+Flint also has support for SPARQL's [blank node syntactic sugar](https://www.w3.org/TR/sparql11-query/#QSynBlankNodes), which will be expanded out by the SPARQL engine. For example:
+
+```clojure
+{:prefixes {:foaf "<http://xmlns.com/foaf/0.1/>"
+ :select   [?name]
+ :where    [{[:foaf/name ?name
+              :foaf/mbox "<mailto:foo@example.org>"] {}}]}}
+```
+
+becomes:
+```sparql
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+SELECT ?name
+WHERE {
+    [ foaf:name ?name
+      foaf:mbox <mailto:foo@example.com> ] .
+}
+```
+
+Note that like with RDF lists, the predicate and object may be omitted here.
 
 ## Property Paths
 

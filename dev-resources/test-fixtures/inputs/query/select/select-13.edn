@@ -1,0 +1,7 @@
+;; SELECT with blank node vectors
+{:prefixes {:$    "<http://foo.org/>"
+            :foaf "<http://xmlns.com/foaf/0.1/>"}
+ :select   [?x ?name]
+ :where    [[[:p1 "v"] :q1 "w"]
+            [:x :q2 [:p2 "v"]]
+            [[:foaf/name ?name :foaf/mbox "<mailto:bar@example.com>"]]]}

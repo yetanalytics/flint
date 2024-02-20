@@ -41,9 +41,10 @@
     ;; (We can't `require` it due to circular dependencies.)
     (is (= [:expr/branch [[:expr/op 'exists]
                           [:expr/args [[:where-sub/where
-                                        [[:triple/vec '[[:ax/var ?s]
-                                                        [:ax/var ?p]
-                                                        [:ax/var ?o]]]]]]]]]
+                                        [[:where/triple
+                                          [:triple.vec/spo '[[:ax/var ?s]
+                                                             [:ax/var ?p]
+                                                             [:ax/var ?o]]]]]]]]]]
            (s/conform ::es/expr '(exists [[?s ?p ?o]]))))
     (is (= [:expr/branch [[:expr/op 'contains]
                           [:expr/args [[:expr/terminal [:ax/literal "foo"]]

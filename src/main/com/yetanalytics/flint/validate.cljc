@@ -3,6 +3,38 @@
             [com.yetanalytics.flint.spec.expr :as es]
             [com.yetanalytics.flint.util :as u]))
 
+(defn- bgp-divider?
+  "Is `ast-node` a divider between BGPs? BGPs are divided by `:where/special`
+   clauses, with the exception of filters (unless they themselves have a
+   subquery):
+   
+     [:where/triple
+      [:triple.vec/spo ...]]     => 0
+     [:where/triple
+      [:triple.nform/spo ...]]   => 0
+     [:where/special
+      [:where/filter ...]]   => 0 ; FILTERs don't divide BGPs
+     [:where/special
+      [:where/optional ...]] => X ; BGP divider
+     [:where/triple
+      [:triple.nform/spo ...]]   => 1
+   "
+  [loc]
+  (let [?left-node (some-> loc zip/left zip/node)
+        ?curr-node (some-> loc zip/node)]
+    (or
+     ;; BGPs are separated by special clauses, with the exception of FILTER...
+     (and (some-> ?left-node (get-in [0]) (= :where/special))
+          (some-> ?left-node (get-in [1 0]) (not= :where/filter)))
+     ;; BGPs are also separated via nesting (which also separates BGPs at the
+     ;; top level)
+     (some-> ?curr-node (get-in [0]) (= :where-sub/where))
+     ;; ...including the case of FILTER (NOT) EXISTS, which has its own BGP
+     ;; as a subquery (c.f. MINUS)
+     (and (some-> ?curr-node (get-in [0]) (= :expr/branch))
+          (or (some-> ?curr-node (get-in [1 0]) (= [:expr/op 'exists]))
+              (some-> ?curr-node (get-in [1 0]) (= [:expr/op 'not-exists])))))))
+
 (def axiom-keys
   #{:ax/iri :ax/prefix-iri :ax/var :ax/bnode :ax/wildcard :ax/rdf-type
     :ax/str-lit :ax/lmap-list :ax/num-lit :ax/bool-lit :ax/dt-lit
@@ -17,12 +49,15 @@
 (defn- ast-children
   [[k children]]
   (cond
-    (#{:triple/spo :triple/po} k)
+    ;; These values are colls of non-AST colls
+    (#{:triple/bnodes :triple.nform/spo :triple.nform/po} k)
     (apply concat children)
+    ;; These values are either AST nodes or scalars
     (or (and (vector? children)
              (keyword? (first children)))
         (not (coll? children)))
     [children]
+    ;; These values are colls of AST nodes
     :else
     children))
 
@@ -65,22 +100,37 @@
 
 (defn collect-nodes
   [ast]
-  (loop [loc    (ast-zipper ast)
-         node-m {}]
+  (loop [loc     (ast-zipper ast)
+         node-m  {}
+         bgp-idx 0]
     (if-not (zip/end? loc)
-      (let [ast-node (zip/node loc)]
+      (let [ast-node (zip/node loc)
+            bgp-idx* (cond-> bgp-idx (bgp-divider? loc) inc)]
         (if-some [k (u/get-keyword ast-node)]
           (cond
-            ;; Prefixes, blank nodes, and BIND clauses
-            (node-keys k)
-            (recur (zip/next loc)
-                   (update-in node-m [k (second ast-node)] conj loc))
+            ;; Prefixes, BIND (expr AS var), and SELECT ... (expr AS var) ...
+            (#{:ax/prefix-iri :where/bind :select/expr-as-var} k)
+            (let [v (second ast-node)]
+              (recur (zip/next loc)
+                     (update-in node-m [k v] conj loc)
+                     bgp-idx*))
+            ;; Blank nodes
+            (#{:ax/bnode} k)
+            (let [bnode     (second ast-node)
+                  top-level (-> loc zip/path second first)
+                  bgp-path  (cond-> [top-level]
+                              (= :where top-level)
+                              (conj bgp-idx*))]
+              (recur (zip/next loc)
+                     (update-in node-m [k bnode bgp-path] conj loc)
+                     bgp-idx*))
             ;; SELECT with GROUP BY
             (#{:group-by} k)
             (let [select-loc (zip/up loc)
                   select     (zip/node select-loc)]
               (recur (zip/next loc)
-                     (update node-m :agg/select assoc select select-loc)))
+                     (update node-m :agg/select assoc select select-loc)
+                     bgp-idx*))
             ;; SELECT with an aggregate expression
             (#{:expr/branch} k)
             (let [op (-> ast-node ; [:expr/branch ...]
@@ -97,9 +147,9 @@
                                          assoc
                                          select
                                          select-loc)]
-                  (recur (zip/next loc) node-m*))
-                (recur (zip/next loc) node-m)))
+                  (recur (zip/next loc) node-m* bgp-idx*))
+                (recur (zip/next loc) node-m bgp-idx*)))
             :else
-            (recur (zip/next loc) node-m))
-          (recur (zip/next loc) node-m)))
+            (recur (zip/next loc) node-m bgp-idx*))
+          (recur (zip/next loc) node-m bgp-idx*)))
       node-m)))

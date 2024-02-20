@@ -36,47 +36,63 @@
     (testing "in basic graph patterns"
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars
-              '[:triple/vec [[:ax/var ?x]
-                             [:ax/var ?y]
-                             [:ax/var ?z]]])))
+              '[:triple.vec/spo [[:ax/var ?x]
+                                 [:ax/var ?y]
+                                 [:ax/var ?z]]])))
       (is (= '[?s ?p ?o]
              (vv/get-scope-vars
-              '[:triple/nform
-                [:triple/spo
-                 [[[:ax/var ?s]
-                   [:triple/po [[[:ax/var ?p]
-                                 [:triple/o [[:ax/var ?o]]]]]]]]]])))
+              '[:triple.nform/spo
+               [[[:ax/var ?s]
+                 [:triple.nform/po
+                  [[[:ax/var ?p]
+                    [:triple.nform/o [[:ax/var ?o]]]]]]]]])))
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars
               '[:where-sub/where
-                [[:triple/vec [[:ax/var ?x]
-                               [:ax/var ?y]
-                               [:ax/var ?z]]]]])))
+                [[:where/triple
+                  [:triple.vec/spo [[:ax/var ?x]
+                                    [:ax/var ?y]
+                                    [:ax/var ?z]]]]]])))
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars
               '[:where-sub/where
-                [[:triple/vec [[:ax/var ?x]
-                               [:ax/var ?y]
-                               [:ax/var ?z]]]]])))
+                [[:where/triple
+                  [:triple.vec/spo [[:ax/var ?x]
+                                    [:ax/var ?y]
+                                    [:ax/var ?z]]]]]])))
       (is (= '[?x ?ya ?yb ?z]
              (vv/get-scope-vars
-              '[:triple/vec
+              '[:triple.vec/spo
                 [[:ax/var ?x]
                  [:triple/path
                   [:path/branch [[:path/op cat]
                                  [:path/paths
                                   [[:path/terminal [:ax/var ?ya]]
                                    [:path/terminal [:ax/var ?yb]]]]]]]
-                 [:ax/var ?z]]]))))
+                 [:ax/var ?z]]])))
+      (is (= '[?x1 ?x2 ?y ?z1 ?z2]
+             (vv/get-scope-vars
+              '[:triple.vec/spo [[:triple/list [[:ax/var ?x1] [:ax/var ?x2]]]
+                                 [:ax/var ?y]
+                                 [:triple/bnodes [[[:ax/var ?z1] [:ax/var ?z2]]]]]])))
+      (is (= '[?x1 ?x2 ?y ?z1 ?z2]
+             (vv/get-scope-vars
+              '[:triple.nform/spo
+                [[[:triple/list [[:ax/var ?x1] [:ax/var ?x2]]]
+                  [:triple.nform/po
+                   [[[:ax/var ?y]
+                     [:triple.nform/o
+                      [[:triple/bnodes [[[:ax/var ?z1] [:ax/var ?z2]]]]]]]]]]]]))))
     (testing "in sub-SELECT queries"
       (is (= '[?x ?y ?z]
              (vv/get-scope-vars
               '[:where-sub/select
                 [[:select [:ax/wildcard '*]]
                  [:where [:where-sub/where
-                          [[:triple/vec [[:ax/var ?x]
-                                         [:ax/var ?y]
-                                         [:ax/var ?z]]]]]]]])))
+                          [[:where/triple
+                            [:triple.vec/spo [[:ax/var ?x]
+                                              [:ax/var ?y]
+                                              [:ax/var ?z]]]]]]]]])))
       ;; This is an illegal sub-SELECT since it has both a wildcard and
       ;; GROUP BY, but we want to cover all of our bases.
       (is (= '[?x ?y ?z ?w]
@@ -84,9 +100,10 @@
               '[:where-sub/select
                 [[:select [:ax/wildcard '*]]
                  [:where [:where-sub/where
-                          [[:triple/vec [[:ax/var ?x]
-                                         [:ax/var ?y]
-                                         [:ax/var ?z]]]]]]
+                          [[:where/triple
+                            [:triple.vec/spo [[:ax/var ?x]
+                                              [:ax/var ?y]
+                                              [:ax/var ?z]]]]]]]
                  [:group-by [[:ax/var ?w]]]]])))
       (is (= '[?a ?b ?c]
              (vv/get-scope-vars
@@ -98,9 +115,10 @@
                              [:expr/as-var [[:expr/terminal [:ax/num-lit 2]]
                                             [:ax/var ?c]]]]]]]
                  [:where [:where-sub/where
-                          [[:triple/vec [[:ax/var ?x]
-                                         [:ax/var ?y]
-                                         [:ax/var ?z]]]]]]
+                          [[:where/triple
+                            [:triple.vec/spo [[:ax/var ?x]
+                                              [:ax/var ?y]
+                                              [:ax/var ?z]]]]]]]
                  [:group-by [[:ax/var ?a]
                              [:ax/var ?b]
                              [:ax/var ?c]]]]]))))
@@ -117,33 +135,41 @@
             '[:where-sub/where
               [[:where/recurse
                 [:where-sub/where
-                 [[:triple/vec [[:ax/var ?s1] [:ax/var ?p1] [:ax/var ?o1]]]]]]
+                 [[:where/triple
+                   [:triple.vec/spo
+                    [[:ax/var ?s1] [:ax/var ?p1] [:ax/var ?o1]]]]]]]
                [:where/union
                 [[:where-sub/where
-                  [[:triple/vec
-                    [[:ax/var ?s2] [:ax/var ?p2] [:ax/var ?o2]]]]]
+                  [[:where/triple
+                    [:triple.vec/spo
+                     [[:ax/var ?s2] [:ax/var ?p2] [:ax/var ?o2]]]]]]
                  [:where-sub/where
-                  [[:triple/vec
-                    [[:ax/var ?s3] [:ax/var ?p3] [:ax/var ?o3]]]]]]]
+                  [[:where/triple
+                    [:triple.vec/spo
+                     [[:ax/var ?s3] [:ax/var ?p3] [:ax/var ?o3]]]]]]]]
                [:where/optional
                 [:where-sub/where
-                 [[:triple/vec
-                   [[:ax/var ?s4] [:ax/var ?p4] [:ax/var ?o4]]]]]]
+                 [[:where/triple
+                   [:triple.vec/spo
+                    [[:ax/var ?s4] [:ax/var ?p4] [:ax/var ?o4]]]]]]]
                [:where/graph
                 [[:ax/var ?graphTerm]
                  [:where-sub/where
-                  [[:triple/vec
-                    [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]
+                  [[:where/triple
+                    [:triple.vec/spo
+                     [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]]
                [:where/service
                 [[:ax/var ?serviceTerm]
                  [:where-sub/where
-                  [[:triple/vec
-                    [[:ax/var ?s6] [:ax/var ?p6] [:ax/var ?o6]]]]]]]
+                  [[:where/triple
+                    [:triple.vec/spo
+                     [[:ax/var ?s6] [:ax/var ?p6] [:ax/var ?o6]]]]]]]]
                [:where/service-silent
                 [[:ax/var ?serviceSilentTerm]
                  [:where-sub/where
-                  [[:triple/vec
-                    [[:ax/var ?s7] [:ax/var ?p7] [:ax/var ?o7]]]]]]]
+                  [[:where/triple
+                    [:triple.vec/spo
+                     [[:ax/var ?s7] [:ax/var ?p7] [:ax/var ?o7]]]]]]]]
                [:where/bind
                 [:expr/as-var
                  [[:expr/branch
@@ -163,8 +189,9 @@
                     [:expr/terminal [:ax/var ?bar]])]]]]
                [:where/minus
                 [:where-sub/where
-                 [[:triple/vec
-                   [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]])))))
+                 [[:where/triple
+                   [:triple.vec/spo
+                    [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]]])))))
 
 
 (deftest scope-validation-test

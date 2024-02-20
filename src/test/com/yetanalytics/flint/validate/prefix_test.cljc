@@ -23,26 +23,39 @@
                    v/collect-nodes
                    (vp/validate-prefixes (assoc (:prefixes query)
                                                 :$ "<http://default.org>")))))
-    (is (= [{:iri :bar
-             :prefix :$
+    (is (= [{:iri      :bar
+             :prefix   :$
              :prefixes {:foo "<http://foo.org/>"}
-             :path [:query/select :where :where-sub/where :triple/vec :ax/prefix-iri]}]
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :ax/prefix-iri]}]
            (->> (assoc query :where '[[:bar :a ?y]])
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                (vp/validate-prefixes (:prefixes query)))))
+    (is (= [{:iri      :bar
+             :prefix   :$
+             :prefixes {:foo "<http://foo.org/>"}
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :triple/bnodes :ax/prefix-iri]}
+            {:iri      :bee
+             :prefix   :$
+             :prefixes {:foo "<http://foo.org/>"}
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :triple/bnodes :ax/prefix-iri]}]
+           (->> (assoc query :where '[[[:bar ?x] :a ?y]
+                                      [?z :a [:bee ?w]]])
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 (vp/validate-prefixes (:prefixes query)))))
     (is (= [{:iri      :fee/bar
              :prefix   :fee
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :triple/vec :ax/prefix-iri]}
+             :path     [:query/select :where :where-sub/where :where/triple :triple.vec/spo :ax/prefix-iri]}
             {:iri      :fii/bar
              :prefix   :fii
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :triple/vec :ax/prefix-iri]}
+             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :where/triple :triple.vec/spo :ax/prefix-iri]}
             {:iri      :fum/bar
              :prefix   :fum
              :prefixes {:foo "<http://foo.org/>"}
-             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :triple/vec :ax/prefix-iri]}]
+             :path     [:query/select :where :where-sub/where :where/special :where/union :where-sub/where :where/triple :triple.vec/spo :ax/prefix-iri]}]
            (->> query
                 (s/conform qs/query-spec)
                 v/collect-nodes
@@ -50,16 +63,15 @@
     (is (= [{:iri :baz/Qux
              :prefix :baz
              :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
-             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple/nform :triple/spo :triple/po :triple/o :ax/prefix-iri]}
+             :path [:update/insert-data :insert-data :triple.quad/gspo :triple.quad/spo :triple.nform/spo :triple.nform/po :triple.nform/o :ax/prefix-iri]}
             {:iri :baz/Quu
              :prefix :baz
              :prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
-             :path [:update/insert-data :insert-data :triple/quads :triple/quad-triples :triple/vec :ax/prefix-iri]}]
-           (->>
-            {:prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
-             :insert-data [[:graph "<http://foo.org>"
-                            [{"<http://bar.org>" {:rdf/type #{:baz/Qux}}}
-                             ["<http://bar.org>" :rdf/type :baz/Quu]]]]}
-            (s/conform us/update-spec)
-            v/collect-nodes
-            (vp/validate-prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}))))))
+             :path [:update/insert-data :insert-data :triple.quad/gspo :triple.quad/spo :triple.vec/spo :ax/prefix-iri]}]
+           (->> {:prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}
+                 :insert-data [[:graph "<http://foo.org>"
+                                [{"<http://bar.org>" {:rdf/type #{:baz/Qux}}}
+                                 ["<http://bar.org>" :rdf/type :baz/Quu]]]]}
+                (s/conform us/update-spec)
+                v/collect-nodes
+                (vp/validate-prefixes {:rdf "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"}))))))

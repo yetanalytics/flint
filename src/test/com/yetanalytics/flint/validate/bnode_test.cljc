@@ -49,13 +49,19 @@
                            [:where [[?y :baz/qux _]]]]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
+                vb/validate-bnodes)))
+    (is (= [#{} nil]
+           (->> '{:select [?p]
+                  :where  [[?x ?y] ?p (?z ?w)]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
                 vb/validate-bnodes))))
   (testing "invalid blank nodes"
     (is (= [#{'_1} {:kind   ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1 :where/special :where/recurse :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.vec/spo]}]}]
            (->> '{:select [?x]
                   :where  [[:where [[?x :foo/bar _1]]]
                            [:where [[?y :baz/qux _1]]]]}
@@ -64,13 +70,13 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1 :where/special :where/recurse :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1 :where/special :where/recurse :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}]}]
            (->> '{:select [?x]
                   :where  [[:where [{?x {:foo/bar #{_1}
                                          :baz/qux #{_1}}}]]
@@ -81,17 +87,17 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1 '_2} {:kind ::vb/dupe-bnodes-bgp
                         :errors [{:bnode '_2
-                                  :path  [:query/select :where :where-sub/where 1 :where/special :where/recurse :where-sub/where 0]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo]}
                                  {:bnode '_2
-                                  :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo]}
                                  {:bnode '_1
-                                  :path  [:query/select :where :where-sub/where 1 :where/special :where/recurse :where-sub/where 0]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                                  {:bnode '_1
-                                  :path  [:query/select :where :where-sub/where 1 :where/special :where/recurse :where-sub/where 0]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                                  {:bnode '_1
-                                  :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}
                                  {:bnode '_1
-                                  :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}]}]
+                                  :path [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.nform/spo :triple.nform/po :triple.nform/o]}]}]
            (->> '{:select [?x]
                   :where  [[:where [{_2 {:foo/bar #{_1}
                                          :baz/qux #{_1}}}]]
@@ -102,9 +108,9 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1 :where/special :where/optional :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/optional :where-sub/where :where/triple :triple.vec/spo]}]}]
            (->> '{:select [?x]
                   :where  [[?x :foo/bar _1]
                            [:optional [[?y :baz/qux _1]]]]}
@@ -113,11 +119,11 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 2 :where/special :where/optional :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/optional :where-sub/where :where/triple :triple.vec/spo]}]}]
            (->> '{:select [?x]
                   :where  [[?x :foo/bar _1]
                            [?y :baz/qux _1]
@@ -127,11 +133,11 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1]}
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1 :where/special :where/optional :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/special :where/optional :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}]}]
            (->> '{:select [?x]
                   :where  [[?x :foo/bar _1]
                            [:optional [[?z :far/lands _1]]]
@@ -139,13 +145,25 @@
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 vb/validate-bnodes)))
+    (is (= [#{'_1 '_2} {:kind ::vb/dupe-bnodes-bgp
+                        :errors [{:bnode '_2
+                                  :path  [:query/select :where :where-sub/where :where/special :where/optional :where-sub/where :where/triple :triple.vec/spo]}
+                                 {:bnode '_2
+                                  :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}]}]
+           (->> '{:select [?x]
+                  :where  [[?x :foo/bar _1]
+                           [:optional [[?z :far/lands _2]]]
+                           [?y :baz/qux _2]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vb/validate-bnodes)))
     (is (= [#{'_1} {:kind ::vb/dupe-bnodes-bgp
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 1 :where/special :where/filter :expr/branch :expr/args :where-sub/where 0]}
+                              :path  [:query/select :where :where-sub/where :where/triple :triple.vec/spo]}
                              {:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0]}]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/filter :expr/branch :expr/args :where-sub/where :where/triple :triple.vec/spo]}]}]
            (->> '{:select [?x]
                   :where  [[?x :foo/bar _1]
                            [:filter (not-exists [[?z :far/lands _1]])]
@@ -155,7 +173,7 @@
                 vb/validate-bnodes)))
     (is (= [#{'_1} {:kind   ::vb/dupe-bnodes-update
                     :errors [{:bnode '_1
-                              :path  [:query/select :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}]
+                              :path  [:query/select :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.vec/spo]}]
                     :prev-bnodes #{'_1}}]
            (->> '{:select [?x]
                   :where  [[:where [[?x :foo/bar _1]]]]}
@@ -164,9 +182,9 @@
                 (vb/validate-bnodes #{'_1}))))
     (is (= [[#{'_1} {:kind   ::vb/dupe-bnodes-bgp
                      :errors [{:bnode '_1
-                               :path  [:update/modify :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}
+                               :path  [:update/modify :insert :triple.vec/spo]}
                               {:bnode '_1
-                               :path  [:update/modify :insert]}]}]]
+                               :path  [:update/modify :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.vec/spo]}]}]]
            (->> '[{:insert [[?x :foo/bar _1]]
                    :where  [[:where [[?x :foo/bar _1]]]]}]
                 (map (partial s/conform us/update-spec))
@@ -186,9 +204,9 @@
              ::vb/dupe-bnodes-update
              :errors
              [{:bnode '_1
-               :path  [:update/modify :insert]}
+               :path  [:update/modify :insert :triple.vec/spo]}
               {:bnode '_2
-               :path  [:update/modify :where :where-sub/where 0 :where/special :where/recurse :where-sub/where 0]}]
+               :path  [:update/modify :where :where-sub/where :where/special :where/recurse :where-sub/where :where/triple :triple.vec/spo]}]
              :prev-bnodes
              #{'_1 '_2}}]
            (->> '[{:insert [[?x :foo/bar _1]]

@@ -58,5 +58,8 @@
 (defmethod f/format-ast-node :where/special [_ [_ where-form]]
   where-form)
 
+(defmethod f/format-ast-node :where/triple [_ [_ triples]]
+  triples)
+
 (defmethod f/format-ast-node :where [_ [_ where]]
   (str "WHERE " where))

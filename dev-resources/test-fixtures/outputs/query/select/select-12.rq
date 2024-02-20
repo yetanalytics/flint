@@ -1,0 +1,4 @@
+SELECT ?x
+WHERE {
+    ?s ?p ( 1 ?x 3 4 ) .
+}

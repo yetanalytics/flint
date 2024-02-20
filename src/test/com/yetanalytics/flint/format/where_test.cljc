@@ -11,8 +11,8 @@
                             "    ?s ?p ?o ."
                             "}"])
            (-> '[:where-sub/where
-                 [[:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]
-                  [:triple/vec [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]
+                 [[:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]
+                  [:where/triple [:triple.vec/spo [[:ax/var ?s] [:ax/var ?p] [:ax/var ?o]]]]]]
                (f/format-ast {:pretty? true}))))
     (is (= (cstr/join "\n" ["{"
                             "    ?s1 ?p1 ?o1 ."
@@ -51,47 +51,50 @@
                             "    }"
                             "}"])
            (-> '[:where-sub/where
-                 [[:triple/vec
-                   [[:ax/var ?s1] [:ax/var ?p1] [:ax/var ?o1]]]
-                  [:triple/nform
-                   [:triple/spo [[[:ax/var ?s2]
-                                  [:triple/po [[[:ax/var ?p2]
-                                                [:triple/o [[:ax/var ?o2a]
-                                                            [:ax/var ?o2b]]]]]]]]]]
+                 [[:where/triple
+                   [:triple.vec/spo
+                    [[:ax/var ?s1] [:ax/var ?p1] [:ax/var ?o1]]]]
+                  [:where/triple
+                   [:triple.nform/spo
+                    [[[:ax/var ?s2]
+                      [:triple.nform/po
+                       [[[:ax/var ?p2]
+                         [:triple.nform/o [[:ax/var ?o2a]
+                                           [:ax/var ?o2b]]]]]]]]]]
                   [:where/special
                    [:where/recurse
                     [:where-sub/where
-                     [[:triple/vec [[:ax/var ?s3] [:ax/var ?p3] [:ax/var ?o3]]]]]]]
+                     [[:where/triple [:triple.vec/spo [[:ax/var ?s3] [:ax/var ?p3] [:ax/var ?o3]]]]]]]]
                   [:where/special
                    [:where/union
                     [[:where-sub/where
-                      [[:triple/vec
-                        [[:ax/var ?s4] [:ax/var ?p4] [:ax/var ?o4]]]]]
+                      [[:where/triple [:triple.vec/spo
+                                       [[:ax/var ?s4] [:ax/var ?p4] [:ax/var ?o4]]]]]]
                      [:where-sub/where
-                      [[:triple/vec [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]]
+                      [[:where/triple [:triple.vec/spo [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]]]
                   [:where/special
                    [:where/optional
                     [:where-sub/where
-                     [[:triple/vec [[:ax/var ?s6] [:ax/var ?p6] [:ax/var ?o6]]]]]]]
+                     [[:where/triple [:triple.vec/spo [[:ax/var ?s6] [:ax/var ?p6] [:ax/var ?o6]]]]]]]]
                   [:where/special
                    [:where/minus
                     [:where-sub/where
-                     [[:triple/vec [[:ax/var ?s7] [:ax/var ?p7] [:ax/var ?o7]]]]]]]
+                     [[:where/triple [:triple.vec/spo [[:ax/var ?s7] [:ax/var ?p7] [:ax/var ?o7]]]]]]]]
                   [:where/special
                    [:where/graph
                     [[:ax/prefix-iri :ns/my-graph]
                      [:where-sub/where
-                      [[:triple/vec [[:ax/var ?s8] [:ax/var ?p8] [:ax/var ?o8]]]]]]]]
+                      [[:where/triple [:triple.vec/spo [[:ax/var ?s8] [:ax/var ?p8] [:ax/var ?o8]]]]]]]]]
                   [:where/special
                    [:where/service
                     [[:ax/prefix-iri :ns/my-uri]
                      [:where-sub/where
-                      [[:triple/vec [[:ax/var ?s9] [:ax/var ?p9] [:ax/var ?o9]]]]]]]]
+                      [[:where/triple [:triple.vec/spo [[:ax/var ?s9] [:ax/var ?p9] [:ax/var ?o9]]]]]]]]]
                   [:where/special
                    [:where/service-silent
                     [[:ax/prefix-iri :ns/my-uri]
                      [:where-sub/where
-                      [[:triple/vec [[:ax/var ?s10] [:ax/var ?p10] [:ax/var ?o10]]]]]]]]
+                      [[:where/triple [:triple.vec/spo [[:ax/var ?s10] [:ax/var ?p10] [:ax/var ?o10]]]]]]]]]
                   [:where/special
                    [:where/bind
                     [:expr/as-var

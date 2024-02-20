@@ -13,9 +13,9 @@
                             "    foo:x dc:title \"Title\" ."
                             "}"])
            (->> '[:update/insert-data
-                  [[:insert-data [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                                [:ax/prefix-iri :dc/title]
-                                                [:ax/literal "Title"]]]]]]]
+                  [[:insert-data [[:triple.vec/spo [[:ax/prefix-iri :foo/x]
+                                                    [:ax/prefix-iri :dc/title]
+                                                    [:ax/literal "Title"]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE DATA clauses"
     (is (= (cstr/join "\n" ["DELETE DATA {"
@@ -25,12 +25,12 @@
                             "}"])
            (->> '[:update/delete-data
                   [[:delete-data
-                    [[:triple/quads
+                    [[:triple.quad/gspo
                       [[:ax/iri "<http://example.org>"]
-                       [:triple/quad-triples
-                        [[:triple/vec [[:ax/prefix-iri :foo/x]
-                                       [:ax/prefix-iri :dc/title]
-                                       [:ax/literal "Title"]]]]]]]]]]]
+                       [:triple.quad/spo
+                        [[:triple.vec/spo [[:ax/prefix-iri :foo/x]
+                                           [:ax/prefix-iri :dc/title]
+                                           [:ax/literal "Title"]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE WHERE clauses"
     (is (= (cstr/join "\n" ["DELETE WHERE {"
@@ -39,8 +39,8 @@
                             "}"])
            (->> '[:update/delete-where
                   [[:delete-where
-                    [[:triple/vec [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
-                     [:triple/vec [[:ax/var ?i] [:ax/var ?j] [:ax/var ?k]]]]]]]
+                    [[:triple.vec/spo [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
+                     [:triple.vec/spo [[:ax/var ?i] [:ax/var ?j] [:ax/var ?k]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["DELETE WHERE {"
                             "    ?x ?y ?z ."
@@ -52,19 +52,21 @@
                             "}"])
            (->> '[:update/delete-where
                   [[:delete-where
-                    [[:triple/vec
+                    [[:triple.vec/spo
                       [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]
-                     [:triple/nform
-                      [:triple/spo [[[:ax/var ?i]
-                                     [:triple/po [[[:ax/var ?j]
-                                                   [:triple/o [[:ax/var ?k]]]]]]]
-                                    [[:ax/var ?s]
-                                     [:triple/po [[[:ax/var ?p]
-                                                   [:triple/o [[:ax/var ?o]]]]]]]]]]
-                     [:triple/quads
+                     [:triple.nform/spo
+                      [[[:ax/var ?i]
+                        [:triple.nform/po
+                         [[[:ax/var ?j]
+                           [:triple.nform/o [[:ax/var ?k]]]]]]]
+                       [[:ax/var ?s]
+                        [:triple.nform/po
+                         [[[:ax/var ?p]
+                           [:triple.nform/o [[:ax/var ?o]]]]]]]]]
+                     [:triple.quad/gspo
                       [[:ax/iri "<http://example.org>"]
-                       [:triple/quad-triples
-                        [[:triple/vec [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]]
+                       [:triple.quad/spo
+                        [[:triple.vec/spo [[:ax/var ?q] [:ax/var ?r] [:ax/var ?s]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting DELETE...INSERT clauses"
     (is (= (cstr/join "\n" ["INSERT {"
@@ -76,12 +78,13 @@
                             "}"])
            (->> '[:update/modify
                   [[:insert
-                    [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
+                    [[:triple.vec/spo [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
                    [:using
                     [:update/named-iri [:named [:ax/iri "<http://example.org/2>"]]]]
                    [:where
                     [:where-sub/where
-                     [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]]]]
+                     [[:where/triple
+                       [:triple.vec/spo [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["WITH <http://example.org>"
                             "DELETE {"
@@ -97,18 +100,20 @@
                             "}"])
            (->> '[:update/modify
                   [[:with [:ax/iri "<http://example.org>"]]
-                   [:delete [[:triple/vec [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]]]
-                   [:insert [[:triple/vec [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
+                   [:delete [[:triple.vec/spo [[:ax/var ?x] [:ax/var ?y] [:ax/var ?z]]]]]
+                   [:insert [[:triple.vec/spo [[:ax/var ?a] [:ax/var ?b] [:ax/var ?c]]]]]
                    [:using [:update/iri [:ax/iri "<http://example.org/2>"]]]
                    [:where [:where-sub/where
-                            [[:triple/nform
-                              [:triple/spo
+                            [[:where/triple
+                              [:triple.nform/spo
                                [[[:ax/var ?x]
-                                 [:triple/po [[[:ax/var ?y]
-                                               [:triple/o [[:ax/var ?z]]]]]]]
+                                 [:triple.nform/po
+                                  [[[:ax/var ?y]
+                                    [:triple.nform/o [[:ax/var ?z]]]]]]]
                                 [[:ax/var ?a]
-                                 [:triple/po [[[:ax/var ?b]
-                                               [:triple/o [[:ax/var ?c]]]]]]]]]]]]]]]
+                                 [:triple.nform/po
+                                  [[[:ax/var ?b]
+                                    [:triple.nform/o [[:ax/var ?c]]]]]]]]]]]]]]]
                 format-ast))))
   (testing "Formatting graph management updates"
     (testing "- LOAD"

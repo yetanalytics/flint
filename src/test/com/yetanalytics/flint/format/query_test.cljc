@@ -23,9 +23,10 @@
                   [[:prefixes [[:prologue/prefix [[:ax/prefix :foo] [:ax/iri "<http://example.org/foo/>"]]]]]
                    [:select [:select/var-or-exprs [[:ax/var ?x]]]]
                    [:from [:ax/iri "<http://example.org/my-graph/>"]]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]
                    [:order-by [[:mod/asc-desc
                                 [[:mod/op asc]
                                  [:mod/asc-desc-expr [:expr/terminal [:ax/var ?y]]]]]]]
@@ -42,13 +43,14 @@
                             "    ?x ?y ?z ."
                             "}"])
            (->> '[:query/construct
-                  [[:construct [[:triple/vec [[:ax/var ?x]
-                                              [:ax/var ?y]
-                                              [:ax/var ?z]]]]]
+                  [[:construct [[:triple.vec/spo [[:ax/var ?x]
+                                                  [:ax/var ?y]
+                                                  [:ax/var ?z]]]]]
                    [:from [:ax/iri "<http://example.org/my-graph/>"]]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "FROM <http://example.org/my-graph/>"
@@ -58,9 +60,10 @@
            (->> '[:query/construct
                   [[:construct []]
                    [:from [:ax/iri "<http://example.org/my-graph/>"]]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["CONSTRUCT"
                             "WHERE {"
@@ -68,9 +71,10 @@
                             "}"])
            (->> '[:query/construct
                   [[:construct []]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]]]
                 format-ast))))
   (testing "Formatting DESCRIBE queries"
     (is (= (cstr/join "\n" ["DESCRIBE ?x ?y"
@@ -83,9 +87,10 @@
                   [[:describe [:describe/vars-or-iris [[:ax/var ?x] [:ax/var ?y]]]]
                    [:from-named [[:ax/iri "<http://example.org/my-graph/>"]
                                  [:ax/iri "<http://example.org/my-graph-2/>"]]]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]]]
                 format-ast))))
   (testing "Formatting ASK queries"
     (is (= (cstr/join "\n" ["ASK"
@@ -98,9 +103,10 @@
                   [[:ask []]
                    [:from-named [[:ax/iri "<http://example.org/my-graph/>"]
                                  [:ax/iri "<http://example.org/my-graph-2/>"]]]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]]]
                 format-ast)))
     (is (= (cstr/join "\n" ["ASK"
                             "WHERE {"
@@ -108,7 +114,8 @@
                             "}"])
            (->> '[:query/ask
                   [[:ask []]
-                   [:where [:where-sub/where [[:triple/vec [[:ax/var ?x]
-                                                            [:ax/var ?y]
-                                                            [:ax/var ?z]]]]]]]]
+                   [:where [:where-sub/where [[:where/triple
+                                               [:triple.vec/spo [[:ax/var ?x]
+                                                                 [:ax/var ?y]
+                                                                 [:ax/var ?z]]]]]]]]]
                 format-ast)))))

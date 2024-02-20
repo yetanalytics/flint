@@ -3,25 +3,8 @@
             [com.yetanalytics.flint.format :as f]
             [com.yetanalytics.flint.format.axiom]
             [com.yetanalytics.flint.format.prologue]
-            [com.yetanalytics.flint.format.triple]
+            [com.yetanalytics.flint.format.triple :as tf]
             [com.yetanalytics.flint.format.where]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Quads
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn- format-quads [quads pretty?]
-  (-> quads
-      (f/join-clauses pretty?)
-      (f/wrap-in-braces pretty?)))
-
-(defmethod f/format-ast-node :triple/quads
-  [_ [_ [var-or-iri triples-str]]]
-  (str "GRAPH " var-or-iri " " triples-str))
-
-(defmethod f/format-ast-node :triple/quad-triples
-  [{:keys [pretty?]} [_ triples]]
-  (format-quads triples pretty?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Management
@@ -128,19 +111,19 @@
   (str "WITH " with))
 
 (defmethod f/format-ast-node :insert-data [{:keys [pretty?]} [_ insert-data]]
-  (str "INSERT DATA " (format-quads insert-data pretty?)))
+  (str "INSERT DATA " (tf/format-quads insert-data pretty?)))
 
 (defmethod f/format-ast-node :delete-data [{:keys [pretty?]} [_ delete-data]]
-  (str "DELETE DATA " (format-quads delete-data pretty?)))
+  (str "DELETE DATA " (tf/format-quads delete-data pretty?)))
 
 (defmethod f/format-ast-node :delete-where [{:keys [pretty?]} [_ delete-where]]
-  (str "DELETE WHERE " (format-quads delete-where pretty?)))
+  (str "DELETE WHERE " (tf/format-quads delete-where pretty?)))
 
 (defmethod f/format-ast-node :delete [{:keys [pretty?]} [_ delete]]
-  (str "DELETE " (format-quads delete pretty?)))
+  (str "DELETE " (tf/format-quads delete pretty?)))
 
 (defmethod f/format-ast-node :insert [{:keys [pretty?]} [_ insert]]
-  (str "INSERT " (format-quads insert pretty?)))
+  (str "INSERT " (tf/format-quads insert pretty?)))
 
 (defmethod f/format-ast-node :update/insert-data [{:keys [pretty?]} [_ id-update]]
   (f/join-clauses id-update pretty?))

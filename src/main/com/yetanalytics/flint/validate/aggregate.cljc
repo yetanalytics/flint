@@ -1,7 +1,7 @@
 (ns com.yetanalytics.flint.validate.aggregate
-  (:require [clojure.zip :as zip]
-            [com.yetanalytics.flint.validate.variable :as vv]
-            [com.yetanalytics.flint.util              :as u]))
+  (:require [com.yetanalytics.flint.validate.variable :as vv]
+            [com.yetanalytics.flint.util              :as u]
+            [com.yetanalytics.flint.validate.util     :as vu]))
 
 ;; In a query level which uses aggregates, only expressions consisting of
 ;; aggregates and constants may be projected, with one exception.
@@ -9,7 +9,7 @@
 ;; just a variable, those variables may be projected from the level.
 
 ;; GOOD:
-;;   SELECT (2 AS ?two) WHER { ?x ?y ?z }
+;;   SELECT (2 AS ?two) WHERE { ?x ?y ?z }
 ;;   SELECT (SUM(?x) AS ?sum) WHERE { ?x ?y ?z }
 ;;   SELECT ?x WHERE { ?x ?y ?z } GROUP BY ?x
 
@@ -57,12 +57,12 @@
     (case sel-k
       :ax/wildcard
       {:kind ::wildcard-group-by
-       :path (->> loc zip/path (mapv first))}
+       :path (vu/zip-path loc)}
       :select/var-or-exprs
       (when-some [bad-vars (validate-agg-select-clause group-by-vs sel-v)]
         {:kind      ::invalid-aggregate-var
          :variables bad-vars
-         :path      (->> loc zip/path (mapv first))})
+         :path      (vu/zip-path loc)})
       ;; else - perhaps it is a CONSTRUCT, DESCRIBE, or ASK query instead
       nil)))
 

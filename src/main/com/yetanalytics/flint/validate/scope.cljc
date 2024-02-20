@@ -1,6 +1,7 @@
 (ns com.yetanalytics.flint.validate.scope
   (:require [clojure.zip :as zip]
             [com.yetanalytics.flint.validate.variable :as vv]
+            [com.yetanalytics.flint.validate.util     :as vu]
             [com.yetanalytics.flint.util              :as u]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12,14 +13,14 @@
   {:kind       ::var-in-scope
    :variable   var
    :scope-vars scope-vars
-   :path       (conj (->> zip-loc zip/path (mapv first)) k)})
+   :path       (conj (vu/zip-path zip-loc) k)})
 
 (defn- not-in-scope-err-map
   [vars scope-vars zip-loc k]
   {:kind       ::var-not-in-scope
    :variables  vars
    :scope-vars scope-vars
-   :path       (conj (->> zip-loc zip/path (mapv first)) k)})
+   :path       (conj (vu/zip-path zip-loc) k)})
 
 (defn- validate-bind
   "Validate `BIND (expr AS var)` in WHERE clauses."
