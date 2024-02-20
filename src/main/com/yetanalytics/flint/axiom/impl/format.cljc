@@ -25,14 +25,14 @@
 (defn format-var-symbol
   "Return the var `v-sym` as a string of the form `?var`."
   [v-sym]
-  (name v-sym))
+  (str v-sym))
 
 (defn format-bnode-symbol
   "Return the bnode `b-sym` as a string of the form `_:bnode`. Returns
    `[]` if `b-sym` is a single underscore."
   [b-sym]
   (if (not= '_ b-sym)
-    (let [^String s  (name b-sym)
+    (let [^String s  (str b-sym)
           sub-string (.substring s 1 (count s))]
       (str "_:" sub-string))
     "[]"))

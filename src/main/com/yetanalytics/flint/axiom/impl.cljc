@@ -168,7 +168,7 @@
 
   #?(:clj clojure.lang.Symbol :cljs Symbol)
   (-valid-wildcard? [sym] (= '* sym))
-  (-format-wildcard [sym] (name sym)))
+  (-format-wildcard [sym] (str sym)))
 
 (extend-protocol p/RDFType
   #?(:clj clojure.lang.Keyword :cljs Keyword)
@@ -177,7 +177,7 @@
 
   #?(:clj clojure.lang.Symbol :cljs Symbol)
   (-valid-rdf-type? [sym] (= 'a sym))
-  (-format-rdf-type [sym] (name sym)))
+  (-format-rdf-type [sym] (str sym)))
 
 ;; Defaults
 

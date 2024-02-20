@@ -184,7 +184,11 @@
                            :in     []}]
             ::s/spec ::es/expr
             ::s/value '(+)}
-           (s/explain-data ::es/expr '(+))))))
+           (s/explain-data ::es/expr '(+)))))
+  (testing "Invalid expressions due to syntax quoting"
+    (is (not (s/valid? ::es/expr `(+ 2 2))))
+    (is (not (s/valid? ::es/expr `(and true true))))
+    (is (not (s/valid? ::es/expr `(contains "foo" "foobar"))))))
 
 (deftest conform-expr-as-var-test
   (testing "Conforming expr AS var clauses"
