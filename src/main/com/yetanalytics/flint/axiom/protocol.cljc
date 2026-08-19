@@ -29,7 +29,7 @@
     "Convert the prefixed IRI `this` into its string representation."))
 
 (defprotocol Variable
-  "A SPARQL variable (e.g. `?var`)."
+  "A SPARQL variable (e.g. `?var` or `$var`)."
   (-valid-variable? [this]
     "Return `true` if `this` is a valid variable of its type.")
   (-format-variable [this]

@@ -36,10 +36,11 @@
 
 (deftest string-validation-gentest
   (testing "variables"
-    (let [var-prop (make-prop (fn [s] (symbol (str "?" s)))
-                              v/var-regex
-                              v/valid-var-symbol?)]
-      (is (:pass? (tc/quick-check 100 var-prop)))))
+    (doseq [sigil ["?" "$"]]
+      (let [var-prop (make-prop (fn [s] (symbol (str sigil s)))
+                                v/var-regex
+                                v/valid-var-symbol?)]
+        (is (:pass? (tc/quick-check 100 var-prop))))))
   (testing "blank nodes"
     (let [bnode-prop (make-prop (fn [s] (symbol (str "_" s)))
                                 v/bnode-regex
@@ -112,20 +113,22 @@
 
 (deftest string-validation-unit-test
   (testing "variable strings"
-    (multilingual-test
-     (fn [x] (v/valid-var-symbol? (symbol (str "?" x)))))
-    (are [x] (not (v/valid-var-symbol? (symbol (str "?" x))))
-      "???"
-      "foo bar"
-      "foo.bar"
-      ".foobar"
-      "foo'bar"
-      "foo#bar"
-      (str "foo" (char 0x037E) "bar")
-      (str \u0308)
-      "·t"
-      biang-biang-noodles)
+    (doseq [sigil ["?" "$"]]
+      (multilingual-test
+       (fn [x] (v/valid-var-symbol? (symbol (str sigil x)))))
+      (are [x] (not (v/valid-var-symbol? (symbol (str sigil x))))
+        "???"
+        "foo bar"
+        "foo.bar"
+        ".foobar"
+        "foo'bar"
+        "foo#bar"
+        (str "foo" (char 0x037E) "bar")
+        (str \u0308)
+        "·t"
+        biang-biang-noodles))
     (is (v/valid-var-symbol? '?1234567890))
+    (is (v/valid-var-symbol? '$1234567890))
     (is (not (v/valid-var-symbol? 'foo)))
     (is (not (v/valid-var-symbol? '？foo))))
   (testing "blank node strings"
@@ -239,9 +242,12 @@
       (is (not (s/valid? ax/prefix-iri-spec :*)))))
   (testing "variables"
     (is (s/valid? ax/variable-spec '?foo))
+    (is (s/valid? ax/variable-spec '$foo))
     (is (not (s/valid? ax/variable-spec "?foo")))
+    (is (not (s/valid? ax/variable-spec "$foo")))
     (is (not (s/valid? ax/variable-spec 'foo)))
-    (is (not (s/valid? ax/variable-spec `?foo))))
+    (is (not (s/valid? ax/variable-spec `?foo)))
+    (is (not (s/valid? ax/variable-spec `$foo))))
   (testing "blank nodes"
     (is (s/valid? ax/bnode-spec '_))
     (is (s/valid? ax/bnode-spec '_foo))

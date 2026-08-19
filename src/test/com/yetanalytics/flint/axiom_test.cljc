@@ -34,7 +34,9 @@
     (is (= "foo:bar" (p/-format-prefix-iri :foo/bar))))
   (testing "Variables"
     (is (p/-valid-variable? '?foo))
-    (is (= "?foo" (p/-format-variable '?foo))))
+    (is (p/-valid-variable? '$foo))
+    (is (= "?foo" (p/-format-variable '?foo)))
+    (is (= "$foo" (p/-format-variable '$foo))))
   (testing "Blank Nodes"
     (is (p/-valid-bnode? '_bar))
     (is (= "_:bar" (p/-format-bnode '_bar))))
