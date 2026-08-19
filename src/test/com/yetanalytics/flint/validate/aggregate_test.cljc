@@ -8,6 +8,9 @@
 
 (deftest helper-test
   (testing "helper multimethods"
+    (testing "to compare variables by SPARQL name"
+      (is (= '[?x $y]
+             (vv/distinct-vars '[?x $x $y ?y]))))
     (testing "to find GROUP BY projected vars"
       (is (= []
              (vv/group-by-projected-vars
@@ -30,8 +33,12 @@
               '[:expr/terminal [:ax/var ?x]])))
       (is (= []
              (vv/invalid-agg-expr-vars
-              #{'?x}
+              #{"x"}
               '[:expr/terminal [:ax/var ?x]])))
+      (is (= []
+             (vv/invalid-agg-expr-vars
+              #{"x"}
+              '[:expr/terminal [:ax/var $x]])))
       (is (= ['?x]
              (vv/invalid-agg-expr-vars
               #{}
@@ -44,7 +51,7 @@
                               [:expr/args [[:expr/terminal [:ax/var ?x]]]]]])))
       (is (= []
              (vv/invalid-agg-expr-vars
-              #{'?x}
+              #{"x"}
               '[:expr/branch [[:expr/op str]
                               [:expr/args [[:expr/terminal [:ax/var ?x]]]]]]))))))
 
@@ -78,6 +85,20 @@
          (->> '{:select   [?x]
                 :where    [[?x ?y ?z]]
                 :group-by [?x]}
+              (s/conform qs/query-spec)
+              v/collect-nodes
+              va/validate-agg-selects)))
+    (is (nil?
+         (->> '{:select   [$x]
+                :where    [[?x ?y ?z]]
+                :group-by [?x]}
+              (s/conform qs/query-spec)
+              v/collect-nodes
+              va/validate-agg-selects)))
+    (is (nil?
+         (->> '{:select   [?x]
+                :where    [[?x ?y ?z]]
+                :group-by [$x]}
               (s/conform qs/query-spec)
               v/collect-nodes
               va/validate-agg-selects)))
@@ -145,6 +166,16 @@
              :variables ['?z]}]
            (->> '{:select [[(sum ?x) ?sum] [(str ?z) ?str]]
                   :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                va/validate-agg-selects
+                (map #(dissoc % :path)))))
+    (is (= [{:kind ::va/invalid-aggregate-var
+             :variables ['?z]}]
+           (->> '{:select   [[(str ?z) ?str]
+                             [(str $z) $str2]]
+                  :where    [[?x ?y ?z]]
+                  :group-by [?x]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 va/validate-agg-selects

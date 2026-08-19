@@ -1,7 +1,8 @@
 (ns com.yetanalytics.flint.validate.aggregate
-  (:require [com.yetanalytics.flint.validate.variable :as vv]
-            [com.yetanalytics.flint.util              :as u]
-            [com.yetanalytics.flint.validate.util     :as vu]))
+  (:require [com.yetanalytics.flint.axiom.protocol     :as p]
+            [com.yetanalytics.flint.validate.variable  :as vv]
+            [com.yetanalytics.flint.util               :as u]
+            [com.yetanalytics.flint.validate.util      :as vu]))
 
 ;; In a query level which uses aggregates, only expressions consisting of
 ;; aggregates and constants may be projected, with one exception.
@@ -25,7 +26,7 @@
         (reduce (fn [[valid-vars bad-vars] [k x]]
                   (case k
                     :ax/var
-                    (if-not (valid-vars x)
+                    (if-not (valid-vars (p/variable-name x))
                       [valid-vars (conj bad-vars x)]
                       [valid-vars bad-vars])
                     :select/expr-as-var
@@ -38,10 +39,10 @@
                         [valid-vars (concat bad-vars bad-expr-vars)]
                         ;; Somehow already-projected vars are now valid,
                         ;; at least according to Apache Jena's query parser
-                        [(conj valid-vars v) bad-vars]))))
+                        [(conj valid-vars (p/variable-name v)) bad-vars]))))
                 [group-by-vars []]
                 sel-clause)]
-    (not-empty bad-vars)))
+    (some-> bad-vars vv/distinct-vars not-empty)))
 
 (defn- validate-agg-select
   [[[_select-k select] loc]]
@@ -51,6 +52,7 @@
                          (->> ?group-by
                               (map vv/group-by-projected-vars)
                               (filter some?)
+                              (map p/variable-name)
                               set)
                          #{})
         [sel-k sel-v]  select-cls]

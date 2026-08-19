@@ -35,6 +35,11 @@
   (-format-variable [this]
     "Convert the variable `this` into its string representation."))
 
+(defn variable-name
+  "Return the name of `variable` without its leading `?` or `$` sigil."
+  [variable]
+  (subs (-format-variable variable) 1))
+
 (defprotocol BlankNode
   "A SPARQL blank node (e.g. `_:b0`)."
   (-valid-bnode? [this]

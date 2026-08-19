@@ -1,5 +1,6 @@
 (ns com.yetanalytics.flint.validate.scope
   (:require [clojure.zip :as zip]
+            [com.yetanalytics.flint.axiom.protocol    :as p]
             [com.yetanalytics.flint.validate.variable :as vv]
             [com.yetanalytics.flint.validate.util     :as vu]
             [com.yetanalytics.flint.util              :as u]))
@@ -29,8 +30,9 @@
         prev-elems   (-> loc
                          zip/up ; :where/special
                          zip/lefts)
-        scope        (set (mapcat vv/get-scope-vars prev-elems))]
-    (when (contains? scope bind-var)
+        scope        (set (mapcat vv/get-scope-vars prev-elems))
+        scope-names  (set (map p/variable-name scope))]
+    (when (contains? scope-names (p/variable-name bind-var))
       (in-scope-err-map bind-var scope loc :where/bind))))
 
 (defn- validate-select
@@ -49,10 +51,15 @@
         where-vars   (-> where second vv/get-scope-vars)
         group-vars   (some-> ?group-by vv/group-by-projected-vars)
         prev-vars    (mapcat vv/get-scope-vars prev-elems)
-        scope        (set (concat where-vars group-vars prev-vars))]
-    (if-some [bad-expr-vars (not-empty (filter #(not (scope %)) expr-vars))]
+        scope        (set (concat where-vars group-vars prev-vars))
+        scope-names  (set (map p/variable-name scope))]
+    (if-some [bad-expr-vars (->> expr-vars
+                                 (remove #(contains? scope-names
+                                                     (p/variable-name %)))
+                                 vv/distinct-vars
+                                 not-empty)]
       (not-in-scope-err-map bad-expr-vars scope loc :select/expr-as-var)
-      (when (contains? scope bind-var)
+      (when (contains? scope-names (p/variable-name bind-var))
         (in-scope-err-map bind-var scope loc :select/expr-as-var)))))
 
 (defn- validate-node-locs

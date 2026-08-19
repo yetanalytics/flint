@@ -223,6 +223,20 @@
                    (s/conform qs/query-spec)
                    v/collect-nodes
                    vs/validate-scoped-vars)))
+    (is (nil? (->> '{:select [[(+ $x 1) ?sum]]
+                     :where  [[?x ?y ?z]]}
+                   (s/conform qs/query-spec)
+                   v/collect-nodes
+                   vs/validate-scoped-vars)))
+    (is (= [{:kind       ::vs/var-not-in-scope
+             :variables  ['?u]
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
+           (->> '{:select [[(+ ?u $u) ?sum]]
+                  :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars)))
     (is (= [{:kind       ::vs/var-not-in-scope
              :variables  ['?u '?v]
              :scope-vars #{'?x '?y '?z}
@@ -276,6 +290,25 @@
            (->> '{:select [?x]
                   :where [[?x ?y ?z]
                           [:bind [3 ?y]]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars)))
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '$x
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :select :select/var-or-exprs :select/expr-as-var]}]
+           (->> '{:select [[2 $x]]
+                  :where  [[?x ?y ?z]]}
+                (s/conform qs/query-spec)
+                v/collect-nodes
+                vs/validate-scoped-vars)))
+    (is (= [{:kind       ::vs/var-in-scope
+             :variable   '$y
+             :scope-vars #{'?x '?y '?z}
+             :path       [:query/select :where :where-sub/where :where/special :where/bind]}]
+           (->> '{:select [?x]
+                  :where  [[?x ?y ?z]
+                           [:bind [3 $y]]]}
                 (s/conform qs/query-spec)
                 v/collect-nodes
                 vs/validate-scoped-vars)))

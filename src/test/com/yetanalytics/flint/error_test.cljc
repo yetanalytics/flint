@@ -181,6 +181,10 @@
                 v/collect-nodes
                 vs/validate-scoped-vars
                 err/scope-error-msg)))
+    (is (= "1 variable in 2 `expr AS var` clauses was already defined in scope: ?x!'"
+           (err/scope-error-msg
+            [{:kind ::vs/var-in-scope :variable '?x}
+             {:kind ::vs/var-in-scope :variable '$x}])))
     (is (= "1 variable at index 0 in 1 `expr AS var` clause was already defined in scope: ?x!'"
            (->> '[{:delete [[?x ?y ?z]]
                    :where  [[?x ?y ?z]
@@ -227,6 +231,9 @@
                 v/collect-nodes
                 va/validate-agg-selects
                 err/aggregate-error-msg)))
+    (is (= "1 variable was illegally used in SELECTs with aggregates: ?y!"
+           (err/aggregate-error-msg
+            [{:kind ::va/invalid-aggregate-var :variables ['?y '$y]}])))
     (is (= "2 variables at index 0 were illegally used in SELECTs with aggregates: ?y and ?z!"
            (->> '[{:delete [[?x ?y ?z]]
                    :where  {:select   [?x ?y ?z]

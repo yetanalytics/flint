@@ -36,7 +36,14 @@
     (is (p/-valid-variable? '?foo))
     (is (p/-valid-variable? '$foo))
     (is (= "?foo" (p/-format-variable '?foo)))
-    (is (= "$foo" (p/-format-variable '$foo))))
+    (is (= "$foo" (p/-format-variable '$foo)))
+    (is (= "foo"
+           (p/variable-name '?foo)
+           (p/variable-name '$foo)))
+    (let [custom-var (reify p/Variable
+                       (-valid-variable? [_] true)
+                       (-format-variable [_] "$custom"))]
+      (is (= "custom" (p/variable-name custom-var)))))
   (testing "Blank Nodes"
     (is (p/-valid-bnode? '_bar))
     (is (= "_:bar" (p/-format-bnode '_bar))))

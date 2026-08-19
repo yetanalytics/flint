@@ -18,6 +18,10 @@
 (deftest invalid-select-test
   (testing "Invalid SELECT clauses"
     (is (not (s/valid? ss/select-spec '[?x ?x])))
+    (is (not (s/valid? ss/select-spec '[?x $x])))
     (is (not (s/valid? ss/select-spec '[?x ?y [2 ?y]])))
+    (is (not (s/valid? ss/select-spec '[?x ?y [2 $y]])))
     (is (not (s/valid? ss/select-spec '[?x [2 ?y] ?y])))
-    (is (not (s/valid? ss/select-spec '[[2 ?y] [3 ?y]])))))
+    (is (not (s/valid? ss/select-spec '[?x [2 ?y] $y])))
+    (is (not (s/valid? ss/select-spec '[[2 ?y] [3 ?y]])))
+    (is (not (s/valid? ss/select-spec '[[2 ?y] [3 $y]])))))
