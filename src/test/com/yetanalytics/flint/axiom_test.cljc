@@ -305,7 +305,7 @@
                     {:prefixes {:xsd (java.net.URI. "http://www.w3.org/2001/XMLSchema#")
                                 :foo (java.net.URI. "http://foo.org/")}
                      :select   ['?x]
-                     :where    [['?x :foo/time (java.time.Instant/EPOCH)]]})
+                     :where    [['?x :foo/time java.time.Instant/EPOCH]]})
                    (flint/format-query
                     {:prefixes {:xsd (java.net.URI. "http://www.w3.org/2001/XMLSchema#")
                                 :foo (java.net.URI. "http://foo.org/")}
