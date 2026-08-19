@@ -331,12 +331,12 @@
     kwargs (conj [:expr/kwargs kwargs])))
 
 (def expr-branch-spec
-  (s/and list?
+  (s/and seq?
          expr-multi-spec
          (s/conformer conform-expr)))
 
 (def agg-expr-branch-spec
-  (s/and list?
+  (s/and seq?
          agg-expr-multi-spec
          (s/conformer conform-expr)))
 
