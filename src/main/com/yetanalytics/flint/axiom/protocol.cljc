@@ -29,11 +29,16 @@
     "Convert the prefixed IRI `this` into its string representation."))
 
 (defprotocol Variable
-  "A SPARQL variable (e.g. `?var`)."
+  "A SPARQL variable (e.g. `?var` or `$var`)."
   (-valid-variable? [this]
     "Return `true` if `this` is a valid variable of its type.")
   (-format-variable [this]
     "Convert the variable `this` into its string representation."))
+
+(defn variable-name
+  "Return the name of `variable` without its leading `?` or `$` sigil."
+  [variable]
+  (subs (-format-variable variable) 1))
 
 (defprotocol BlankNode
   "A SPARQL blank node (e.g. `_:b0`)."

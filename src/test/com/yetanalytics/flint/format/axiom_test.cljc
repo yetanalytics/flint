@@ -21,6 +21,8 @@
            (f/format-ast-node {} [:ax/prefix-iri :bar])))
     (is (= "?xyz"
            (f/format-ast-node {} [:ax/var '?xyz])))
+    (is (= "$xyz"
+           (f/format-ast-node {} [:ax/var '$xyz])))
     (is (= "_:b0"
            (f/format-ast-node {} [:ax/bnode '_b0])))
     (is (= "[]"

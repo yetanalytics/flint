@@ -82,6 +82,18 @@
   (make-format-pretty-tests (fn [ups] (format-updates ups :pretty? true))
                             "dev-resources/test-fixtures/inputs/update-seq/"))
 
+(deftest dollar-variable-integration-test
+  (testing "Dollar-prefixed variables through the public API"
+    (is (= "SELECT ($x AS ?same) WHERE { ?x a $o . } GROUP BY ?x VALUES $o { 1 }"
+           (format-query '{:select   [[$x ?same]]
+                           :where    [[?x :a $o]]
+                           :group-by [?x]
+                           :values   {$o [1]}})))
+    (is (= "DELETE { $x a ?o . } INSERT { ?x a $new . } WHERE { ?x a $o . }"
+           (format-update '{:delete [[$x :a ?o]]
+                            :insert [[?x :a $new]]
+                            :where  [[?x :a $o]]})))))
+
 (deftest exception-tests
   (testing "API functions throwing exceptions"
     (is (= ::flint/invalid-query

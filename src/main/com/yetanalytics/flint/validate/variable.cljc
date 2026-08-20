@@ -1,6 +1,20 @@
 (ns com.yetanalytics.flint.validate.variable
-  (:require [com.yetanalytics.flint.util :as u]
-            [com.yetanalytics.flint.spec.expr :as es]))
+  (:require [com.yetanalytics.flint.axiom.protocol :as p]
+            [com.yetanalytics.flint.util           :as u]
+            [com.yetanalytics.flint.spec.expr      :as es]))
+
+(defn distinct-vars
+  "Return the distinct variables in `vars`, comparing their SPARQL names while
+   retaining the first encountered representation of each variable."
+  [vars]
+  (second
+   (reduce (fn [[seen ret] v]
+             (let [vname (p/variable-name v)]
+               (if (contains? seen vname)
+                 [seen ret]
+                 [(conj seen vname) (conj ret v)])))
+           [#{} []]
+           vars)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expression variables
@@ -45,7 +59,7 @@
   (invalid-agg-expr-vars valid-vars x))
 
 (defmethod invalid-agg-expr-vars :ax/var [valid-vars [_ v]]
-  (if-not (valid-vars v) [v] []))
+  (if-not (valid-vars (p/variable-name v)) [v] []))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; GROUP BY projection variables

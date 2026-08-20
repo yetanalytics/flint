@@ -57,9 +57,9 @@ the `:where` triples are all equivalent.
 
 ## Variables
 
-Examples: `?var`
+Examples: `?var`, `$var`
 
-Variables are written as symbols prefixed with a question mark `?`. Translating to SPARQL does not change the variable other than stringifying it.
+Variables are written as symbols prefixed with a question mark `?` or dollar sign `$`. The sigil is not part of the variable name, so `?var` and `$var` identify the same variable. Translating to SPARQL preserves the sigil and otherwise only stringifies the symbol.
 
 ## Blank Nodes
 

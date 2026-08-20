@@ -6,6 +6,7 @@
             [com.yetanalytics.flint.validate.aggregate :as va]
             [com.yetanalytics.flint.validate.bnode     :as vb]
             [com.yetanalytics.flint.validate.scope     :as vs]
+            [com.yetanalytics.flint.validate.variable  :as vv]
             #?@(:clj [[clojure.core :refer [format]]]
                 :cljs [[goog.string :as gstring]
                        [goog.string.format]])))
@@ -157,8 +158,8 @@
   (let [[nots ins] (split-with #(= ::vs/var-not-in-scope (:kind %))
                                scope-errs)
         var-coll   (if (not-empty nots)
-                     (->> nots (mapcat :variables) distinct sort)
-                     (->> ins (map :variable) distinct sort))
+                     (->> nots (mapcat :variables) vv/distinct-vars sort)
+                     (->> ins (map :variable) vv/distinct-vars sort))
         var-count  (->> var-coll count)
         var-strs   (->> var-coll (map str))
         var-str    (join-str-coll var-strs)]
@@ -195,7 +196,7 @@
              (plural-s wild-count)
              index-str
              (plural-has wild-count)))
-      (let [var-coll (->> errs (mapcat :variables) distinct sort)
+      (let [var-coll (->> errs (mapcat :variables) vv/distinct-vars sort)
             var-count (->> var-coll count)
             var-strs  (->> var-coll (map str))
             var-str   (join-str-coll var-strs)]

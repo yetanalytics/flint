@@ -23,7 +23,7 @@
     (str kns ":" kname)))
 
 (defn format-var-symbol
-  "Return the var `v-sym` as a string of the form `?var`."
+  "Return the var `v-sym` as a string of the form `?var` or `$var`."
   [v-sym]
   (str v-sym))
 

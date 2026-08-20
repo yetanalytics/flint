@@ -11,7 +11,7 @@
   [c]
   #?(:clj (int c) :cljs (.charCodeAt c)))
 
-#?(:clj (def ^:private qmark-range [(char->int \?)]))
+(def ^:private var-sigil-range (mapv char->int [\? \$]))
 #?(:clj (def ^:private uscore-range [(char->int \_)]))
 #?(:clj (def ^:private hyphen-range [(char->int \-)]))
 #?(:clj (def ^:private bslash-range [(char->int \\)]))
@@ -188,9 +188,11 @@
     (re-pattern (format "<%s*>" iri-banned))))
 
 (def var-regex
-  (let [var-start (ranges->regex-charset var-start-range)
+  (let [var-sigil (ranges->regex-charset var-sigil-range)
+        var-start (ranges->regex-charset var-start-range)
         var-body  (ranges->regex-charset var-body-range)]
-    (re-pattern (format "\\?%s%s*"
+    (re-pattern (format "%s%s%s*"
+                        var-sigil
                         var-start
                         var-body))))
 
@@ -259,8 +261,8 @@
                      `(.set ~r#)))
                  cp-ranges#)))))
 
-#?(:clj (def ^{:private true :tag BitSet} qmark-bitset
-          (unicode-bitset qmark-range)))
+#?(:clj (def ^{:private true :tag BitSet} var-sigil-bitset
+          (unicode-bitset var-sigil-range)))
 #?(:clj (def ^{:private true :tag BitSet} uscore-bitset
           (unicode-bitset uscore-range)))
 #?(:clj (def ^{:private true :tag BitSet} hyphen-bitset
@@ -376,9 +378,9 @@
        (loop [idx 0]
          (cond
            (>= idx ccnt)
-           (<= 2 ccnt) ; Need to have initial qmark + at least one start char
+           (<= 2 ccnt) ; Need to have a sigil + at least one start char
            (= idx 0)
-           (recur-if (in-bitset? qmark-bitset vs idx)
+           (recur-if (in-bitset? var-sigil-bitset vs idx)
                      (inc idx))
            (= idx 1)
            (recur-if (in-bitset? var-start-bitset vs idx)
@@ -578,7 +580,7 @@
      :cljs (boolean (re-matches bnode-regex bnode-str))))
 
 (defn valid-var-symbol?
-  "Is `var-sym` a symbol that starts with `?`?"
+  "Is `var-sym` a symbol that starts with `?` or `$`?"
   [var-sym]
   (valid-var-str? (str var-sym)))
 
