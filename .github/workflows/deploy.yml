@@ -21,7 +21,7 @@ jobs:
       run: echo version=${GITHUB_REF#refs\/tags\/v} >> $GITHUB_OUTPUT
 
     - name: Build and deploy to Clojars
-      uses: yetanalytics/action-deploy-clojars@v1
+      uses: yetanalytics/action-deploy-clojars@v2
       with:
           artifact-id: 'flint'
           resource-dirs: '[]'
