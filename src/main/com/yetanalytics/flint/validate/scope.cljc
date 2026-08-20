@@ -31,7 +31,7 @@
                          zip/up ; :where/special
                          zip/lefts)
         scope-vars   (mapcat vv/get-scope-vars prev-elems)
-        scope-names  (set (map p/variable-name scope-vars))]
+        scope-names  (into #{} (map p/variable-name) scope-vars)]
     (when (contains? scope-names (p/variable-name bind-var))
       (in-scope-err-map bind-var scope-vars loc :where/bind))))
 
