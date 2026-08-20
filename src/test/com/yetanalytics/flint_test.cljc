@@ -62,6 +62,14 @@
   (make-format-pretty-tests (fn [q] (format-query q :pretty? true))
                             "dev-resources/test-fixtures/inputs/query/"))
 
+(deftest cons-expression-test
+  (let [fclause (cons '= '(?v 5))]
+    (is (= "PREFIX ex: <http://ex.com/> SELECT ?e WHERE { ?e ex:value ?v . FILTER (?v = 5) }"
+           (format-query {:prefixes {:ex "<http://ex.com/>"}
+                          :select   '[?e]
+                          :where    ['[?e :ex/value ?v]
+                                     [:filter fclause]]})))))
+
 (deftest update-tests
   (make-format-tests format-update
                      "dev-resources/test-fixtures/inputs/update/")
