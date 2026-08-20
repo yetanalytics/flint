@@ -13,14 +13,14 @@
   [var scope-vars zip-loc k]
   {:kind       ::var-in-scope
    :variable   var
-   :scope-vars scope-vars
+   :scope-vars (set scope-vars)
    :path       (conj (vu/zip-path zip-loc) k)})
 
 (defn- not-in-scope-err-map
   [vars scope-vars zip-loc k]
   {:kind       ::var-not-in-scope
    :variables  vars
-   :scope-vars scope-vars
+   :scope-vars (set scope-vars)
    :path       (conj (vu/zip-path zip-loc) k)})
 
 (defn- validate-bind
@@ -30,10 +30,10 @@
         prev-elems   (-> loc
                          zip/up ; :where/special
                          zip/lefts)
-        scope        (set (mapcat vv/get-scope-vars prev-elems))
-        scope-names  (set (map p/variable-name scope))]
+        scope-vars   (mapcat vv/get-scope-vars prev-elems)
+        scope-names  (set (map p/variable-name scope-vars))]
     (when (contains? scope-names (p/variable-name bind-var))
-      (in-scope-err-map bind-var scope loc :where/bind))))
+      (in-scope-err-map bind-var scope-vars loc :where/bind))))
 
 (defn- validate-select
   "Validate `SELECT ... (expr AS var) ..."
@@ -51,16 +51,16 @@
         where-vars   (-> where second vv/get-scope-vars)
         group-vars   (some-> ?group-by vv/group-by-projected-vars)
         prev-vars    (mapcat vv/get-scope-vars prev-elems)
-        scope        (set (concat where-vars group-vars prev-vars))
-        scope-names  (set (map p/variable-name scope))]
+        scope-vars   (concat where-vars group-vars prev-vars)
+        scope-names  (into #{} (map p/variable-name) scope-vars)]
     (if-some [bad-expr-vars (->> expr-vars
                                  (remove #(contains? scope-names
                                                      (p/variable-name %)))
                                  vv/distinct-vars
                                  not-empty)]
-      (not-in-scope-err-map bad-expr-vars scope loc :select/expr-as-var)
+      (not-in-scope-err-map bad-expr-vars scope-vars loc :select/expr-as-var)
       (when (contains? scope-names (p/variable-name bind-var))
-        (in-scope-err-map bind-var scope loc :select/expr-as-var)))))
+        (in-scope-err-map bind-var scope-vars loc :select/expr-as-var)))))
 
 (defn- validate-node-locs
   [validation-fn node-locs]
