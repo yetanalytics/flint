@@ -132,6 +132,22 @@ WHERE {
 - Flint borrows certain syntactic conventions from the [Datomic](https://docs.datomic.com/on-prem/query/query.html) and [Asami](https://github.com/threatgrid/asami) query and update languages.
 - The map-based triples syntax is based on the normal form used in the [IGraph protocol](https://github.com/ont-app/igraph).
 
+## Dependency vulnerability tracking
+
+The `Deps` workflow submits the library's Maven dependency tree to GitHub's
+dependency graph on pushes to `main` and can also be run manually. Dependabot
+uses this graph to check for known vulnerabilities.
+
+`make pom.xml` regenerates the ignored POM from the base dependencies in
+`deps.edn`, excluding local user configuration. The snapshot is associated with
+`deps.edn` in GitHub and includes Clojure, ClojureScript, and their transitive
+Maven dependencies.
+
+The `:dev` and `:test` aliases are excluded, including Jena, Criterium, coverage
+tools, and test runners. The Cognitect test runner is a Git dependency and needs
+handling beyond Maven POM generation. Development and test tooling require
+separate coverage.
+
 ## License
 
 Copyright © 2022-2026 Yet Analytics, Inc.
