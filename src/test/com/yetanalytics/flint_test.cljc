@@ -62,6 +62,21 @@
   (make-format-pretty-tests (fn [q] (format-query q :pretty? true))
                             "dev-resources/test-fixtures/inputs/query/"))
 
+(deftest bind-after-subquery-test
+  (doseq [[select-clause select-text] [[:select "SELECT"]
+                                     [:select-distinct "SELECT DISTINCT"]
+                                     [:select-reduced "SELECT REDUCED"]]
+          projection ['[?node] '*]]
+    (testing (str "BIND after " select-clause " " projection)
+      (is (= (str "SELECT ?reference WHERE { { " select-text " "
+                  (if (= '* projection) "*" "?node")
+                  " WHERE { ?node ?p ?o . } } BIND (?node AS ?reference) }")
+             (format-query
+              {:select '[?reference]
+               :where [[:where {select-clause projection
+                                :where '[[?node ?p ?o]]}]
+                       [:bind '[?node ?reference]]]}))))))
+
 (deftest cons-expression-test
   (let [fclause (cons '= '(?v 5))]
     (is (= "PREFIX ex: <http://ex.com/> SELECT ?e WHERE { ?e ex:value ?v . FILTER (?v = 5) }"

@@ -170,7 +170,9 @@
   (get-scope-vars ev))
 
 (defmethod get-scope-vars :where-sub/select [[_ s]]
-  (let [[_ select] (u/get-kv-pair s :select)
+  (let [[_ select] (or (u/get-kv-pair s :select)
+                       (u/get-kv-pair s :select-distinct)
+                       (u/get-kv-pair s :select-reduced))
         where      (u/get-kv-pair s :where)
         ?group-by  (u/get-kv-pair s :group-by)]
     (case (first select)

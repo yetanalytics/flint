@@ -194,6 +194,20 @@
                     [[:ax/var ?s5] [:ax/var ?p5] [:ax/var ?o5]]]]]]]]])))))
 
 
+(deftest bind-after-subquery-scope-test
+  (doseq [select-clause [:select :select-distinct :select-reduced]
+          projection ['[?node] '*]]
+    (testing (str "Cannot rebind a variable projected by " select-clause " " projection)
+      (let [errors (->> {:select '[?node]
+                         :where [[:where {select-clause projection
+                                          :where '[[?node ?p ?o]]}]
+                                 [:bind '[1 ?node]]]}
+                        (s/conform qs/query-spec)
+                        v/collect-nodes
+                        vs/validate-scoped-vars)]
+        (is (= [::vs/var-in-scope] (mapv :kind errors)))
+        (is (= '[?node] (mapv :variable errors)))))))
+
 (deftest scope-validation-test
   (testing "Bind var scope validation"
     (is (nil? (->> '{:select [?x]
